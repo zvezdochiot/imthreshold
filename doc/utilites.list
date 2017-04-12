@@ -1,0 +1,75 @@
+ImThreshold.
+Linux fork BookScanLib.ru (http://djvu-soft.narod.ru/bookscanlib/).
+It's a set of command line tools to create color images of djvu.
+
+ Make DjVu:
+
+  imthreshold-a4
+  imthreshold-anytodjvu
+  imthreshold-anytominidjvu
+
+ Threshold:
+
+  imthreshold-tabutaleb
+  imthreshold-tbernsen
+  imthreshold-tbht
+  imthreshold-tbimod
+  imthreshold-tdalg
+  imthreshold-tdither
+  imthreshold-tdjvu
+  imthreshold-tdjvul
+  imthreshold-tent
+  imthreshold-teqbright
+  imthreshold-tgatos
+  imthreshold-tgrad
+  imthreshold-thalftone2
+  imthreshold-tjanni
+  imthreshold-tkmeans
+  imthreshold-tnib
+  imthreshold-totsu
+  imthreshold-trot
+  imthreshold-tsauvola
+  imthreshold-ttext
+  imthreshold-ttsai
+  imthreshold-twhiterohrer
+
+ Filters:
+
+  imthreshold-fadsmooth
+  imthreshold-fautoinv
+  imthreshold-fbgfglsep
+  imthreshold-fdespeckle
+  imthreshold-fgreyworld
+  imthreshold-fillumc
+  imthreshold-finfo
+  imthreshold-fkmeans
+  imthreshold-flevelmean
+  imthreshold-flevelsigma
+  imthreshold-fpmean
+  imthreshold-fretinex
+  imthreshold-fselgauss
+  imthreshold-fshrink
+  imthreshold-funripple
+  imthreshold-funsharp
+  imthreshold-fwiener
+
+ Scale:
+
+  imthreshold-sbicub
+  imthreshold-sbilin
+  imthreshold-sbwmag2
+  imthreshold-shris
+  imthreshold-snearest
+
+ Other:
+
+  imthreshold-deskew
+  imthreshold-bash-scripts
+
+2017-04-11
+
+ 2016-2017 zvezdochiot.
+ 2006-2016 monday2000.
+ Website: https://sourceforge.net/projects/imthreshold/
+ BookScanLib.ru Website: http://djvu-soft.narod.ru/
+ Email: zvezdochiot@users.sourceforge.net
