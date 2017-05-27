@@ -40,11 +40,9 @@ It's a set of command line tools to create color images of djvu.
   imthreshold-fbgfglsep
   imthreshold-fdespeckle
   imthreshold-fgreyworld
-  imthreshold-fillumc
   imthreshold-finfo
   imthreshold-fkmeans
   imthreshold-flevelmean
-  imthreshold-flevelsigma
   imthreshold-fpmean
   imthreshold-fretinex
   imthreshold-fselgauss
@@ -66,9 +64,9 @@ It's a set of command line tools to create color images of djvu.
   imthreshold-deskew
   imthreshold-bash-scripts
 
-2017-04-11
+2017-02-28
 
- 2016-2017 zvezdochiot.
+ 2016 zvezdochiot.
  2006-2016 monday2000.
  Website: https://sourceforge.net/projects/imthreshold/
  BookScanLib.ru Website: http://djvu-soft.narod.ru/
