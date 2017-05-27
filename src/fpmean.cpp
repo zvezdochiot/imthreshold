@@ -45,7 +45,7 @@ void ImthresholdFilterPMeanUsage()
 	printf("Usage : imthreshold-fpmean [options] <input_file> <output_file>\n\n");
 	printf("options:\n");
 	printf("          -r N.N  radius (double, optional, default = 3.0)\n");
-	printf("          -m str  mode {similar, nlm, bilateral, wbselect, radial, simple} (str, optional, default = similar)\n");
+	printf("          -m str  mode {similar, nlm, bilateral, wbselect, radial, simple, minmax} (str, optional, default = similar)\n");
 	printf("          -n      neared (bool, optional, default = false)\n");
 	printf("          -h      this help\n");
 }
@@ -76,6 +76,8 @@ int main(int argc, char *argv[])
 				if (strcmp(optarg, "simple") == 0) {fmode = 3;}
 				if (strcmp(optarg, "nlm") == 0) {fmode = 4;}
 				if (strcmp(optarg, "bilateral") == 0) {fmode = 5;}
+				if (strcmp(optarg, "min") == 0) {fmode = 6;}
+				if (strcmp(optarg, "max") == 0) {fmode = 7;}
 				break;
 			case 'n':
 				fneared = true;
@@ -114,6 +116,8 @@ int main(int argc, char *argv[])
 	if (fmode == 3) {printf("Mode= simple\n");}
 	if (fmode == 4) {printf("Mode= nlm\n");}
 	if (fmode == 5) {printf("Mode= bilateral\n");}
+	if (fmode == 6) {printf("Mode= min\n");}
+	if (fmode == 7) {printf("Mode= max\n");}
 	if (fneared > 0) {printf("Neared= true\n");}
 	if (dib)
 	{
