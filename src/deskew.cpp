@@ -13,7 +13,7 @@
 //	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //	http://www.gnu.org/copyleft/gpl.html
 
-// GreyWorld filter image.
+// Deskew image.
 
 // This algorithm was taken from the TerraNoNames (http://mykaralw.narod.ru/)
 // and adopted for the FreeImage library
@@ -27,19 +27,19 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void ImthresholdFilterGreyWorldTitle()
+void ImthresholdFilterDeskewTitle()
 {
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
-	printf("GreyWorld filter image.\n");
+	printf("The Deskew algorithm adapted for the FreeImage\n");
 	printf("TerraNoNames: http://mykaralw.narod.ru/.\n\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void ImthresholdFilterGreyWorldUsage()
+void ImthresholdFilterDeskewUsage()
 {
-	printf("Usage : imthreshold-fgreyworld [options] <input_file> <output_file>\n\n");
+	printf("Usage : imthreshold-deskew [options] <input_file> <output_file>\n\n");
 	printf("options:\n");
 	printf("          -h      this help\n");
 }
@@ -71,11 +71,11 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	ImthresholdFilterGreyWorldTitle();
+	ImthresholdFilterDeskewTitle();
 	
 	if(optind + 2 > argc || fhelp)
 	{
-		ImthresholdFilterGreyWorldUsage();
+		ImthresholdFilterDeskewUsage();
 		return 0;
 	}
 	const char *src_filename = argv[optind];
@@ -92,27 +92,37 @@ int main(int argc, char *argv[])
 			FIBITMAP* dst_dib;
 			unsigned width = FreeImage_GetWidth(dib);
 			unsigned height = FreeImage_GetHeight(dib);
-			unsigned y, d;
-			IMTpixel dim;
+			unsigned y;
+			double fskew;
 			
 			IMTpixel** p_im;
 			p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
 			for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+
+			IMTpixel** s_im;
+			s_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+			for (y = 0; y < height; y++) {s_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+
 			IMTpixel** d_im;
 			d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
 			for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 
 			ImthresholdGetData(dib, p_im);
 			FreeImage_Unload(dib);
-			dim = IMTFilterGreyWorld(p_im, d_im, height, width);
-			printf("Normalize= %d,%d,%d\n", dim.c[0], dim.c[1], dim.c[2]);
+			IMTFilterSobel(p_im, s_im, height, width);
+			fskew = IMTFilterFindSkew(s_im, height, width);
+			for (y = 0; y < height; y++){free(s_im[y]);}
+			free(s_im);
+			printf("Angle= %f\n", fskew);
+			IMTFilterRotate(p_im, d_im, height, width, fskew);
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);
+
 			dst_dib = FreeImage_Allocate(width, height, 24);
 			ImthresholdSetData(dst_dib, d_im);
 			for (y = 0; y < height; y++){free(d_im[y]);}
 			free(d_im);
-			
+
 			if (dst_dib)
 			{
 				FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(output_filename);

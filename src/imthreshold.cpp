@@ -22,6 +22,7 @@
 
 #include "imthreshold.h"
 
+double RADGRD = 57.295779513082320876798154814105;
 ////////////////////////////////////////////////////////////////////////////////
 
 int compare_colors(const void *elem1, const void *elem2)
@@ -166,6 +167,52 @@ IMTpixel IMTrefilter1p(IMTpixel IMTim, IMTpixel IMTimf)
 	immt.s = ims;
 	
 	return immt;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+IMTpixel IMTinterpolation(IMTpixel** p_im, unsigned height, unsigned width, double y, double x)
+{
+	unsigned d, y1, x1, y2, x2;
+	double p11, p21, p12, p22, ky, kx, k11, k21, k12, k22, t;
+	IMTpixel res;
+	BYTE val;
+
+	y1 = int(y);
+	x1 = int(x);
+	y2 = y1 + 1;
+	x2 = x1 + 1;
+	if (y1 < 0) {y1 = 0;}
+	if (x1 < 0) {x1 = 0;}
+	if (y1 >= height - 1) {y1 = height - 1;}
+	if (x1 >= width - 1) {x1 = width - 1;}
+	if (y2 < 0) {y2 = 0;}
+	if (x2 < 0) {x2 = 0;}
+	if (y2 >= height - 1) {y2 = height - 1;}
+	if (x2 >= width - 1) {x2 = width - 1;}
+	ky = y - y1;
+	if (ky < 0) {ky = 0.0;}
+	if (ky > 1) {ky = 1.0;}
+	kx = x - x1;
+	if (kx < 0) {kx = 0.0;}
+	if (kx > 1) {kx = 1.0;}
+	k11 = (1.0 - ky) * (1.0 - kx);
+	k21 = ky * (1.0 - kx);
+	k12 = (1.0 - ky) * kx;
+	k22 = ky * kx;
+	res.s = 0;
+	for (d = 0; d < 3; d++)
+	{
+		p11 = p_im[y1][x1].c[d];
+		p21 = p_im[y2][x1].c[d];
+		p12 = p_im[y1][x2].c[d];
+		p22 = p_im[y2][x2].c[d];
+		t = p11 * k11 + p21 * k21 + p12 * k12 + p22 * k22;
+		val = (BYTE)t;
+		res.c[d] = val;
+		res.s += val;
+	}
+	return res;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -580,6 +627,138 @@ void IMTFilterDespeck2(BYTE** p_im, unsigned height, unsigned width, unsigned Ks
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void IMTFilterDNeuro2(BYTE** p_im, unsigned height, unsigned width, unsigned Ksize, double lambda, unsigned lnum)
+{	
+	int k2 = Ksize/2;
+	int kmax = Ksize - k2;
+	int i, j, k;
+	unsigned y, x, y1, x1, n, l;
+	int val;
+	double z, s, er, sigma, dw;
+	double** weight;
+	weight = (double**)malloc(Ksize * sizeof(double*));
+	for (y = 0; y < Ksize; y++) {weight[y] = (double*)malloc(Ksize * sizeof(double));}
+	BYTE** d_im;
+	d_im = (BYTE**)malloc(height * sizeof(BYTE*));
+	for (y = 0; y < height; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+	
+	if (lnum < 1) {lnum = 1;}
+	n = 0;
+	for (i = 0; i < Ksize; i++)
+	{
+		for (j = 0; j < Ksize; j++)
+		{
+			n++;
+			weight[i][j] = n;
+		}
+	}
+	for (i = 0; i < Ksize; i++)
+	{
+		for (j = 0; j < Ksize; j++)
+		{
+			weight[i][j] /= n;
+			weight[i][j] += 1;
+		}
+	}
+	for (l = 0; l < lnum; l++)
+	{
+		for (y = 0; y < height; y++)
+		{
+			for (x = 0; x < width; x++)
+			{
+				s = 0;
+				for(i = 0; i < Ksize; i++)
+				{
+					for(j = 0; j < Ksize; j++)
+					{
+						y1 = y + i - k2;
+						x1 = x + j - k2;
+						if ((y1 >= 0) && (x1 >= 0) && (y1 < height) && (x1 < width) && y1 != y && x1 != x)
+						{
+							if (p_im[y1][x1] > 0)
+							{
+								s += weight[i][j];
+							} else {
+								s -= weight[i][j];
+							}
+						}
+					}
+				}
+				z = 2.0 / (1.0 + exp(-s)) - 1;
+				if (p_im[y][x] > 0) {er = 1.0;} else {er = -1.0;}
+				er -= z;
+				sigma = er * z * (1 - z);
+				dw = lambda * sigma;
+				for(i = 0; i < Ksize; i++)
+				{
+					for(j = 0; j < Ksize; j++)
+					{
+						y1 = y + i - k2;
+						x1 = x + j - k2;
+						if ((y1 >= 0) && (x1 >= 0) && (y1 < height) && (x1 < width) && y1 != y && x1 != x)
+						{
+							weight[i][j] += dw;
+						}
+					}
+				}
+			}
+		}
+	}
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			s = 0;
+			for(i = 0; i < Ksize; i++)
+			{
+				for(j = 0; j < Ksize; j++)
+				{
+					y1 = y + i - k2;
+					x1 = x + j - k2;
+					if ((y1 >= 0) && (x1 >= 0) && (y1 < height) && (x1 < width) && y1 != y && x1 != x)
+					{
+						if (p_im[y1][x1] > 0)
+						{
+							s += weight[i][j];
+						} else {
+							s -= weight[i][j];
+						}
+					}
+				}
+			}
+			z = 2.0 / (1.0 + exp(-s)) - 1;
+			if (z > 0)
+			{
+				val = 0;
+			} else {
+				val = 255;
+			}
+			d_im[y][x] = (BYTE)val;
+		}
+	}
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			p_im[y][x] = d_im[y][x];
+		}
+	}
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			p_im[y][x] = d_im[y][x];
+		}
+	}
+	
+	for (y = 0; y < Ksize; y++){free(weight[y]);}
+	free(weight);
+	for (y = 0; y < height; y++){free(d_im[y]);}
+	free(d_im);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void IMTBlurMask(IMTpixel** p_im, BYTE** m_im, unsigned height, unsigned width, int radius)
 {
 	int y, x, y0, x0, y1, x1;
@@ -737,6 +916,127 @@ IMTpixel IMTFilterIllumCorr(IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, u
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
+
+double IMTFilterFindSkew(IMTpixel** p_im, unsigned height, unsigned width)
+{
+    unsigned int y, x, z;
+    int t, u;
+	double kmin, kmax, kt, dkp, dkt, yt, xt, smin, smax, st, s;
+	double fskew;
+	
+	dkp = 1.0 / sqrt(height * height + width * width);
+	kmin = -0.5;
+	kt = kmin;
+	st = 0;
+	for (y = 0; y < height; y++)
+	{
+		s = 0;
+		yt = y;
+		for (x = 0; x < width; x++)
+		{
+			t = yt;
+			if (t >= 0 && t < height)
+			{
+				u = p_im[t][x].s;
+				u = 765 - u;
+				s += u;
+			}
+			yt += kt;
+		}
+		if (s > st) {st = s;}
+	}
+	smin = st;
+	kmax = 0.5;
+	kt = kmax;
+	st = 0;
+	for (y = 0; y < height; y++)
+	{
+		s = 0;
+		yt = y;
+		for (x = 0; x < width; x++)
+		{
+			t = yt;
+			if (t >= 0 && t < height)
+			{
+				u = p_im[t][x].s;
+				u = 765 - u;
+				s += u;
+			}
+			yt += kt;
+		}
+		if (s > st) {st = s;}
+	}
+	smin = st;
+	dkt = kmax - kmin;
+	while (dkt > dkp)
+	{
+		kt = (kmax + kmin) / 2.0;
+		st = 0;
+		for (y = 0; y < height; y++)
+		{
+			s = 0;
+			yt = y;
+			for (x = 0; x < width; x++)
+			{
+				t = yt;
+				if (t >= 0 && t < height)
+				{
+					u = p_im[t][x].s;
+					u = 765 - u;
+					s += u;
+				}
+				yt += kt;
+			}
+			if (s > st) {st = s;}
+		}
+		if (smax > smin)
+		{
+			smin = st;
+			kmin = kt;
+		} else {
+			smax = st;
+			kmax = kt;
+		}
+		dkt = kmax - kmin;			
+	}
+	if (smin < smax) {fskew = kmax;} else {fskew = kmin;}
+	fskew = -atan(fskew) * RADGRD;
+	return fskew;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterRotate(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double angle)
+{
+    unsigned int y, x;
+	double yt, xt, yr, xr, ktc, kts;
+	
+	angle /= RADGRD;
+	kts = sin(angle);
+	ktc = cos(angle);
+	for (y = 0; y < height; y++)
+	{
+		yt = y;
+		yt -= height / 2;
+		for (x = 0; x < width; x++)
+		{
+			xt = x;
+			xt -= width / 2;
+			yr = ktc * yt - kts * xt;
+			yr += height / 2;
+			xr = ktc * xt + kts * yt;
+			xr += width / 2;
+			if (yr >= 0 && yr < height && xr >= 0 && xr < width)
+			{
+				d_im[y][x] = IMTinterpolation(p_im, height, width, yr, xr);
+			} else {
+				d_im[y][x] = IMTset(255,255,255);
+			}
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 IMTinfo IMTFilterInfo(IMTpixel** p_im, unsigned height, unsigned width, unsigned bpp)
 {	
@@ -1493,6 +1793,74 @@ IMTpixel IMTmeanBlIcM(IMTpixel** IMTim, IMTpixel IMTimm, double** sqfilt, double
 
 ////////////////////////////////////////////////////////////////////////////////
 
+IMTpixel IMTmeanMinIcM(IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx)
+{
+	unsigned y, x, d, i, j;
+	int im, imf, imm, ims = 0;
+	IMTpixel immt;
+
+	for (d = 0; d < 3; d++)
+	{
+		imm = 256;
+		i = dy;
+		for (y = y0; y < y1; y++)
+		{
+			j = dx;
+			for (x = x0; x < x1; x++)
+			{
+				if (fmask[i][j])
+				{
+					imf = IMTim[y][x].c[d];
+					if (imf < imm) {imm = imf;}
+				}
+				j++;
+			}
+			i++;
+		}
+		immt.c[d] = imm;
+		ims += imm;
+	}
+	immt.s = ims;
+	
+	return immt;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+IMTpixel IMTmeanMaxIcM(IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx)
+{
+	unsigned y, x, d, i, j;
+	int im, imf, imm, ims = 0;
+	IMTpixel immt;
+
+	for (d = 0; d < 3; d++)
+	{
+		imm = 0;
+		i = dy;
+		for (y = y0; y < y1; y++)
+		{
+			j = dx;
+			for (x = x0; x < x1; x++)
+			{
+				if (fmask[i][j])
+				{
+					imf = IMTim[y][x].c[d];
+					if (imf > imm) {imm = imf;}
+				}
+				j++;
+			}
+			i++;
+		}
+		immt.c[d] = imm;
+		ims += imm;
+	}
+	immt.s = ims;
+	
+	return immt;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 int IMTFilterKMeans(IMTpixel** IMTim, unsigned height, unsigned width, unsigned ncluster, unsigned iters)
 {
 	unsigned y, x, i, j, d, y0, x0, y1, x1;
@@ -1802,6 +2170,48 @@ void IMTFilterPMean(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned 
 				}
 			}
 			break;
+		case 6:
+			for (y = 0; y < height; y++)
+			{
+				dy = 0;
+				y0 = y - iradius;
+				if (y0 < 0) {dy = -y0; y0 = 0;}
+				y1 = y + iradius + 1;
+				if (y1 > height) {y1 = height;}
+				for (x = 0; x < width; x++)
+				{
+					dx = 0;
+					x0 = x - iradius;
+					if (x0 < 0) {dx = -x0; x0 = 0;}
+					x1 = x + iradius + 1;
+					if (x1 > width) {x1 = width;}
+					IMTmeanS = IMTmeanMinIcM(p_im, p_im[y][x], fmask, y0, x0, y1, x1, dy, dx);
+					if (radius < 0) {IMTmeanS = IMTrefilter1p(p_im[y][x], IMTmeanS);}
+					d_im[y][x] = IMTmeanS;
+				}
+			}
+			break;
+		case 7:
+			for (y = 0; y < height; y++)
+			{
+				dy = 0;
+				y0 = y - iradius;
+				if (y0 < 0) {dy = -y0; y0 = 0;}
+				y1 = y + iradius + 1;
+				if (y1 > height) {y1 = height;}
+				for (x = 0; x < width; x++)
+				{
+					dx = 0;
+					x0 = x - iradius;
+					if (x0 < 0) {dx = -x0; x0 = 0;}
+					x1 = x + iradius + 1;
+					if (x1 > width) {x1 = width;}
+					IMTmeanS = IMTmeanMaxIcM(p_im, p_im[y][x], fmask, y0, x0, y1, x1, dy, dx);
+					if (radius < 0) {IMTmeanS = IMTrefilter1p(p_im[y][x], IMTmeanS);}
+					d_im[y][x] = IMTmeanS;
+				}
+			}
+			break;
 	}
 
 	for (y = 0; y < rn; y++){free(fradial[y]);}
@@ -2082,6 +2492,52 @@ double IMTFilterShrink(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsign
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void IMTFilterSobel(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width)
+{
+    unsigned int y, x, d;
+	int i, j, im, imf, ims;
+	BYTE val;
+	
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			for (d = 0; d < 3; d++)
+			{
+				d_im[y][x].c[d] = 255;
+			}
+			d_im[y][x].s = 765;
+		}
+	}
+	for (y = 1; y < height - 1; y++)
+	{
+		for (x = 1; x < width - 1; x++)
+		{
+			ims = 0;
+			for (d = 0; d < 3; d++)
+			{
+				imf = p_im[y][x].c[d];
+				im = imf * 9;
+				for (i = -1; i <= 1; i++)
+				{
+					for (j = -1; j <= 1; j++)
+					{
+						imf = p_im[y + i][x + j].c[d];
+						im -= imf;
+					}
+				}
+				im = 255 - im;
+				val = (BYTE)MIN(MAX((int)0, im), (int)255);
+				ims += int(val);
+				d_im[y][x].c[d] = val;
+			}
+			d_im[y][x].s = (WORD)ims;
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void IMTFilterUnRipple(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double thres)
 {
 	
@@ -2291,6 +2747,59 @@ void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsi
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+
+double IMTFilterBgDiv (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned ndiv)
+{  
+	unsigned y, x, d, k, im, n;
+	int t, dd;
+	double xdiv, xx, value, ims;
+
+	ims = 0;
+	n = 0;
+	for (y = 0; y < height; y++)
+    {
+		for (x = 0; x < width; x++)
+        {
+			im = p_im[y][x].s;
+			ims += im;
+			n++;
+		}
+	}
+	ims /= n;
+	ims /= 3.0;
+	ims /= 255.0;
+	for (y = 0; y < height; y++)
+    {
+		for (x = 0; x < width; x++)
+        {
+			t = p_im[y][x].s;
+			t++;
+			dd = b_im[y][x].s;
+			dd++;
+			xdiv = t;
+			xx = dd;
+			xdiv /= xx;
+			xx = xdiv;
+			for (k = 0; k < ndiv; k++)
+			{
+				xdiv *= xx;
+			}
+			xx = 1.0 / (ims + 0.5);
+			for (d = 0; d < 3; d++)
+            {
+				value = p_im[y][x].c[d];
+				value -= 127.5;
+				value *= xx;
+				value += 127.5;
+				value *= xdiv;
+				d_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)(value + 0.5)), (int)255);;
+            }
+        }
+    }
+	return ims;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, double amount, int threshold)
 {  
