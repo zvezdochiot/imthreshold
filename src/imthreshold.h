@@ -111,6 +111,7 @@ void MFilterMean(unsigned width, unsigned height, int radius, double** p_im, dou
 void MFilterVariance(unsigned width, unsigned height, int radius, double** p_im, double** p_mean, double** p_var);
 double MFilterMedian(unsigned width, unsigned height, double** p_im, double** p_var);
 IMTpixel IMTset(BYTE c0, BYTE c1, BYTE c2);
+IMTpixel IMTcalcS (IMTpixel im);
 IMTpixel IMTrefilter1p(IMTpixel IMTim, IMTpixel IMTimf);
 IMTpixel IMTinterpolation(IMTpixel** p_im, unsigned height, unsigned width, double y, double x);
 BYTE IMTmax(IMTpixel** IMTim, unsigned height, unsigned width);
@@ -154,7 +155,7 @@ void IMTFilterPMean(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned 
 int IMTFilterRetinex(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double sigma);
 void IMTSelGaussInitMatrix (double radius, double *mat, int num);
 void IMTFilterSelGauss (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, int maxdelta);
-double IMTFilterShrink(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, int thres);
+double IMTFilterShrink(IMTpixel** p_im, unsigned height, unsigned width, int thres);
 void IMTFilterSobel(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width);
 void IMTFilterUnRipple(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double thres);
 void IMTGaussLineMatrix (double *cmatrix, double radius);
