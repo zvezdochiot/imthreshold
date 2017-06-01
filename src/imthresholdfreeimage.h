@@ -154,7 +154,7 @@ CalculateLine(int width, int bitdepth) {
 
 inline int
 CalculatePitch(int line) {
-	return line + 3 & ~3;
+	return ((line + 3) & ~3);
 }
 
 inline int

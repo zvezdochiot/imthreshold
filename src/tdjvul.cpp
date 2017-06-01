@@ -42,12 +42,13 @@ void ImthresholdIMTFilterDjVuLUsage()
 	printf("Usage : imthreshold-tdjvul [options] <input_file> <output_file>(BW) [fg_file] [bg_file] [fg_mask] [bg_mask]\n\n");
 	printf("options:\n");
 	printf("          -a N.N  anisotropic (double, optional, default = 0.0)\n");
-	printf("          -c N    clean blur radius (int, optional, default = 0)\n");
+	printf("          -c N    clean fg, bg blur radius (int, optional, default = 0)\n");
 	printf("          -d N    despeckle aperture size (int, optional, default = 0)\n");
 	printf("          -b N    base block size (int, optional, default = 3)\n");
 	printf("          -f N    foreground divide (int, optional, default = 2)\n");
 	printf("          -l N    level (int, optional, default = 10)\n");
 	printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
+	printf("          -s N    shrink fg, bg (int, optional, default = 0)\n");
 	printf("          -w N    w/b mode (int, optional, default = 0 [auto], >0-white, <0-black)\n");
 	printf("          -h      this help\n");
 }
@@ -70,8 +71,10 @@ int main(int argc, char *argv[])
 	int wbmode = 0;
 	int fclean = 0;
 	int fdespeckle = 0;
+	int fshrink = 0;
+	double imsh = 0;
 	bool fhelp = false;
-	while ((opt = getopt(argc, argv, ":a:c:d:b:f:l:o:w:h")) != -1)
+	while ((opt = getopt(argc, argv, ":a:c:d:b:f:l:s:o:w:h")) != -1)
 	{
 		switch(opt)
 		{
@@ -98,6 +101,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'd':
 				fdespeckle = atof(optarg);
+				break;
+			case 's':
+				fshrink = atof(optarg);
 				break;
 			case 'h':
 				fhelp = true;
@@ -214,6 +220,14 @@ int main(int argc, char *argv[])
 				ImthresholdSetDataBW(dst_dib, m_im);
 				for (y = 0; y < height; y++){free(m_im[y]);}
 				free(m_im);
+				if (fshrink != 0)
+				{
+					printf("Shrink= %d\n", fshrink);
+					imsh = IMTFilterShrink(fg_im, heightfg, widthfg, fshrink);
+					printf("ShrinkFG= %f\n", imsh);
+					imsh = IMTFilterShrink(bg_im, heightbg, widthbg, fshrink);
+					printf("ShrinkBG= %f\n", imsh);
+				}
 				if (fclean > 0)
 				{
 					printf("Blur= %d\n", fclean);

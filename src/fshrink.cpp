@@ -39,8 +39,7 @@ void ImthresholdFilterShrinkUsage()
 {
 	printf("Usage : imthreshold-fshrink [options] <input_file> <output_file>\n\n");
 	printf("options:\n");
-	printf("          -r N    radius (int, optional, default = 5)\n");
-	printf("          -t N.N  threshold (int, optional, default = 10)\n");
+	printf("          -t N    threshold (int, optional, default = 4)\n");
 	printf("          -h      this help\n");
 }
 
@@ -54,17 +53,13 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 	
 	int opt;
-	int radius = 5;
-	int thres = 10;
+	int thres = 4;
 	bool fhelp = false;
 	double imsh = 0;
-	while ((opt = getopt(argc, argv, ":r:t:h")) != -1)
+	while ((opt = getopt(argc, argv, ":t:h")) != -1)
 	{
 		switch(opt)
 		{
-			case 'r':
-				radius = atof(optarg);
-				break;
 			case 't':
 				thres = atof(optarg);
 				break;
@@ -82,7 +77,7 @@ int main(int argc, char *argv[])
 	
 	ImthresholdFilterShrinkTitle();
 	
-	if(optind + 2 > argc || fhelp || radius == 0)
+	if(optind + 2 > argc || fhelp)
 	{
 		ImthresholdFilterShrinkUsage();
 		return 0;
@@ -106,23 +101,17 @@ int main(int argc, char *argv[])
 			IMTpixel** p_im;
 			p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
 			for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-			IMTpixel** d_im;
-			d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-			for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 
-			printf("Radius= %d\n", radius);
 			printf("Threshold= %d\n", thres);
 
 			ImthresholdGetData(dib, p_im);
 			FreeImage_Unload(dib);
-			imsh = IMTFilterShrink(p_im, d_im, height, width, radius, thres);
+			imsh = IMTFilterShrink(p_im, height, width, thres);
 			printf("Shrink= %f\n", imsh);
+			dst_dib = FreeImage_Allocate(width, height, 24);
+			ImthresholdSetData(dst_dib, p_im);
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);
-			dst_dib = FreeImage_Allocate(width, height, 24);
-			ImthresholdSetData(dst_dib, d_im);
-			for (y = 0; y < height; y++){free(d_im[y]);}
-			free(d_im);
 			
 			if (dst_dib)
 			{
