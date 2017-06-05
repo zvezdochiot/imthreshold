@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 			FIBITMAP* dst_dib;
 			unsigned width = FreeImage_GetWidth(dib);
 			unsigned height = FreeImage_GetHeight(dib);
-			unsigned y, d;
+			unsigned y;
 			IMTpixel dim;
 			
 			IMTpixel** p_im;

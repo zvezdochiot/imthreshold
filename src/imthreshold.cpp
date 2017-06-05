@@ -984,7 +984,7 @@ double IMTFilterFindSkew (IMTpixel** p_im, unsigned height, unsigned width)
 		}
 		if (s > st) {st = s;}
 	}
-	smin = st;
+	smax = st;
 	dkt = kmax - kmin;
 	while (dkt > dkp)
 	{
@@ -4464,7 +4464,7 @@ int IMTFilterTEnt (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width
 	}
 	if (sum == 0)
 	{
-		return NULL;
+		return 384;
 	}
 	
 	for (i = 0; i < cn; i++)
@@ -4551,8 +4551,8 @@ int IMTFilterTEqBright (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
 {
 	unsigned x, y, i;
 	
-	unsigned tx, tt, threshold;
-	double imx, sw, swt, sws = 0, swts = 0, tts = 0, dsr, dst;
+	unsigned tx, tt, threshold = 0;
+	double imx, sw, swt, sws = 0, swts = 0, tts = 0, dsr = 0, dst = 0;
 	int histogram[768] = {0};
 	BYTE val;
 	int* tlh;
@@ -4581,7 +4581,7 @@ int IMTFilterTEqBright (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
 			{
 				dsr = sw - swt;
 				imx = histogram[tt];
-				swt += (imx*767);
+				swt += (imx * 767);
 				dst = swt - sw;
 				tt--;
 			}
@@ -4622,14 +4622,14 @@ int IMTFilterTEqBright (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
 				{
 					dsr = sw - swt;
 					imx = histogram[tt];
-					swt += (imx*767);
+					swt += (imx * 767);
 					dst = swt - sw;
 					tt--;
 				}
 				if (dst > dsr)
 				{
 					tt++;
-					swt -= (imx*767);
+					swt -= (imx * 767);
 				}
 				swts += swt;
 				tts += tt;
@@ -4827,7 +4827,7 @@ int IMTFilterGatosBG (IMTpixel** p_im, BYTE** d_im, IMTpixel** bg_im, unsigned h
 					for (d = 0; d < 3; d++)
 					{
 						imx = p_sum[d] / (double)bin_sum;
-						val = (BYTE)MIN(MAX((int)0, (int)(imx+0.5)), (int)255);
+						val = (BYTE)MIN(MAX((int)0, (int)(imx + 0.5)), (int)255);
 						bg_im[y][x].c[d] = val;
 					}
 					bg_im[y][x] = IMTcalcS (bg_im[y][x]);
@@ -5353,7 +5353,7 @@ int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 {
 	unsigned x, y;
 	double imx, mean, deviation, t , st = 0, sn = 0;
-	int threshold = 384;
+	int threshold = 0;
 	BYTE val;
 	
     double** p_imd;
@@ -5944,7 +5944,7 @@ int IMTFilterTWhiteRohrer(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigne
 	int x_ahead, y_ahead;
 	int t, tx, rx, tbias;
 	int offset = WR1_BIAS;
-	unsigned im, threshold, sum, sqr_sum;
+	unsigned im, threshold = 0, sum, sqr_sum;
 	double mu = 0.0, s_dev = 0.0; 
 	int nZ, n;
 	int *Z;

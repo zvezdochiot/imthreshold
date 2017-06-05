@@ -57,7 +57,6 @@ int main(int argc, char *argv[])
 	
 	int opt;
 	int region_size = 4;
-	int delta = 0;
 	bool fnorm = false;
 	bool fhelp = false;
 	int threshold = 0;
