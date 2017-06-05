@@ -50,6 +50,8 @@ int     threshold; // Threshold (0-255)
 0    // default threshold
 */	
 
+////////////////////////////////////////////////////////////////////////////////
+
 void ImthresholdFilterUnsharpMaskTitle()
 {
 	printf("ImThreshold.\n");
@@ -146,8 +148,6 @@ int main(int argc, char *argv[])
 				b_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
 				for (y = 0; y < height; y++) {b_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 				IMTpixel** d_im;
-				d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-				for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 
 				printf("Radius= %f\n", radius);
 				printf("Amount= %f\n", amount);
@@ -163,11 +163,13 @@ int main(int argc, char *argv[])
 					ImthresholdSetData(dst_dib, b_im);
 				} else {
 					printf("Mode= Sharpen\n");
+					d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+					for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 					IMTFilterUnsharpMask(p_im, b_im, d_im, height, width, amount, threshold);
 					ImthresholdSetData(dst_dib, d_im);
+					for (y = 0; y < height; y++){free(d_im[y]);}
+					free(d_im);
 				}
-				for (y = 0; y < height; y++){free(d_im[y]);}
-				free(d_im);
 				for (y = 0; y < height; y++){free(b_im[y]);}
 				free(b_im);
 				for (y = 0; y < height; y++){free(p_im[y]);}
