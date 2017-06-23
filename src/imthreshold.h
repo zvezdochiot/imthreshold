@@ -153,6 +153,7 @@ IMTpixel IMTmeanMaxIcM(IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigned
 int IMTFilterKMeans(IMTpixel** IMTim, unsigned height, unsigned width, unsigned ncluster, unsigned iters);
 void IMTFilterPMean(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, int fmode, bool fneared);
 int IMTFilterRetinex(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double sigma);
+double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width, bool finv);
 void IMTSelGaussInitMatrix (double radius, double *mat, int num);
 void IMTFilterSelGauss (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, int maxdelta);
 double IMTFilterShrink(IMTpixel** p_im, unsigned height, unsigned width, int thres);
