@@ -2344,6 +2344,146 @@ int IMTFilterRetinex (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
 
 ////////////////////////////////////////////////////////////////////////////////
 
+double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width, bool finv)
+{
+	unsigned d;
+	int y, x, yp2, xp2, yp1, xp1, yn1, xn1, yn2, xn2;
+	double imx = 0, ims = 0, imd = 0;
+	int h = height;
+	int w = width;
+	IMTpixel** t_im;
+	t_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+	for (d = 0; d < height; d++) {t_im[d] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+	
+	imd = 0;
+	for ( y = 0; y < h; y++ )
+	{
+		yp2 = y - 2;
+		if (yp2 < 0) {yp2 = 0;}
+		yp1 = y - 1;
+		if (yp1 < 0) {yp1 = 0;}
+		yn1 = y + 1;
+		if (yn1 >= h) {yn1 = h - 1;}
+		yn2 = y + 2;
+		if (yn2 >= h) {yn2 = h - 1;}
+		for ( x = 0; x < w; x++ )
+		{
+			xp2 = x - 2;
+			if (xp2 < 0) {xp2 = 0;}
+			xp1 = x - 1;
+			if (xp1 < 0) {xp1 = 0;}
+			xn1 = x + 1;
+			if (xn1 >= w) {xn1 = w - 1;}
+			xn2 = x + 2;
+			if (xn2 >= h) {xn2 = w - 1;}
+			for (d = 0; d < 3; d++)
+			{
+				ims = 0;
+				imx = p_im[yp2][xp2].c[d];
+				imx *= imx;
+				ims -= imx;
+				imx = p_im[yp2][xp1].c[d];
+				imx *= imx;
+				ims -= (2 * imx);
+				imx = p_im[yp2][x].c[d];
+				imx *= imx;
+				ims -= (3 * imx);
+				imx = p_im[yp2][xn1].c[d];
+				imx *= imx;
+				ims -= (2 * imx);
+				imx = p_im[yp2][xn2].c[d];
+				imx *= imx;
+				ims -= imx;
+				imx = p_im[yp1][xp2].c[d];
+				imx *= imx;
+				ims -= (2 * imx);
+				imx = p_im[yp1][xp1].c[d];
+				imx *= imx;
+				ims += (5 * imx);
+				imx = p_im[yp1][x].c[d];
+				imx *= imx;
+				ims += (3 * imx);
+				imx = p_im[yp1][xn1].c[d];
+				imx *= imx;
+				ims += (5 * imx);
+				imx = p_im[yp1][xn2].c[d];
+				imx *= imx;
+				ims -= (2 * imx);
+				imx = p_im[y][xp2].c[d];
+				imx *= imx;
+				ims -= (3 * imx);
+				imx = p_im[y][xp1].c[d];
+				imx *= imx;
+				ims += (3 * imx);
+				imx = p_im[y][xn1].c[d];
+				imx *= imx;
+				ims += (3 * imx);
+				imx = p_im[y][xn2].c[d];
+				imx *= imx;
+				ims -= (3 * imx);
+				imx = p_im[yn1][xp2].c[d];
+				imx *= imx;
+				ims -= (2 * imx);
+				imx = p_im[yn1][xp1].c[d];
+				imx *= imx;
+				ims += (5 * imx);
+				imx = p_im[yn1][x].c[d];
+				imx *= imx;
+				ims += (3 * imx);
+				imx = p_im[yn1][xn1].c[d];
+				imx *= imx;
+				ims += (5 * imx);
+				imx = p_im[yn1][xn2].c[d];
+				imx *= imx;
+				ims -= (2 * imx);
+				imx = p_im[yn2][xp2].c[d];
+				imx *= imx;
+				ims -= imx;
+				imx = p_im[yn2][xp1].c[d];
+				imx *= imx;
+				ims -= (2 * imx);
+				imx = p_im[yn2][x].c[d];
+				imx *= imx;
+				ims -= (3 * imx);
+				imx = p_im[yn2][xn1].c[d];
+				imx *= imx;
+				ims -= (2 * imx);
+				imx = p_im[yn2][xn2].c[d];
+				imx *= imx;
+				ims -= imx;
+				ims /= 81.0;
+				if (finv) {ims = -ims;}
+				if (ims < 0) {imd -= ims;} else {imd += ims;}
+				imx = p_im[y][x].c[d];
+				imx *= imx;
+				ims += imx;
+				if (ims < 0) {ims = -ims;}
+				ims = sqrt(ims);
+				t_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)(ims + 0.5)), (int)255);
+			}
+		}
+	}
+	for ( y = 0; y < h; y++ )
+	{
+		for ( x = 0; x < w; x++ )
+		{
+			p_im[y][x] = IMTcalcS (t_im[y][x]);
+		}
+	}
+	imd /= h;
+	imd /= w;
+	imd /= 1.5;
+	imd = sqrt(imd);
+	imd /= 255.0;
+	
+	for (d = 0; d < height; d++){free(t_im[d]);}
+	free(t_im);
+	
+	return imd;
+ }
+
+////////////////////////////////////////////////////////////////////////////////
+
 void IMTSelGaussInitMatrix (double radius, double *mat, int num)
 {
     int    dx;
