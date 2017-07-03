@@ -152,6 +152,7 @@ int main(int argc, char *argv[])
 							FreeImage_Unload(dib);
 							
 							printf("Level= %d\n", level);
+							printf("Overlay= %f\n", doverlay);
 							
 							FIBITMAP* fg_dib;
 							FIBITMAP* bg_dib;
