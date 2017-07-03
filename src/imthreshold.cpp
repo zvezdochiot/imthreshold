@@ -23,119 +23,6 @@
 #include "imthreshold.h"
 
 double RADGRD = 57.295779513082320876798154814105;
-////////////////////////////////////////////////////////////////////////////////
-
-int compare_colors (const void *elem1, const void *elem2)
-{
-	// Comparison function for sorting pixels - needed for the standart qsort function	
-	return (int)(*((double*)elem2) - *((double*)elem1));
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void MFilterMean (unsigned width, unsigned height, int radius, double** p_im, double** p_mean)
-{
-	int x, y, i, j, xt, yt;
-	unsigned t;
-	double sum;
-	int h = height;
-	int w = width;
-	
-	for (y = 0; y < h; y++)
-	{
-		for (x = 0; x < w; x++)
-		{
-			sum = 0;
-			t = 0;
-			for (i = -radius; i <= radius; i++)
-			{
-				yt = y + i;
-				if (y >= 0 && yt < h)
-				{
-					for (j = -radius; j <= radius; j++)
-					{			
-						xt = x + j;
-						if (xt >= 0 && xt < w)
-						{
-							sum += p_im[yt][xt];
-							t++;
-						}
-					}
-				}
-			}
-			if (t > 0)
-			{
-				p_mean[y][x] = sum / t;
-			} else {
-				p_mean[y][x] = sum;
-			}
-		}
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void MFilterVariance (unsigned width, unsigned height, int radius, double** p_im, double** p_mean, double** p_var)
-{
-	int y, x, i, j, xt, yt;
-	unsigned t;
-	double sum;
-	int h = height;
-	int w = width;
-	
-	for (y = 0; y < h; y++)
-	{
-		for (x = 0; x < w; x++)
-		{
-			sum = 0;
-			t = 0;
-			for (i = -radius; i <= radius; i++)
-			{
-				yt = y + i;
-				if (y >= 0 && yt < h)
-				{
-					for (j = -radius; j <= radius; j++)
-					{			
-						xt = x + j;
-						if (xt >= 0 && xt < w)
-						{
-							sum += p_im[yt][xt] * p_im[yt][xt];
-							t++;
-						}
-					}
-				}
-			}
-			if (t > 0)
-			{
-				p_var[y][x] = sum / t - p_mean[y][x] * p_mean[y][x];
-			} else {
-				p_var[y][x] = sum - p_mean[y][x] * p_mean[y][x];
-			}
-		}
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-double MFilterMedian (unsigned width, unsigned height, double** p_im, double** p_var)
-{
-	unsigned y, x, k = 0;
-	int int_size = height*width*sizeof(double);
-	int area = height*width;
-	double* p_median = (double*)malloc(int_size);
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			p_median[k] = p_var[y][x];
-			k++;
-		}
-	}
-	qsort(p_median, area, sizeof(double), compare_colors);	
-	double res = p_median[(area - 1) / 2];
-	free(p_median);
-	return res; // noise_variance
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -3065,57 +2952,120 @@ void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, un
 
 void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double noise_variance)
 {	
-	if (radius < 0) {radius = -radius;}
-
-	unsigned x, y, d;
-	BYTE mean;
-	double variance, imx, kvar, var;
+	unsigned x, y, d, n;
+	int y1, x1, y2, x2, yf, xf;
+	double imx, imm, imv, imn, kvar, var, multiplier;
+	int h = height;
+	int w = width;
 	int ivar;
 
-    double** p_imd;
-    p_imd = (double**)malloc(height * sizeof(double*));
-    for (y = 0; y < height; y++) {p_imd[y] = (double*)malloc(width * sizeof(double));}
-    double** p_mean;
-    p_mean = (double**)malloc(height * sizeof(double*));
-    for (y = 0; y < height; y++) {p_mean[y] = (double*)malloc(width * sizeof(double));}
-    double** p_var;
-    p_var = (double**)malloc(height * sizeof(double*));
-    for (y = 0; y < height; y++) {p_var[y] = (double*)malloc(width * sizeof(double));}
-
+	if (radius < 0) {radius = -radius;}
+	
+	imn = 0;
+	if (noise_variance < 0)
+	{
+		for (y = 0; y < height; y++)
+		{
+			y1 = y;
+			y1 -= radius;
+			if (y1 < 0) {y1 = 0;}
+			y2 = y + 1;
+			y2 += radius;
+			if (y2 > h) {y2 = h;}
+			for (x = 0; x < width; x++)
+			{
+				x1 = x;
+				x1 -= radius;
+				if (x1 < 0) {x1 = 0;}
+				x2 = x + 1;
+				x2 += radius;
+				if (x2 > w) {x2 = w;}
+				imm = 0;
+				n = 0;
+				for (yf = y1; yf < y2; yf++)
+				{
+					for (xf = x1; xf < x2; xf++)
+					{
+						imx = (double)p_im[yf][xf].s;
+						imm += imx;
+						n++;
+					}
+				}
+				if (n > 0) {imm /= n;}
+				imm /= 3;
+				imv = 0;
+				n = 0;
+				for (yf = y1; yf < y2; yf++)
+				{
+					for (xf = x1; xf < x2; xf++)
+					{
+						imx = (double)p_im[yf][xf].s;
+						imv += (imx * imx);
+						n++;
+					}
+				}
+				if (n > 0) {imv /= n;}
+				imv /= 9;
+				imv -= (imm * imm);
+				imn += imv;
+			}
+		}
+		imn /= width;
+		imn /= height;
+		imn *= 0.22531205501218;
+		noise_variance *= -imn;
+	}
     for (y = 0; y < height; y++)
 	{
-        for (x = 0; x < width; x++)
+		y1 = y;
+		y1 -= radius;
+		if (y1 < 0) {y1 = 0;}
+		y2 = y + 1;
+		y2 += radius;
+		if (y2 > h) {y2 = h;}
+		for (x = 0; x < width; x++)
 		{
+			x1 = x;
+			x1 -= radius;
+			if (x1 < 0) {x1 = 0;}
+			x2 = x + 1;
+			x2 += radius;
+			if (x2 > w) {x2 = w;}
+			imm = 0;
+			n = 0;
+			for (yf = y1; yf < y2; yf++)
+			{
+				for (xf = x1; xf < x2; xf++)
+				{
+					imx = (double)p_im[yf][xf].s;
+					imm += imx;
+					n++;
+				}
+			}
+			if (n > 0) {imm /= n;}
+			imm /= 3;
+			imv = 0;
+			n = 0;
+			for (yf = y1; yf < y2; yf++)
+			{
+				for (xf = x1; xf < x2; xf++)
+				{
+					imx = (double)p_im[yf][xf].s;
+					imv += (imx * imx);
+					n++;
+				}
+			}
+			if (n > 0) {imv /= n;}
+			imv /= 9;
+			imv -= (imm * imm);
 			imx = (double)p_im[y][x].s;
 			imx /= 3;
-			p_imd[y][x] = imx;
-		}
-	}
-
-	MFilterMean (width, height, radius, p_imd, p_mean);	
-	MFilterVariance (width, height, radius, p_imd, p_mean, p_var);	
-    // Compute noise variance if needed.
-    if (noise_variance < 0) noise_variance = MFilterMedian(width, height, p_imd, p_var);	
-	
-    for (y = 0; y < height; y++)
-	{
-        for (x = 0; x < width; x++)
-		{
-			mean = p_mean[y][x];
-			variance = p_var[y][x];
-            // The estimate of noise variance will never be perfect, but in
-            // theory, it would be impossible for any region to have a local
-            // variance less than it. The following check eliminates that
-            // theoretical impossibility and has a side benefit of preventing
-            // division by zero.
-            if (variance < noise_variance)
+            if (imv < noise_variance)
             {
-				kvar = mean - p_imd[y][x];
+				kvar = imm - imx;
 			} else {
-                double multiplier = (variance - noise_variance) / variance;
-				double value = p_imd[y][x];
-				value = mean + multiplier * (value - mean);
-				kvar = value - p_imd[y][x];
+                multiplier = (imv - noise_variance) / imv;
+				kvar = imm + multiplier * (imx - imm) - imx;
             }
 			for (d = 0; d < 3; d++)
 			{
@@ -3126,13 +3076,6 @@ void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
 			d_im[y][x] = IMTcalcS (d_im[y][x]);
         }
     }
-	
-    for (y = 0; y < height; y++) {free(p_imd[y]);}
-	free(p_imd);
-    for (y = 0; y < height; y++) {free(p_mean[y]);}
-	free(p_mean);
-    for (y = 0; y < height; y++) {free(p_var[y]);}
-	free(p_var);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3851,34 +3794,21 @@ int IMTFilterTBernsen(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wi
 
 int IMTFilterTAbutaleb (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius)
 {
-	unsigned x, y, i, st = 0, sn = 0;
+	unsigned x, y, i, n, st = 0, sn = 0;
+	int y1, x1, y2, x2, yf, xf;
+	double imx, imm;
+	int h = height;
+	int w = width;
 	unsigned a, b, s, t;
 	BYTE val;
-	double imx;
-
-    double** p_imd;
-    p_imd = (double**)malloc(height * sizeof(double*));
-    for (y = 0; y < height; y++) {p_imd[y] = (double*)malloc(width * sizeof(double));}
-    double** p_average;
-    p_average = (double**)malloc(height * sizeof(double*));
-    for (y = 0; y < height; y++) {p_average[y] = (double*)malloc(width * sizeof(double));}
-	
-	if (radius < 0) {radius = -radius;}
-		
-    for (y = 0; y < height; y++)
-	{
-        for (x = 0; x < width; x++)
-		{
-			imx = (double)p_im[y][x].s / 3;
-			p_imd[y][x] = imx;
-		}
-	}
-
-	MFilterMean(width, height, radius, p_imd, p_average);	
-
 	int hw = 256;	 // square histogram width
-	
 	int hist_size = hw*hw*sizeof(double);	
+	double one_over_area = 1.0 / (width * height);
+	double P_sum, p, H_sum, H_end, Phi, P, H;
+	double Phi_max = 1;
+	double Phi_max_sub = 1;
+	double tiny = 1e-6;
+	unsigned threshold = 0, avg_threshold = 0;
 	
 	double* histogram = (double*)malloc(hist_size);
 	double* P_histogram = (double*)malloc(hist_size);
@@ -3887,21 +3817,47 @@ int IMTFilterTAbutaleb (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
 	memset(histogram,0,hist_size);
 	memset(P_histogram,0,hist_size);
 	memset(H_histogram,0,hist_size);
+
+	if (radius < 0) {radius = -radius;}
 		
-	for (y = 0; y < height; y++)
+    for (y = 0; y < height; y++)
 	{
+		y1 = y;
+		y1 -= radius;
+		if (y1 < 0) {y1 = 0;}
+		y2 = y + 1;
+		y2 += radius;
+		if (y2 > h) {y2 = h;}
 		for (x = 0; x < width; x++)
 		{
-			a = (unsigned)p_imd[y][x];
-			b = (unsigned)p_average[y][x];
+			x1 = x;
+			x1 -= radius;
+			if (x1 < 0) {x1 = 0;}
+			x2 = x + 1;
+			x2 += radius;
+			if (x2 > w) {x2 = w;}
+			imm = 0;
+			n = 0;
+			for (yf = y1; yf < y2; yf++)
+			{
+				for (xf = x1; xf < x2; xf++)
+				{
+					imx = (double)p_im[yf][xf].s;
+					imm += imx;
+					n++;
+				}
+			}
+			if (n > 0) {imm /= n;}
+			imm /= 3;
+			imx = (double)p_im[y][x].s;
+			imx /= 3;
+			a = (unsigned)imx;
+			b = (unsigned)imm;
 			i = (a * hw + b);
 			histogram[i]++;
 		}
 	}	
-	
-	double one_over_area = 1.0 / (width * height);
-	double P_sum, p, H_sum;
-	
+		
 	for (b = 0; b < 256; b++)
 	{
 		for (a = 0; a < 256; a++)
@@ -3947,17 +3903,14 @@ int IMTFilterTAbutaleb (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
 		}
 	}
 
-	double Phi_max = 1;
-	double Phi_max_sub = 1;
 	while (1 + Phi_max_sub > 1)
 	{
 		Phi_max = Phi_max_sub;
 		Phi_max_sub = Phi_max / 10;
 	}
-	double tiny = 1e-6;
-	double H_end = H_histogram[255*hw+255];
-	unsigned threshold = 0, avg_threshold = 0;
-	double Phi, P, H;
+	H_end = H_histogram[255*hw+255];
+	threshold = 0;
+	avg_threshold = 0;
 		
 	for (s = 0; s < 256; s++)
 	{
@@ -3979,17 +3932,44 @@ int IMTFilterTAbutaleb (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
 		}
 	}
 		
-	for (y = 0; y < height; y++)
+    for (y = 0; y < height; y++)
 	{
+		y1 = y;
+		y1 -= radius;
+		if (y1 < 0) {y1 = 0;}
+		y2 = y + 1;
+		y2 += radius;
+		if (y2 > h) {y2 = h;}
 		for (x = 0; x < width; x++)
 		{
-			if (p_imd[y][x] <= threshold && p_average[y][x] <= avg_threshold)
+			x1 = x;
+			x1 -= radius;
+			if (x1 < 0) {x1 = 0;}
+			x2 = x + 1;
+			x2 += radius;
+			if (x2 > w) {x2 = w;}
+			imm = 0;
+			n = 0;
+			for (yf = y1; yf < y2; yf++)
+			{
+				for (xf = x1; xf < x2; xf++)
+				{
+					imx = (double)p_im[yf][xf].s;
+					imm += imx;
+					n++;
+				}
+			}
+			if (n > 0) {imm /= n;}
+			imm /= 3;
+			imx = (double)p_im[y][x].s;
+			imx /= 3;
+			if (imx <= (double)threshold && imm <= (double)avg_threshold)
 			{
 				val = 0;
 			} else {
 				val = 255;
-				if (p_imd[y][x] > threshold) {st += threshold; sn++;}
-				if (p_average[y][x] > avg_threshold) {st += avg_threshold; sn++;}
+				if (imx > (double)threshold) {st += threshold; sn++;}
+				if (imm > (double)avg_threshold) {st += avg_threshold; sn++;}
 			}
 			d_im[y][x] = val;
 		}
@@ -3999,11 +3979,6 @@ int IMTFilterTAbutaleb (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
 	free(histogram);
 	free(P_histogram);
 	free(H_histogram);
-	
-    for (y = 0; y < height; y++) {free(p_imd[y]);}
-	free(p_imd);
-    for (y = 0; y < height; y++) {free(p_average[y]);}
-	free(p_average);
 	
 	return threshold;
 }  
@@ -5491,22 +5466,15 @@ int IMTFilterTKMeans (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wi
 
 int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound)
 {
-	unsigned x, y;
-	double imx, mean, deviation, t , st = 0, sn = 0;
+	unsigned x, y, n;
+	int y1, x1, y2, x2, yf, xf;
+	double imx, imm, imv, t, st = 0, sn = 0;
 	int threshold = 0;
+	int h = height;
+	int w = width;
 	BYTE val;
 	
-    double** p_imd;
-    p_imd = (double**)malloc(height * sizeof(double*));
-    for (y = 0; y < height; y++) {p_imd[y] = (double*)malloc(width * sizeof(double));}
-    double** p_mean;
-    p_mean = (double**)malloc(height * sizeof(double*));
-    for (y = 0; y < height; y++) {p_mean[y] = (double*)malloc(width * sizeof(double));}
-    double** p_var;
-    p_var = (double**)malloc(height * sizeof(double*));
-    for (y = 0; y < height; y++) {p_var[y] = (double*)malloc(width * sizeof(double));}
-	
-	if (radius < 0) {radius = -radius;}
+ 	if (radius < 0) {radius = -radius;}
 	if (upper_bound < lower_bound)
 	{
 		upper_bound += lower_bound;
@@ -5516,23 +5484,51 @@ int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 	
     for (y = 0; y < height; y++)
 	{
-       for (x = 0; x < width; x++)
+		y1 = y;
+		y1 -= radius;
+		if (y1 < 0) {y1 = 0;}
+		y2 = y + 1;
+		y2 += radius;
+		if (y2 > h) {y2 = h;}
+		for (x = 0; x < width; x++)
 		{
+			x1 = x;
+			x1 -= radius;
+			if (x1 < 0) {x1 = 0;}
+			x2 = x + 1;
+			x2 += radius;
+			if (x2 > w) {x2 = w;}
+			imm = 0;
+			n = 0;
+			for (yf = y1; yf < y2; yf++)
+			{
+				for (xf = x1; xf < x2; xf++)
+				{
+					imx = (double)p_im[yf][xf].s;
+					imm += imx;
+					n++;
+				}
+			}
+			if (n > 0) {imm /= n;}
+			imm /= 3;
+			imv = 0;
+			n = 0;
+			for (yf = y1; yf < y2; yf++)
+			{
+				for (xf = x1; xf < x2; xf++)
+				{
+					imx = (double)p_im[yf][xf].s;
+					imv += (imx * imx);
+					n++;
+				}
+			}
+			if (n > 0) {imv /= n;}
+			imv /= 9;
+			imv -= (imm * imm);
+			if (imv < 0) {imv = -imv;}
+			imv =sqrt(imv);
 			imx = (double)p_im[y][x].s;
-			p_imd[y][x] = imx / 3;
-		}
-	}
-
-	MFilterMean(width, height, radius, p_imd, p_mean);	
-	MFilterVariance(width, height, radius, p_imd, p_mean, p_var);	
-	
-    for (y = 0; y < height; y++)
-	{
-       for (x = 0; x < width; x++)
-		{
-			imx = p_imd[y][x];
-			mean = p_mean[y][x];
-			deviation = sqrt(p_var[y][x]);
+			imx /= 3;
 			if (imx < lower_bound)
 			{
 				t = lower_bound;
@@ -5542,7 +5538,7 @@ int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 				t = upper_bound;
 				val = 255;
 			} else {				
-				t = (mean + sensitivity * deviation);
+				t = (imm + sensitivity * imv);
 				val = (BYTE) ((imx >= t) ? 255 : 0);
 			}
 			st += t;
@@ -5551,13 +5547,6 @@ int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
         }
     }
 	if (sn > 0) {threshold =  (st * 3.0 /sn);}
-	
-    for (y = 0; y < height; y++) {free(p_imd[y]);}
-	free(p_imd);
-    for (y = 0; y < height; y++) {free(p_mean[y]);}
-	free(p_mean);
-    for (y = 0; y < height; y++) {free(p_var[y]);}
-	free(p_var);
 	
 	return threshold;
 }
@@ -5705,21 +5694,14 @@ int IMTFilterTRot (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width
 
 int IMTFilterTSauvola (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int dynamic_range, int lower_bound, int upper_bound)
 {
-	unsigned x, y;
-	double imx, t, st = 0, sn = 0, mean, deviation, adjusted_deviation;
-	BYTE val;
+	unsigned x, y, n;
+	int y1, x1, y2, x2, yf, xf;
+	double imx, imm, imv, ima, t, st = 0, sn = 0;
 	int threshold = 0;
+	int h = height;
+	int w = width;
+	BYTE val;
 
-    double** p_imd;
-    p_imd = (double**)malloc(height * sizeof(double*));
-    for (y = 0; y < height; y++) {p_imd[y] = (double*)malloc(width * sizeof(double));}
-    double** p_mean;
-    p_mean = (double**)malloc(height * sizeof(double*));
-    for (y = 0; y < height; y++) {p_mean[y] = (double*)malloc(width * sizeof(double));}
-    double** p_var;
-    p_var = (double**)malloc(height * sizeof(double*));
-    for (y = 0; y < height; y++) {p_var[y] = (double*)malloc(width * sizeof(double));}
-	
 	if (radius < 0) {radius = -radius;}
 	if (upper_bound < lower_bound)
 	{
@@ -5728,35 +5710,64 @@ int IMTFilterTSauvola (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 		upper_bound -= lower_bound;
 	}
 		
-    for (y = 0; y < height; y++)
+   for (y = 0; y < height; y++)
 	{
-        for (x = 0; x < width; x++)
+		y1 = y;
+		y1 -= radius;
+		if (y1 < 0) {y1 = 0;}
+		y2 = y + 1;
+		y2 += radius;
+		if (y2 > h) {y2 = h;}
+		for (x = 0; x < width; x++)
 		{
-			imx = (double)p_im[y][x].s / 3;
-			p_imd[y][x] = imx;
-		}
-	}
-
-	MFilterMean(width, height, radius, p_imd, p_mean);	
-	MFilterVariance(width, height, radius, p_imd, p_mean, p_var);	
-	
-    for (y = 0; y < height; y++)
-	{
-        for (x = 0; x < width; x++)
-		{
-			mean = p_mean[y][x];
-			deviation = sqrt(p_var[y][x]);            
-			adjusted_deviation = 1.0 - deviation / (double)dynamic_range;
-			imx = p_imd[y][x];
+			x1 = x;
+			x1 -= radius;
+			if (x1 < 0) {x1 = 0;}
+			x2 = x + 1;
+			x2 += radius;
+			if (x2 > w) {x2 = w;}
+			imm = 0;
+			n = 0;
+			for (yf = y1; yf < y2; yf++)
+			{
+				for (xf = x1; xf < x2; xf++)
+				{
+					imx = (double)p_im[yf][xf].s;
+					imm += imx;
+					n++;
+				}
+			}
+			if (n > 0) {imm /= n;}
+			imm /= 3;
+			imv = 0;
+			n = 0;
+			for (yf = y1; yf < y2; yf++)
+			{
+				for (xf = x1; xf < x2; xf++)
+				{
+					imx = (double)p_im[yf][xf].s;
+					imv += (imx * imx);
+					n++;
+				}
+			}
+			if (n > 0) {imv /= n;}
+			imv /= 9;
+			imv -= (imm * imm);
+			if (imv < 0) {imv = -imv;}
+			imv =sqrt(imv);
+			ima = 1.0 - imv / (double)dynamic_range;
+			imx = (double)p_im[y][x].s;
+			imx /= 3;
 			if (imx < lower_bound)
 			{
 				t = lower_bound;
 				val = 0;
-			} else if (imx > upper_bound) {
+			} else if (imx > upper_bound)
+			{
 				t = upper_bound;
 				val = 255;
 			} else {				
-				t = mean + (1.0 - sensitivity * adjusted_deviation);
+				t = imm + (1.0 - sensitivity * ima);
 				val = (BYTE) ((imx >= t) ? 255 : 0);
 			}
 			st += t;
@@ -5764,14 +5775,6 @@ int IMTFilterTSauvola (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 			d_im[y][x] = val;
         }
     }
-	if (sn > 0) {threshold =  (st * 3.0 /sn);}
-	
-    for (y = 0; y < height; y++) {free(p_imd[y]);}
-	free(p_imd);
-    for (y = 0; y < height; y++) {free(p_mean[y]);}
-	free(p_mean);
-    for (y = 0; y < height; y++) {free(p_var[y]);}
-	free(p_var);
 	
 	return threshold;
 }

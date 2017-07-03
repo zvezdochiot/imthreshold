@@ -106,10 +106,6 @@ MAXMIN(const T* L, long n, T& max, T& min) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int compare_colors(const void *elem1, const void *elem2);
-void MFilterMean(unsigned width, unsigned height, int radius, double** p_im, double** p_mean);
-void MFilterVariance(unsigned width, unsigned height, int radius, double** p_im, double** p_mean, double** p_var);
-double MFilterMedian(unsigned width, unsigned height, double** p_im, double** p_var);
 IMTpixel IMTset(BYTE c0, BYTE c1, BYTE c2);
 IMTpixel IMTcalcS (IMTpixel im);
 IMTpixel IMTrefilter1p(IMTpixel IMTim, IMTpixel IMTimf);
