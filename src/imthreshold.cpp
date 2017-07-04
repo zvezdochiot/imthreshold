@@ -1087,10 +1087,10 @@ void IMTFilterBGFGLsep (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel
 	unsigned heightfg = (heightbg + fgs - 1) / fgs;
 	unsigned y, x, d, l, i, j, y0, x0, y1, x1, y0b, x0b, y1b, x1b;
 	unsigned blsz = 1;
-	BYTE fgbase, bgbase;
+	BYTE fgbase, bgbase, mim;
 	unsigned cnth, cntw;
 	IMTpixel pim, fgim, bgim;
-	double fgdist, bgdist, kover, fgpart, bgpart, fgk = 1.0;
+	double fgdist, bgdist, kover, fgpart, bgpart;
 	unsigned maskbl, maskover, bgsover, fgsum[3], bgsum[3], fgnum, bgnum;
 	
 	IMTpixel** fgt_im;
@@ -1149,9 +1149,8 @@ void IMTFilterBGFGLsep (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel
 					for (x = x0; x < x1; x++)
 					{
 						pim = p_im[y][x];
-						fgdist = IMTdist(pim, fgim);
-						bgdist = IMTdist(pim, bgim);
-						if (fgdist * fgk < bgdist)
+						mim = m_im[y][x];
+						if (mim == 0)
 						{
 							for (d = 0; d < 3; d++)
 							{
@@ -1184,7 +1183,6 @@ void IMTFilterBGFGLsep (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel
 					}
 				}
 				pim = IMTmeanIc(p_im, y0, x0, y1, x1);
-				
 				fgdist = IMTdist(pim, fgim);
 				bgdist = IMTdist(pim, bgim);
 				fgpart = 1.0;
