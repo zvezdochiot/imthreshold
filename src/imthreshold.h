@@ -160,6 +160,7 @@ void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsi
 double IMTFilterBgDiv (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned ndiv);
 void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, double amount, int threshold);
 void IMTFilterWiener(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double noise_variance);
+int IMTFilterWhiteFill (IMTpixel** p_im, unsigned height, unsigned width);
 double BiCubicKernel(double x);
 void IMTFilterSBicub(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width);
 void IMTFilterSBilin(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width);
