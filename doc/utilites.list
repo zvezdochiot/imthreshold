@@ -53,6 +53,7 @@ It's a set of command line tools to create color images of djvu.
   imthreshold-fshrink
   imthreshold-funripple
   imthreshold-funsharp
+  imthreshold-fwhitefill
   imthreshold-fwiener
 
  Scale:
@@ -69,7 +70,7 @@ It's a set of command line tools to create color images of djvu.
   imthreshold-rotate
   imthreshold-bash-scripts
 
-2017-06-21
+2017-10-09
 
  2016-2017 zvezdochiot.
  2006-2016 monday2000.
