@@ -3076,6 +3076,89 @@ void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterWhiteFill (IMTpixel** p_im, unsigned height, unsigned width)
+{
+	unsigned y, x, yy, xx;
+	int im, sw, imf, niter = 0;
+	
+	sw = 1;
+	while (sw > 0)
+	{
+		niter++;
+		sw = 0;
+		for ( x = 0; x < width; x++ )
+		{
+			for ( y = 0; y < height; y++ )
+			{
+				im = p_im[y][x].s;
+				if (im != 765)
+				{
+					if (x > 0)
+					{
+						imf = p_im[y][x - 1].s;
+						if (imf == 765) {p_im[y][x - 1] = p_im[y][x];}
+					}
+					if (x < width - 1)
+					{
+						imf = p_im[y][x + 1].s;
+						if (imf == 765) {p_im[y][x + 1] = p_im[y][x];}
+					}
+					if (y > 0)
+					{
+						imf = p_im[y - 1][x].s;
+						if (imf == 765) {p_im[y - 1][x] = p_im[y][x];}
+					}
+					if (y < height - 1)
+					{
+						imf = p_im[y + 1][x].s;
+						if (imf == 765) {p_im[y + 1][x] = p_im[y][x];}
+					}
+				} else {
+					sw++;
+				}
+			}
+		}
+		sw = 0;
+		for ( xx = width; xx > 0; xx-- )
+		{
+			x = xx - 1;
+			for ( yy = height; yy > 0; yy-- )
+			{
+				y = yy - 1;
+				im = p_im[y][x].s;
+				if (im != 765)
+				{
+					if (x > 0)
+					{
+						imf = p_im[y][x - 1].s;
+						if (imf == 765) {p_im[y][x - 1] = p_im[y][x];}
+					}
+					if (x < width - 1)
+					{
+						imf = p_im[y][x + 1].s;
+						if (imf == 765) {p_im[y][x + 1] = p_im[y][x];}
+					}
+					if (y > 0)
+					{
+						imf = p_im[y - 1][x].s;
+						if (imf == 765) {p_im[y - 1][x] = p_im[y][x];}
+					}
+					if (y < height - 1)
+					{
+						imf = p_im[y + 1][x].s;
+						if (imf == 765) {p_im[y + 1][x] = p_im[y][x];}
+					}
+				} else {
+					sw++;
+				}
+			}
+		}
+	}
+	return niter;
+ }
+
 ////////////////////////////////////////////////////////////////////////////////
 
 double BiCubicKernel (double x)

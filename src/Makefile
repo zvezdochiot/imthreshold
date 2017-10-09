@@ -1,9 +1,9 @@
-PROGNAME      = imthreshold-deskew imthreshold-rotate imthreshold-fadsmooth imthreshold-fautoinv imthreshold-fbgdiv imthreshold-fbgfglsep imthreshold-fdespeckle imthreshold-fdneuro imthreshold-fgreyworld imthreshold-fillumc imthreshold-finfo imthreshold-fkmeans imthreshold-flevelmean imthreshold-flevelsigma imthreshold-fpmean imthreshold-fretinex imthreshold-frs imthreshold-fselgauss imthreshold-fshrink imthreshold-funripple imthreshold-funsharp imthreshold-fwiener imthreshold-sbicub imthreshold-sbilin imthreshold-sbwmag2 imthreshold-shris imthreshold-snearest imthreshold-tabutaleb imthreshold-tbernsen imthreshold-tbht imthreshold-tbimod imthreshold-tdalg imthreshold-tdither imthreshold-tdjvul imthreshold-tent imthreshold-teqbright imthreshold-tgatos imthreshold-tgrad imthreshold-thalftone2 imthreshold-tjanni imthreshold-tkmeans imthreshold-tnib imthreshold-totsu imthreshold-trot imthreshold-tsauvola imthreshold-ttext imthreshold-ttsai imthreshold-twhiterohrer
+PROGNAME      = imthreshold-deskew imthreshold-rotate imthreshold-fadsmooth imthreshold-fautoinv imthreshold-fbgdiv imthreshold-fbgfglsep imthreshold-fdespeckle imthreshold-fdneuro imthreshold-fgreyworld imthreshold-fillumc imthreshold-finfo imthreshold-fkmeans imthreshold-flevelmean imthreshold-flevelsigma imthreshold-fpmean imthreshold-fretinex imthreshold-frs imthreshold-fselgauss imthreshold-fshrink imthreshold-funripple imthreshold-funsharp imthreshold-fwiener imthreshold-fwhitefill imthreshold-sbicub imthreshold-sbilin imthreshold-sbwmag2 imthreshold-shris imthreshold-snearest imthreshold-tabutaleb imthreshold-tbernsen imthreshold-tbht imthreshold-tbimod imthreshold-tdalg imthreshold-tdither imthreshold-tdjvul imthreshold-tent imthreshold-teqbright imthreshold-tgatos imthreshold-tgrad imthreshold-thalftone2 imthreshold-tjanni imthreshold-tkmeans imthreshold-tnib imthreshold-totsu imthreshold-trot imthreshold-tsauvola imthreshold-ttext imthreshold-ttsai imthreshold-twhiterohrer
 CPP           = g++
 CFLAGS        = -DUNIX -O2 -Wall
 LIBS          = -lfreeimage
 VER           = 0
-VERB          = 20170704
+VERB          = 20171009
 COMMON        = libimthreshold.so.$(VER) libimthresholdfreeimage.so.$(VER)
 PREFIX        = /usr/local
 INCPREFIX     = $(PREFIX)/include
@@ -54,6 +54,9 @@ imthreshold-fbgfglsep: fbgfglsep.cpp $(COMMON)
 imthreshold-fdespeckle: fdespeckle.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
 
+imthreshold-fcolset: fcolset.cpp $(COMMON)
+	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+
 imthreshold-fdneuro: fdneuro.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
 
@@ -97,6 +100,9 @@ imthreshold-funsharp: funsharp.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
 
 imthreshold-fwiener: fwiener.cpp $(COMMON)
+	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+
+imthreshold-fwhitefill: fwhitefill.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
 
 imthreshold-sbicub: sbicub.cpp $(COMMON)
