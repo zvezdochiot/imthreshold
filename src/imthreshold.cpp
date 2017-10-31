@@ -1278,6 +1278,68 @@ IMTpixel IMTFilterGreyWorld (IMTpixel** p_im, IMTpixel** d_im, unsigned height, 
 
 ////////////////////////////////////////////////////////////////////////////////
 
+double IMTFilterLevelL (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned level, unsigned num)
+{
+	unsigned y, x, d, l, i, j, y0, x0, y1, x1;
+	unsigned blsz = 1, cnth, cntw;
+	double immean, val;
+	IMTpixel pim, dim;
+	
+	for (l = 0; l < level; l++)
+	{
+		blsz *= 2;
+	}
+	pim = IMTmeanIc(p_im, 0, 0, height, width);
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			d_im[y][x] = pim;
+		}
+	}
+	if (num > level) {num = 0;}
+	level -= num;
+	for (l = 0; l <= level; l++)
+	{
+		cnth = (height + blsz - 1) / blsz;
+		cntw = (width + blsz - 1) / blsz;
+		for (i = 0; i < cnth; i++)
+		{
+			y0 = i * blsz;
+			y1 = y0 + blsz;
+			if (y1 > height) {y1 = height;}
+			for (j = 0; j < cntw; j++)
+			{
+				x0 = j * blsz;
+				x1 = x0 + blsz;
+				if (x1 > width) {x1 = width;}
+
+				pim = IMTmeanIc(p_im, y0, x0, y1, x1);
+				dim = IMTaverageIc(d_im, pim, y0, x0, y1, x1, level);
+			}
+		}
+		blsz /= 2;
+	}
+	immean = IMTmean(d_im, height, width);
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			for (d = 0; d < 3; d++)
+			{
+				val = p_im[y][x].c[d];
+				val += immean;
+				val -= d_im[y][x].c[d];
+				d_im[y][x].c[d] = MIN(MAX((int)0, (int)val), (int)255);;
+			}
+		}
+	}
+	
+	return immean;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 double IMTFilterLevelMean (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double contour, double thres, int lower_bound, int upper_bound)
 {
 	if (upper_bound < lower_bound)
@@ -1424,6 +1486,85 @@ double IMTFilterLevelSigma (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
 
 	return ks;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+double IMTFilterMirror (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width)
+{
+	unsigned y, x, d;
+	int im, imm, imd;
+	double ims = 0.0;
+	
+	for ( y = 0; y < height; y++ )
+	{
+		for ( x = 0; x < width; x++ )
+		{
+			for (d = 0; d < 3; d++)
+			{
+				im = p_im[y][x].c[d];
+				imm = d_im[y][x].c[d];
+				imd = im - imm;
+				im += imd;
+				ims += imd;
+				d_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)im), (int)255);
+			}
+			d_im[y][x] = IMTcalcS (d_im[y][x]);
+		}
+	}
+	ims /= 3;
+	ims /= width;
+	ims /= height;
+	
+	return ims;
+ }
+
+///////////////////////////////////////////////////////////////////////////////
+
+double IMTFilterMirrorHalf (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width)
+{
+	unsigned y, x, d;
+	int im, imm, imd, ime = 0, imf;
+	double ims = 0.0;
+	
+	for ( y = 0; y < height; y++ )
+	{
+		for ( x = 0; x < width; x++ )
+		{
+			for (d = 0; d < 3; d++)
+			{
+				im = p_im[y][x].c[d];
+				imm = d_im[y][x].c[d];
+				imd = im - imm;
+				imf = (imd + ime) / 2;
+				ime += (imd - imf * 2);
+				im += imf;
+				ims += imf;
+				d_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)im), (int)255);
+			}
+			d_im[y][x] = IMTcalcS (d_im[y][x]);
+		}
+	}
+	ims /= 3;
+	ims /= width;
+	ims /= height;
+	
+	return ims;
+ }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterNone (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width)
+{
+	unsigned y, x;
+	
+	for ( y = 0; y < height; y++ )
+	{
+		for ( x = 0; x < width; x++ )
+		{
+			d_im[y][x] = p_im[y][x];
+		}
+	}
+ }
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1892,7 +2033,7 @@ int IMTFilterKMeans (IMTpixel** IMTim, unsigned height, unsigned width, unsigned
 	return iters;
 }
 
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 void IMTFilterPMean (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, int fmode, bool fneared)
 {
