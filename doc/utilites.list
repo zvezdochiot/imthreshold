@@ -47,7 +47,9 @@ It's a set of command line tools to create color images of djvu.
   imthreshold-flevell
   imthreshold-flevelmean
   imthreshold-flevelsigma
+  imthreshold-fperon
   imthreshold-fpmean
+  imthreshold-fposterize
   imthreshold-fretinex
   imthreshold-frs
   imthreshold-fselgauss
@@ -72,7 +74,7 @@ It's a set of command line tools to create color images of djvu.
   imthreshold-rotate
   imthreshold-bash-scripts
 
-2017-10-31
+2017-11-01
 
  2016-2017 zvezdochiot.
  2006-2016 monday2000.

@@ -141,7 +141,6 @@ double IMTFilterLevelMean(IMTpixel** p_im, IMTpixel** d_im, unsigned height, uns
 double IMTFilterLevelSigma(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double thres, double fpart);
 double IMTFilterMirror (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width);
 double IMTFilterMirrorHalf (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width);
-void IMTFilterNone (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width);
 IMTpixel IMTmeanIcM(IMTpixel** IMTim, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx);
 IMTpixel IMTmeanPtIcM(IMTpixel** IMTim, IMTpixel IMTimm, double* linfilt, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx);
 double IMTwbIcM(IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx);
@@ -151,6 +150,8 @@ IMTpixel IMTmeanBlIcM(IMTpixel** IMTim, IMTpixel IMTimm, double** sqfilt, double
 IMTpixel IMTmeanMinIcM(IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx);
 IMTpixel IMTmeanMaxIcM(IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx);
 int IMTFilterKMeans(IMTpixel** IMTim, unsigned height, unsigned width, unsigned ncluster, unsigned iters);
+void IMTFilterPeron (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, double noise);
+double IMTFilterPosterize (IMTpixel** p_im, unsigned height, unsigned width, unsigned thres);
 void IMTFilterPMean(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, int fmode, bool fneared);
 int IMTFilterRetinex(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double sigma);
 double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width, bool finv);
@@ -179,7 +180,7 @@ int IMTFilterTBHT(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
 int IMTFilterTBiMod(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta);
 int IMTFilterTDalg(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int region_size);
 int IMTFilterTDither(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
-int IMTFilterTDjVuL(IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, int wbmode, double anisotropic, double doverlay);
+int IMTFilterTDjVuL(IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, int wbmode, double anisotropic, double doverlay, unsigned fposter);
 int IMTFilterTEnt(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTEqBright(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int fmode);
 int IMTFilterGatosBG(IMTpixel** p_im, BYTE** d_im, IMTpixel** bg_im, unsigned height, unsigned width, int radius);
