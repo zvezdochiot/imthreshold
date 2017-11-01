@@ -48,7 +48,7 @@ void ImthresholdIMTFilterDjVuLUsage()
 	printf("          -f N    foreground divide (int, optional, default = 2)\n");
 	printf("          -l N    level (int, optional, default = 10)\n");
 	printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
-	printf("          -s N    shrink fg, bg (int, optional, default = 0)\n");
+	printf("          -p N    fposterize fg (int, optional, default = 0)\n");
 	printf("          -w N    w/b mode (int, optional, default = 0 [auto], >0-white, <0-black)\n");
 	printf("          -h      this help\n");
 }
@@ -71,10 +71,9 @@ int main(int argc, char *argv[])
 	int wbmode = 0;
 	int fclean = 0;
 	int fdespeckle = 0;
-	int fshrink = 0;
-	double imsh = 0;
+	unsigned fposter = 0;
 	bool fhelp = false;
-	while ((opt = getopt(argc, argv, ":a:c:d:b:f:l:s:o:w:h")) != -1)
+	while ((opt = getopt(argc, argv, ":a:c:d:b:f:l:p:o:w:h")) != -1)
 	{
 		switch(opt)
 		{
@@ -102,8 +101,8 @@ int main(int argc, char *argv[])
 			case 'd':
 				fdespeckle = atof(optarg);
 				break;
-			case 's':
-				fshrink = atof(optarg);
+			case 'p':
+				fposter = atof(optarg);
 				break;
 			case 'h':
 				fhelp = true;
@@ -199,7 +198,11 @@ int main(int argc, char *argv[])
 				
 				ImthresholdGetData(dib, p_im);
 				FreeImage_Unload(dib);
-				wbmode = IMTFilterTDjVuL(p_im, m_im, fg_im, bg_im, height, width, bgs, fgs, level, wbmode, anisotropic, doverlay);
+				if (fposter != 0)
+				{
+					printf("Posterize= %d\n", fposter);
+				}
+				wbmode = IMTFilterTDjVuL(p_im, m_im, fg_im, bg_im, height, width, bgs, fgs, level, wbmode, anisotropic, doverlay, fposter);
 				if (wbmode > 0)
 				{
 					printf("Mode= white\n");
@@ -220,18 +223,13 @@ int main(int argc, char *argv[])
 				ImthresholdSetDataBW(dst_dib, m_im);
 				for (y = 0; y < height; y++){free(m_im[y]);}
 				free(m_im);
-				if (fshrink != 0)
-				{
-					printf("Shrink= %d\n", fshrink);
-					imsh = IMTFilterShrink(fg_im, heightfg, widthfg, fshrink);
-					printf("ShrinkFG= %f\n", imsh);
-					imsh = IMTFilterShrink(bg_im, heightbg, widthbg, fshrink);
-					printf("ShrinkBG= %f\n", imsh);
-				}
 				if (fclean > 0)
 				{
 					printf("Blur= %d\n", fclean);
-					IMTBlurMask(fg_im, fgm_im, heightfg, widthfg, fclean);
+					if (fposter == 0)
+					{
+						IMTBlurMask(fg_im, fgm_im, heightfg, widthfg, fclean);
+					}
 					IMTBlurMask(bg_im, bgm_im, heightbg, widthbg, fclean);
 				}
 				fg_dib = FreeImage_Allocate(widthfg, heightfg, 24);	

@@ -1553,21 +1553,6 @@ double IMTFilterMirrorHalf (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterNone (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width)
-{
-	unsigned y, x;
-	
-	for ( y = 0; y < height; y++ )
-	{
-		for ( x = 0; x < width; x++ )
-		{
-			d_im[y][x] = p_im[y][x];
-		}
-	}
- }
-
-////////////////////////////////////////////////////////////////////////////////
-
 IMTpixel IMTmeanIcM (IMTpixel** IMTim, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx)
 {
 	unsigned y, x, d, i, j;
@@ -2033,7 +2018,195 @@ int IMTFilterKMeans (IMTpixel** IMTim, unsigned height, unsigned width, unsigned
 	return iters;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterPeron (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, double noise)
+{
+	unsigned y, x, d, r, yp, yn, xp, xn, i, j, level;
+	int im, imf;
+	double dr = 0.2;
+	double fim, fimf;
+	
+	if (radius < 0) {radius = -radius;}
+	if (noise < 0) {noise = -noise;}
+	if (noise == 0) {noise = 1;}
+	level = (radius / dr);
+	for ( r = 0; r < level; r++ )
+	{
+		for ( y = 0; y < height; y++ )
+		{
+			if (y == 0) {yp = y;} else {yp = y - 1;}
+			yn = y + 2;
+			if (yn > height) {yn = height;}
+			for ( x = 0; x < width; x++ )
+			{
+				if (x == 0) {xp = x;} else {xp = x - 1;}
+				xn = x + 2;
+				if (xn > width) {xn = width;}
+				for (d = 0; d < 3; d++)
+				{
+					im = p_im[y][x].c[d];
+					fim = 0.0;
+					for (i = yp; i < yn; i++)
+					{
+						for (j = xp; j < xn; j++)
+						{
+							imf = p_im[i][j].c[d];
+							imf -= im;
+							fimf = imf;
+							fimf /= noise;
+							fimf *= fimf;
+							fimf++;
+							fimf = double(imf) / (fimf);
+							fim += fimf;
+						}
+					}
+					fim /= 2;
+					fim *= dr;
+					imf = im + int(fim + 0.5);
+					d_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)imf), (int)255);
+				}
+				d_im[y][x] = IMTcalcS (d_im[y][x]);
+			}
+		}
+		IMTFilterCopy(d_im, p_im, height, width);
+	}
+ }
+
+////////////////////////////////////////////////////////////////////////////////
+
+double IMTFilterPosterize (IMTpixel** p_im, unsigned height, unsigned width, unsigned thres)
+{
+	unsigned y, x, d, n, i, j, k, l;
+	unsigned imin, imax, jmin, jmax, lmin, lmax;
+	double ims = 0.0, ime;
+	IMTpixel im, immin, immax, imd;
+	unsigned imx[3] = {0};
+	double imdx[3] = {0};
+	double sumc[3] = {0};
+	
+	if (thres < 1) {thres = 1;}
+	if (thres > 255) {thres = 255;}
+
+	if (thres > 1)
+	{
+		n=0;
+		for (d = 0; d < 3; d++)
+		{
+			immin.c[d] = 255;
+			immax.c[d] = 0;
+		}
+		for (y = 0; y < height; y++)
+		{
+			for (x = 0; x < width; x++)
+			{
+				im = p_im[y][x];
+				for (d = 0; d < 3; d++)
+				{
+					if (im.c[d] < immin.c[d]) {immin.c[d] = im.c[d];}
+					if (im.c[d] > immax.c[d]) {immax.c[d] = im.c[d];}
+				}
+			}
+		}
+		for (d = 0; d < 3; d++)
+		{
+			imd.c[d] = immax.c[d] - immin.c[d];
+		}
+		n = imd.c[0];
+		n *= imd.c[1];
+		n *= imd.c[2];
+		n /= thres;
+		k = 1;
+		l = k * k * k;
+		while (n > l)
+		{
+			k++;
+			l = k * k * k;
+		}
+		for (d = 0; d < 3; d++)
+		{
+			imx[d] = int(double(imd.c[d]) / k + 0.5);
+			imdx[d] = imd.c[d];
+			imdx[d] /= imx[d];
+		}
+		for (i = 0; i < imx[0]; i++)
+		{
+			imin = immin.c[0];
+			imin += i * imdx[0];
+			imax = immin.c[0];
+			imax += (i + 1) * imdx[0];
+			for (j = 0; j < imx[1]; j++)
+			{
+				jmin = immin.c[1];
+				jmin += j * imdx[1];
+				jmax = immin.c[1];
+				jmax += (j + 1) * imdx[1];
+				for (l = 0; l < imx[0]; l++)
+				{
+					lmin = immin.c[2];
+					lmin += l * imdx[2];
+					lmax = immin.c[2];
+					lmax += (l + 1) * imdx[2];
+					n = 0;
+					for (d = 0; d < 3; d++)
+					{
+						sumc[d] = 0;
+					}
+					for (y = 0; y < height; y++)
+					{
+						for (x = 0; x < width; x++)
+						{
+							im = p_im[y][x];
+							if ((im.c[0] >= imin) && (im.c[0] <= imax) && (im.c[1] >= jmin) && (im.c[1] <= jmax) && (im.c[2] >= lmin) && (im.c[2] <= lmax))
+							{
+								for (d = 0; d < 3; d++)
+								{
+									sumc[d] += im.c[d];
+								}
+								n++;
+							}
+						}
+					}
+					if (n > 0)
+					{
+						for (d = 0; d < 3; d++)
+						{
+							sumc[d] /= n;
+							sumc[d] += 0.5;
+						}
+						for (y = 0; y < height; y++)
+						{
+							for (x = 0; x < width; x++)
+							{
+								im = p_im[y][x];
+								if ((im.c[0] >= imin) && (im.c[0] <= imax) && (im.c[1] >= jmin) && (im.c[1] <= jmax) && (im.c[2] >= lmin) && (im.c[2] <= lmax))
+								{
+									for (d = 0; d < 3; d++)
+									{
+										ime = im.c[d];
+										ime -= sumc[d];
+										if (ime < 0) {ime = -ime;}
+										ims += ime;
+										im.c[d] = int(sumc[d]);
+										
+									}
+									p_im[y][x] = im;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		ims /= 3;
+		ims /= width;
+		ims /= height;
+	}
+	
+	return ims;
+ }
+
+////////////////////////////////////////////////////////////////////////////////
 
 void IMTFilterPMean (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, int fmode, bool fneared)
 {
@@ -4569,7 +4742,7 @@ int IMTFilterTDither (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wi
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, int wbmode, double anisotropic, double doverlay)
+int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, int wbmode, double anisotropic, double doverlay, unsigned fposter)
 {
 	unsigned widthbg = (width + bgs - 1) / bgs;
 	unsigned heightbg = (height + bgs - 1) / bgs;
@@ -4737,6 +4910,10 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
 			fg_im[y][x] = IMTmeanIc(fgt_im, y0, x0, y1, x1);
 
 		}
+	}
+	if (fposter != 0)
+	{
+		double imsh = IMTFilterPosterize(fg_im, heightfg, widthfg, 256 / fposter);
 	}
 	for (y = 0; y < height; y++)
 	{
