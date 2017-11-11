@@ -40,6 +40,7 @@ It's a set of command line tools to create color images of djvu.
   imthreshold-fbgfglsep
   imthreshold-fdespeckle
   imthreshold-fdneuro
+  imthreshold-fdphist
   imthreshold-fgreyworld
   imthreshold-fillumc
   imthreshold-finfo
