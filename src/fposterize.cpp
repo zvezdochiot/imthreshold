@@ -39,7 +39,7 @@ void ImthresholdFilterPosterizeUsage()
 {
 	printf("Usage : imthreshold-fposterize [options] <input_file> <output_file>\n\n");
 	printf("options:\n");
-	printf("          -t N    threshold (int, optional, default = 16)\n");
+	printf("          -d N    divide factor (int, optional, default = 16)\n");
 	printf("          -h      this help\n");
 }
 
@@ -56,11 +56,11 @@ int main(int argc, char *argv[])
 	int thres = 16;
 	bool fhelp = false;
 	double imsh = 0;
-	while ((opt = getopt(argc, argv, ":t:h")) != -1)
+	while ((opt = getopt(argc, argv, ":d:h")) != -1)
 	{
 		switch(opt)
 		{
-			case 't':
+			case 'd':
 				thres = atof(optarg);
 				break;
 			case 'h':

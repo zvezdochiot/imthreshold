@@ -662,6 +662,110 @@ void IMTFilterDNeuro2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ks
 
 ////////////////////////////////////////////////////////////////////////////////
 
+double IMTFilterDphist (BYTE** p_im, unsigned height, unsigned width)
+{	
+	unsigned y, x, i, j, k, l, n, val, hmin, imin, hmax, imax, nrep, nreps;
+	unsigned hist[512] = {0};
+	double kdp;
+	
+	int** d_im;
+	d_im = (int**)malloc(height * sizeof(BYTE*));
+	for (y = 0; y < height; y++) {d_im[y] = (int*)malloc(width * sizeof(int));}
+
+	n = width * height;
+	for (k = 0; k < 512; k++)
+	{
+		hist[k] = 0;
+	}
+	for (y = 0; y < height - 2; y++)
+	{
+		for (x = 0; x < width - 2; x++)
+		{
+			val = 0;
+			k = 0;
+			for(i = 0; i < 3; i++)
+			{
+				for(j = 0; j < 3; j++)
+				{
+					if (p_im[y + i][x + j] > 0)
+					{
+						l = (1 << k);
+						val += l;
+					}
+					k++;
+				}
+			}
+			d_im[y][x] = val;
+			hist[val]++;
+		}
+	}
+	imin = 0;
+	imax = 1;
+	nreps = 0;
+	while (imin != imax)
+	{
+		hmin = n;
+		imin = 0;
+		for (k = 0; k < 512; k++)
+		{
+			if (hist[k] > 0 && hist[k] < hmin)
+			{
+				hmin = hist[k];
+				imin = k;
+			}
+		}
+		hmax = hmin;
+		imax = imin;
+		for (k = 0; k < 9; k++)
+		{
+			l = (1 << k);
+			i = imin | l;
+			if (hist[i] > hmax)
+			{
+				hmax = hist[i];
+				imax = i;
+			}
+		}
+		nrep = 0;
+		if (imin != imax)
+		{
+			for (y = 0; y < height - 2; y++)
+			{
+				for (x = 0; x < width - 2; x++)
+				{
+					val = d_im[y][x];
+					if (val == imin)
+					{
+						k = 0;
+						for(i = 0; i < 3; i++)
+						{
+							for(j = 0; j < 3; j++)
+							{
+								p_im[y + i][x + j] = (BYTE) (((imax >> k) & 1) ? 255 : 0 );
+								k++;
+							}
+						}
+						nrep++;
+						d_im[y][x] = imax;
+						hist[imax]++;
+					}
+				}
+			}
+			hist[imin] = 0;
+			nreps += nrep;
+		}
+	}
+	kdp = nreps;
+	kdp /= n;
+
+	for (y = 0; y < height; y++){free(d_im[y]);}
+	free(d_im);
+	
+	return kdp;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void IMTBlurMask (IMTpixel** p_im, BYTE** m_im, unsigned height, unsigned width, int radius)
 {
 	int y, x, y0, x0;
@@ -2077,16 +2181,13 @@ void IMTFilterPeron (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
 
 double IMTFilterPosterize (IMTpixel** p_im, unsigned height, unsigned width, unsigned thres)
 {
-	unsigned y, x, d, n, i, j, k, l;
-	unsigned imin, imax, jmin, jmax, lmin, lmax;
-	double ims = 0.0, ime;
-	IMTpixel im, immin, immax, imd;
-	unsigned imx[3] = {0};
-	double imdx[3] = {0};
-	double sumc[3] = {0};
+	unsigned y, x, d, n;
+	unsigned imin, imax, imst;
+	double ims = 0.0, ime, sumc = 0.0;
+	IMTpixel im, immin, immax;
 	
 	if (thres < 1) {thres = 1;}
-	if (thres > 255) {thres = 255;}
+	if (thres > 256) {thres = 256;}
 
 	if (thres > 1)
 	{
@@ -2110,92 +2211,47 @@ double IMTFilterPosterize (IMTpixel** p_im, unsigned height, unsigned width, uns
 		}
 		for (d = 0; d < 3; d++)
 		{
-			imd.c[d] = immax.c[d] - immin.c[d];
-		}
-		n = imd.c[0];
-		n *= imd.c[1];
-		n *= imd.c[2];
-		n /= thres;
-		k = 1;
-		l = k * k * k;
-		while (n > l)
-		{
-			k++;
-			l = k * k * k;
-		}
-		for (d = 0; d < 3; d++)
-		{
-			imx[d] = int(double(imd.c[d]) / k + 0.5);
-			imdx[d] = imd.c[d];
-			imdx[d] /= imx[d];
-		}
-		for (i = 0; i < imx[0]; i++)
-		{
-			imin = immin.c[0];
-			imin += i * imdx[0];
-			imax = immin.c[0];
-			imax += (i + 1) * imdx[0];
-			for (j = 0; j < imx[1]; j++)
+			imin = immin.c[d];
+			imst = immax.c[d];
+			imst++;
+			while (imin < imst)
 			{
-				jmin = immin.c[1];
-				jmin += j * imdx[1];
-				jmax = immin.c[1];
-				jmax += (j + 1) * imdx[1];
-				for (l = 0; l < imx[0]; l++)
+				imax = imin + thres;
+				n = 0;
+				sumc = 0.0;
+				for (y = 0; y < height; y++)
 				{
-					lmin = immin.c[2];
-					lmin += l * imdx[2];
-					lmax = immin.c[2];
-					lmax += (l + 1) * imdx[2];
-					n = 0;
-					for (d = 0; d < 3; d++)
+					for (x = 0; x < width; x++)
 					{
-						sumc[d] = 0;
+						im = p_im[y][x];
+						if ((im.c[d] >= imin) && (im.c[d] < imax))
+						{
+							sumc += im.c[d];
+							n++;
+						}
 					}
+				}
+				if (n > 0)
+				{
+					sumc /= n;
+					sumc += 0.5;
 					for (y = 0; y < height; y++)
 					{
 						for (x = 0; x < width; x++)
 						{
 							im = p_im[y][x];
-							if ((im.c[0] >= imin) && (im.c[0] <= imax) && (im.c[1] >= jmin) && (im.c[1] <= jmax) && (im.c[2] >= lmin) && (im.c[2] <= lmax))
+							if ((im.c[d] >= imin) && (im.c[d] < imax))
 							{
-								for (d = 0; d < 3; d++)
-								{
-									sumc[d] += im.c[d];
-								}
-								n++;
-							}
-						}
-					}
-					if (n > 0)
-					{
-						for (d = 0; d < 3; d++)
-						{
-							sumc[d] /= n;
-							sumc[d] += 0.5;
-						}
-						for (y = 0; y < height; y++)
-						{
-							for (x = 0; x < width; x++)
-							{
-								im = p_im[y][x];
-								if ((im.c[0] >= imin) && (im.c[0] <= imax) && (im.c[1] >= jmin) && (im.c[1] <= jmax) && (im.c[2] >= lmin) && (im.c[2] <= lmax))
-								{
-									for (d = 0; d < 3; d++)
-									{
-										ime = im.c[d];
-										ime -= sumc[d];
-										if (ime < 0) {ime = -ime;}
-										ims += ime;
-										im.c[d] = int(sumc[d]);
-										
-									}
-									p_im[y][x] = im;
-								}
+								ime = im.c[d];
+								ime -= sumc;
+								if (ime < 0) {ime = -ime;}
+								ims += ime;
+								p_im[y][x].c[d] = int(sumc);	
 							}
 						}
 					}
 				}
+				imin += thres;
 			}
 		}
 		ims /= 3;
@@ -4913,7 +4969,7 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
 	}
 	if (fposter != 0)
 	{
-		double imsh = IMTFilterPosterize(fg_im, heightfg, widthfg, 256 / fposter);
+		double imsh = IMTFilterPosterize(fg_im, heightfg, widthfg, fposter);
 	}
 	for (y = 0; y < height; y++)
 	{
