@@ -1,9 +1,9 @@
-PROGNAME      = imthreshold-deskew imthreshold-rotate imthreshold-fadsmooth imthreshold-fautoinv imthreshold-fbgdiv imthreshold-fbgfglsep imthreshold-fdespeckle imthreshold-fdneuro imthreshold-fdphist imthreshold-fgreyworld imthreshold-fillumc imthreshold-finfo imthreshold-fkmeans imthreshold-flevell imthreshold-flevelmean imthreshold-flevelsigma imthreshold-fperon imthreshold-fposterize imthreshold-fpmean imthreshold-fretinex imthreshold-frs imthreshold-fselgauss imthreshold-fshrink imthreshold-funripple imthreshold-funsharp imthreshold-fwiener imthreshold-fwhitefill imthreshold-sbicub imthreshold-sbilin imthreshold-sbwmag2 imthreshold-scris imthreshold-shris imthreshold-snearest imthreshold-tabutaleb imthreshold-tbernsen imthreshold-tbht imthreshold-tbimod imthreshold-tdalg imthreshold-tdither imthreshold-tdjvul imthreshold-tent imthreshold-teqbright imthreshold-tgatos imthreshold-tgrad imthreshold-thalftone2 imthreshold-tjanni imthreshold-tkmeans imthreshold-tnib imthreshold-totsu imthreshold-trot imthreshold-tsauvola imthreshold-ttext imthreshold-ttsai imthreshold-twhiterohrer
+PROGNAME      = imthreshold-deskew imthreshold-rotate imthreshold-fadsmooth imthreshold-fautoinv imthreshold-fbgdiv imthreshold-fbgfglsep imthreshold-fdespeckle imthreshold-fdneuro imthreshold-fdphist imthreshold-fgreyworld imthreshold-fillumc imthreshold-finfo imthreshold-fkmeans imthreshold-flevell imthreshold-flevelmean imthreshold-flevelsigma imthreshold-fperon imthreshold-fposterize imthreshold-fpmean imthreshold-fretinex imthreshold-frs imthreshold-fselgauss imthreshold-fshrink imthreshold-funripple imthreshold-funsharp imthreshold-fwiener imthreshold-fwhitefill imthreshold-sbicub imthreshold-sbilin imthreshold-sbwmag2 imthreshold-scris imthreshold-sgsample imthreshold-shris imthreshold-snearest imthreshold-tabutaleb imthreshold-tbernsen imthreshold-tbht imthreshold-tbimod imthreshold-tdalg imthreshold-tdither imthreshold-tdjvul imthreshold-tent imthreshold-teqbright imthreshold-tgatos imthreshold-tgrad imthreshold-thalftone2 imthreshold-tjanni imthreshold-tkmeans imthreshold-tnib imthreshold-totsu imthreshold-trot imthreshold-tsauvola imthreshold-ttext imthreshold-ttsai imthreshold-twhiterohrer
 CPP           = g++
 CFLAGS        = -DUNIX -O2 -Wall
 LIBS          = -lfreeimage
 VER           = 0
-VERB          = 20171111
+VERB          = 20171123
 COMMON        = libimthreshold.so.$(VER) libimthresholdfreeimage.so.$(VER)
 PREFIX        = /usr/local
 INCPREFIX     = $(PREFIX)/include
@@ -92,6 +92,7 @@ imthreshold-fposterize: fposterize.cpp $(COMMON)
 
 imthreshold-fpmean: fpmean.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+
 imthreshold-fretinex: fretinex.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
 
@@ -128,8 +129,12 @@ imthreshold-sbwmag2: sbwmag2.cpp $(COMMON)
 imthreshold-scris: scris.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
 
+imthreshold-sgsample: sgsample.cpp $(COMMON)
+	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+
 imthreshold-shris: shris.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+
 
 imthreshold-snearest: snearest.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@

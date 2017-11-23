@@ -66,6 +66,7 @@ It's a set of command line tools to create color images of djvu.
   imthreshold-sbilin
   imthreshold-sbwmag2
   imthreshold-scris
+  imthreshold-sgsample
   imthreshold-shris
   imthreshold-snearest
 
