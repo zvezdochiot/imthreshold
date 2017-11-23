@@ -125,7 +125,7 @@ IMTpixel IMTminIc(IMTpixel** IMTim, unsigned y0, unsigned x0, unsigned y1, unsig
 IMTpixel IMTaverageIc(IMTpixel** IMTim, IMTpixel IMTima, unsigned y0, unsigned x0, unsigned y1, unsigned x1, double part);
 void IMTFilterDespeck2(BYTE** p_im, unsigned height, unsigned width, unsigned Ksize);
 void IMTFilterDNeuro2(BYTE** p_im, unsigned height, unsigned width, unsigned Ksize, double lambda, unsigned lnum);
-double IMTFilterDphist (BYTE** p_im, unsigned height, unsigned width);
+double IMTFilterDphist (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize);
 void IMTBlurMask(IMTpixel** p_im, BYTE** m_im, unsigned height, unsigned width, int radius);
 void IMTReduceBW(BYTE** m_im, BYTE** g_im, unsigned height, unsigned width, unsigned heightg, unsigned widthg, unsigned kred, BYTE preval, BYTE result);
 IMTpixel IMTFilterIllumCorr(IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width);
@@ -172,6 +172,7 @@ void IMTFilterSBicub(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
 void IMTFilterSBilin(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width);
 int IMTFilterSBWMag2(BYTE** d_im, BYTE** r_im, unsigned height, unsigned width, unsigned height2, unsigned width2);
 int IMTFilterSBWReduce2(BYTE** d_im, BYTE** r_im, unsigned height, unsigned width, unsigned height2, unsigned width2);
+void IMTFilterSGsample (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width);
 void IMTFilterSHRIS(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int smode);
 void IMTFilterSReduce(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int smode);
 void IMTFilterSNearest(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width);

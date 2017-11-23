@@ -23,6 +23,7 @@ void ImthresholdFilterDphistUsage()
 {
 	printf("Usage : imthreshold-fdphist [options] <input_file>(BW) <output_file>(BW)\n\n");
 	printf("options:\n");
+	printf("          -a N    aperture size (int, optional, default = 1, range = [1, 2, 3])\n");
 	printf("          -i      invert (bool, optional, default = false)\n");
 	printf("          -h      this help\n");
 }
@@ -37,13 +38,17 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 	
 	int opt;
+	unsigned Ksize = 1;
 	double kdp = 0.0;
 	bool finv = false;
 	bool fhelp = false;
-	while ((opt = getopt(argc, argv, ":ih")) != -1)
+	while ((opt = getopt(argc, argv, ":a:ih")) != -1)
 	{
 		switch(opt)
 		{
+			case 'a':
+				Ksize = atof(optarg);
+				break;
 			case 'i':
 				finv = true;
 				break;
@@ -61,7 +66,7 @@ int main(int argc, char *argv[])
 
 	ImthresholdFilterDphistTitle();
 	
-	if(optind + 2 > argc || fhelp)
+	if(optind + 2 > argc || fhelp || Ksize < 1)
 	{
 		ImthresholdFilterDphistUsage();;
 		return 0;
@@ -90,7 +95,7 @@ int main(int argc, char *argv[])
 				
 				ImthresholdGetDataBW(dib, p_im);
 				if (finv) {IMTFilterInvertBW(p_im, height, width);}
-				kdp = IMTFilterDphist(p_im, height, width);
+				kdp = IMTFilterDphist(p_im, height, width, Ksize);
 				printf("Despeckle= %f\n", kdp);
 				despeckled = FreeImage_Allocate(width, height, 1);
 				ImthresholdSetDataBW(despeckled, p_im);
