@@ -3923,14 +3923,16 @@ void IMTFilterSGsample (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
 	
 	for (y = 0; y < h2; y++)
 	{
-		y0  = (double)y * yFactor;
+		y0 = y;
+		y0 *= yFactor;
 		y0i = (int)y0;
 		yn = y0 + yFactor;
 		yni = (int)yn;
 		if (double(yni) < yn) {yni++;}
 		for (x = 0; x < w2; x++)
 		{
-			x0  = (double)x * xFactor;
+			x0 = x;
+			x0 *= xFactor;
 			x0i = (int)x0;
 			xn = x0 + xFactor;
 			xni = (int)xn;
@@ -3941,7 +3943,8 @@ void IMTFilterSGsample (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
 				ss = 0;
 				for (i = y0i; i < yni; i++)
 				{
-					if (double(i) < y0) {y0t = y0;} else {y0t = i;}
+					y0t = i;
+					if (y0t < y0) {y0t = y0;}
 					ynt = i + 1;
 					if (ynt > yn) {ynt = yn;}
 					yt = (y0t + ynt) / 2;
@@ -3955,7 +3958,8 @@ void IMTFilterSGsample (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
 					if (ynx >= h) {ynx = h - 1;}
 					for (j = x0i; j < xni; j++)
 					{
-						if (double(j) < x0) {x0t = x0;} else {x0t = j;}
+						x0t = j;
+						if (x0t < x0) {x0t = x0;}
 						xnt = j + 1;
 						if (xnt > xn) {xnt = xn;}
 						xt = (x0t + xnt) / 2;
