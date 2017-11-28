@@ -1,5 +1,5 @@
 ImThreshold.
-0.20171126
+0.20171129
 
 Download
 --------
@@ -35,7 +35,7 @@ To test this library type the following:
 Installation
 ------------
 
-To install this module type the following:
+To install this library type the following:
 
   cd [imthreshold/source/path]
   cd src
