@@ -4709,6 +4709,110 @@ int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
 
 ////////////////////////////////////////////////////////////////////////////////
 
+int IMTFilterTChistian (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound)
+{
+	unsigned x, y, n;
+	int y1, x1, y2, x2, yf, xf;
+	double imx, imMg, imVg, imm, imv, t, st = 0, sn = 0;
+	int threshold = 0;
+	int h = height;
+	int w = width;
+	BYTE val;
+	
+ 	if (radius < 0) {radius = -radius;}
+	if (upper_bound < lower_bound)
+	{
+		upper_bound += lower_bound;
+		lower_bound = upper_bound - lower_bound;
+		upper_bound -= lower_bound;
+	}
+	
+	imMg = 0;
+	imVg = 0;
+	n = 0;
+    for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			imx = (double)p_im[y][x].s;
+			imMg += imx;
+			imVg += (imx * imx);
+			n++;
+		}
+	}
+	if (n == 0) {n = 1;}
+	imMg /= n;
+	imMg /= 3;
+	imVg /= n;
+	imVg /= 9;
+	imVg -= (imMg * imMg);
+	if (imVg < 0) {imVg = -imVg;}
+	imVg = sqrt(imVg);
+	if (imVg == 0) {imVg = 1;}
+    for (y = 0; y < height; y++)
+	{
+		y1 = y;
+		y1 -= radius;
+		if (y1 < 0) {y1 = 0;}
+		y2 = y + 1;
+		y2 += radius;
+		if (y2 > h) {y2 = h;}
+		for (x = 0; x < width; x++)
+		{
+			x1 = x;
+			x1 -= radius;
+			if (x1 < 0) {x1 = 0;}
+			x2 = x + 1;
+			x2 += radius;
+			if (x2 > w) {x2 = w;}
+			imm = 0;
+			imv = 0;
+			n = 0;
+			for (yf = y1; yf < y2; yf++)
+			{
+				for (xf = x1; xf < x2; xf++)
+				{
+					imx = (double)p_im[yf][xf].s;
+					imm += imx;
+					imv += (imx * imx);
+					n++;
+				}
+			}
+			if (n == 0) {n = 1;}
+			imm /= n;
+			imm /= 3;
+			imv /= n;
+			imv /= 9;
+			imv -= (imm * imm);
+			if (imv < 0) {imv = -imv;}
+			imv = sqrt(imv);
+			imx = (double)p_im[y][x].s;
+			imx /= 3;
+			if (imx < lower_bound)
+			{
+				t = lower_bound;
+				val = 0;
+			} else if (imx > upper_bound)
+			{
+				t = upper_bound;
+				val = 255;
+			} else {				
+				t = (imm + sensitivity * (imMg - imm + (imv / imVg) * (imm - imMg)));
+				val = (BYTE) ((imx >= t) ? 255 : 0);
+			}
+			st += t;
+			sn++;
+			d_im[y][x] = val;
+        }
+    }
+	if (sn == 0) { sn = 1;}
+	threshold =  (st * 3.0 / sn);
+	
+	return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 int IMTFilterTDalg (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int region_size)
 {
 	unsigned x, y, i, j;
@@ -6099,18 +6203,6 @@ int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 			x2 += radius;
 			if (x2 > w) {x2 = w;}
 			imm = 0;
-			n = 0;
-			for (yf = y1; yf < y2; yf++)
-			{
-				for (xf = x1; xf < x2; xf++)
-				{
-					imx = (double)p_im[yf][xf].s;
-					imm += imx;
-					n++;
-				}
-			}
-			if (n > 0) {imm /= n;}
-			imm /= 3;
 			imv = 0;
 			n = 0;
 			for (yf = y1; yf < y2; yf++)
@@ -6118,15 +6210,19 @@ int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 				for (xf = x1; xf < x2; xf++)
 				{
 					imx = (double)p_im[yf][xf].s;
+					imm += imx;
 					imv += (imx * imx);
 					n++;
 				}
 			}
-			if (n > 0) {imv /= n;}
+			if (n == 0) {n = 1;}
+			imm /= n;
+			imm /= 3;
+			imv /= n;
 			imv /= 9;
 			imv -= (imm * imm);
 			if (imv < 0) {imv = -imv;}
-			imv =sqrt(imv);
+			imv = sqrt(imv);
 			imx = (double)p_im[y][x].s;
 			imx /= 3;
 			if (imx < lower_bound)
@@ -6146,7 +6242,8 @@ int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 			d_im[y][x] = val;
         }
     }
-	if (sn > 0) {threshold =  (st * 3.0 /sn);}
+	if (sn == 0) {sn = 1;}
+	threshold =  (st * 3.0 / sn);
 	
 	return threshold;
 }
@@ -6327,18 +6424,6 @@ int IMTFilterTSauvola (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 			x2 += radius;
 			if (x2 > w) {x2 = w;}
 			imm = 0;
-			n = 0;
-			for (yf = y1; yf < y2; yf++)
-			{
-				for (xf = x1; xf < x2; xf++)
-				{
-					imx = (double)p_im[yf][xf].s;
-					imm += imx;
-					n++;
-				}
-			}
-			if (n > 0) {imm /= n;}
-			imm /= 3;
 			imv = 0;
 			n = 0;
 			for (yf = y1; yf < y2; yf++)
@@ -6346,15 +6431,19 @@ int IMTFilterTSauvola (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 				for (xf = x1; xf < x2; xf++)
 				{
 					imx = (double)p_im[yf][xf].s;
+					imm += imx;
 					imv += (imx * imx);
 					n++;
 				}
 			}
-			if (n > 0) {imv /= n;}
+			if (n == 0) {n = 1;}
+			imm /= n;
+			imm /= 3;
+			imv /= n;
 			imv /= 9;
 			imv -= (imm * imm);
 			if (imv < 0) {imv = -imv;}
-			imv =sqrt(imv);
+			imv = sqrt(imv);
 			ima = 1.0 - imv / (double)dynamic_range;
 			imx = (double)p_im[y][x].s;
 			imx /= 3;
@@ -6375,6 +6464,8 @@ int IMTFilterTSauvola (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 			d_im[y][x] = val;
         }
     }
+	if (sn == 0) {sn = 1;}
+	threshold =  (st * 3.0 / sn);
 	
 	return threshold;
 }
