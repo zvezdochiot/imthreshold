@@ -57,13 +57,17 @@ int main(int argc, char *argv[])
 	
 	int opt;
 	int region_size = 4;
+	int delta = 0;
 	bool fnorm = false;
 	bool fhelp = false;
 	int threshold = 0;
-	while ((opt = getopt(argc, argv, ":nr:h")) != -1)
+	while ((opt = getopt(argc, argv, ":d:nr:h")) != -1)
 	{
 		switch(opt)
 		{
+			case 'd':
+				delta = atof(optarg);
+				break;
 			case 'n':
 				fnorm = true;
 				break;
@@ -120,7 +124,8 @@ int main(int argc, char *argv[])
 				printf("Norm= %d\n", threshold);
 			}
 			printf("Region= %d\n", region_size);
-			threshold = IMTFilterTDalg(p_im, d_im, height, width, region_size);
+			printf("Delta= %d\n", delta);
+			threshold = IMTFilterTDalg(p_im, d_im, height, width, region_size, delta);
 			printf("Threshold= %d\n", threshold / 3);
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);

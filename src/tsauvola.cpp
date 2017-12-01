@@ -69,9 +69,10 @@ void ImthresholdFilterTSauvolaUsage()
 	printf("options:\n");
 	printf("          -r N    radius (int, optional, default = 7)\n");
 	printf("          -s N.N  sensitivity (double, optional, default = 0.5)\n");
-	printf("          -d N    dynamic range (int, optional, default = 128)\n");
+	printf("          -f N    dynamic range (int, optional, default = 128)\n");
 	printf("          -l N    lower bound (int, optional, default = 20)\n");
 	printf("          -u N    upper bound (int, optional, default = 150)\n");
+	printf("          -d N.N  delta (double, optional, default = 5.0)\n");
 	printf("          -h      this help\n");
 }
 
@@ -90,9 +91,10 @@ int main(int argc, char *argv[])
 	int dynamic_range = 128;
 	int lower_bound = 20;
 	int upper_bound = 150;
+	double delta = 5.0;
 	bool fhelp = false;
 	int threshold = 0;
-	while ((opt = getopt(argc, argv, ":r:s:d:l:u:h")) != -1)
+	while ((opt = getopt(argc, argv, ":r:s:f:l:u:d:h")) != -1)
 	{
 		switch(opt)
 		{
@@ -102,7 +104,7 @@ int main(int argc, char *argv[])
 			case 's':
 				sensitivity = atof(optarg);
 				break;
-			case 'd':
+			case 'f':
 				dynamic_range = atof(optarg);
 				break;
 			case 'l':
@@ -110,6 +112,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'u':
 				upper_bound = atof(optarg);
+				break;
+			case 'd':
+				delta = atof(optarg);
 				break;
 			case 'h':
 				fhelp = true;
@@ -157,10 +162,11 @@ int main(int argc, char *argv[])
 			printf("Dynamic= %d\n", dynamic_range);
 			printf("Lower= %d\n", lower_bound);
 			printf("Upper= %d\n", upper_bound);
+			printf("Delta= %f\n", delta);
 
 			ImthresholdGetData(dib, p_im);
 			FreeImage_Unload(dib);
-			threshold = IMTFilterTSauvola(p_im, d_im, height, width, radius, sensitivity, dynamic_range, lower_bound, upper_bound);
+			threshold = IMTFilterTSauvola(p_im, d_im, height, width, radius, sensitivity, dynamic_range, lower_bound, upper_bound, delta);
 			printf("Threshold= %d\n", threshold / 3);
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);

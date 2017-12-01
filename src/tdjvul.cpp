@@ -48,7 +48,7 @@ void ImthresholdIMTFilterDjVuLUsage()
 	printf("          -f N    foreground divide (int, optional, default = 2)\n");
 	printf("          -l N    level (int, optional, default = 10)\n");
 	printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
-	printf("          -p N    fposterize fg (int, optional, default = 0)\n");
+	printf("          -p N    posterize fg (int, optional, default = 0)\n");
 	printf("          -w N    w/b mode (int, optional, default = 0 [auto], >0-white, <0-black)\n");
 	printf("          -h      this help\n");
 }

@@ -68,10 +68,13 @@ void ImthresholdFilterTGatosUsage()
 {
 	printf("Usage : imthreshold-tgatos [options] <input_file> <output_file>(BW) [bg_file] [niblack_file](BW)\n\n");
 	printf("options:\n");
+	printf("          -m str  mode {niblack, sauvola, chistian, bimod, dalg, default = niblack)\n");
 	printf("          -r N    radius (int, optional, default = 7)\n");
 	printf("          -s N.N  sensitivity (double, optional, default = -0.2)\n");
+	printf("          -f N    dynamic range (int, optional, default = 128)\n");
 	printf("          -l N    lower bound (int, optional, default = 20)\n");
 	printf("          -u N    upper bound (int, optional, default = 150)\n");
+	printf("          -d N.N  delta (double, optional, default = 0.0)\n");
 	printf("          -q N.N  q (double, optional, default = 0.6)\n");
 	printf("          -1 N.N  p1 (double, optional, default = 0.5)\n");
 	printf("          -2 N.N  p2 (double, optional, default = 0.8)\n");
@@ -88,30 +91,46 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 	
 	int opt;
+	int fmode = 0;
 	int radius = 7;
 	double sensitivity = -0.2;
+	int dynamic_range = 128;
 	int lower_bound = 20;
 	int upper_bound = 150;
+	double delta = 0.0;
 	double q = 0.6;
 	double p1 = 0.5;
 	double p2 = 0.8;
 	bool fhelp = false;
 	int threshold = 0;
-	while ((opt = getopt(argc, argv, ":r:s:l:u:q:1:2:h")) != -1)
+	while ((opt = getopt(argc, argv, ":m:r:s:f:l:u:d:q:1:2:h")) != -1)
 	{
 		switch(opt)
 		{
+			case 'm':
+				if (strcmp(optarg, "niblack") == 0) {fmode = 0;}
+				if (strcmp(optarg, "sauvola") == 0) {fmode = 1;}
+				if (strcmp(optarg, "chistian") == 0) {fmode = 2;}
+				if (strcmp(optarg, "bimod") == 0) {fmode = 3;}
+				if (strcmp(optarg, "dalg") == 0) {fmode = 4;}
+				break;
 			case 'r':
 				radius = atof(optarg);
 				break;
 			case 's':
 				sensitivity = atof(optarg);
 				break;
+			case 'f':
+				dynamic_range = atof(optarg);
+				break;
 			case 'l':
 				lower_bound = atof(optarg);
 				break;
 			case 'u':
 				upper_bound = atof(optarg);
+				break;
+			case 'd':
+				delta = atof(optarg);
 				break;
 			case 'q':
 				q = atof(optarg);
@@ -157,6 +176,11 @@ int main(int argc, char *argv[])
 	FreeImage_SetOutputMessage(FreeImageErrorHandler);
 	
 	printf("Input= %s\n", src_filename);
+	if (fmode == 0) {printf("Mode= Niblack\n");}
+	if (fmode == 1) {printf("Mode= Sauvola\n");}
+	if (fmode == 2) {printf("Mode= Chistian\n");}
+	if (fmode == 3) {printf("Mode= BiMod\n");}
+	if (fmode == 4) {printf("Mode= D-alg\n");}
 	FIBITMAP *dib = ImthresholdGenericLoader(src_filename, 0);
 	if (dib)
 	{		
@@ -182,13 +206,41 @@ int main(int argc, char *argv[])
 			g_im = (BYTE**)malloc(height * sizeof(BYTE*));
 			for (y = 0; y < height; y++) {g_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
 
-			printf("Radius= %d\n", radius);
-			printf("Sensitivity= %f\n", sensitivity);
-			printf("Lower= %d\n", lower_bound);
-			printf("Upper= %d\n", upper_bound);
+			switch(fmode)
+			{
+				case 1:
+					printf("Dynamic= %d\n", dynamic_range);
+				case 0:
+				case 2:
+					printf("Sensitivity= %f\n", sensitivity);
+					printf("Lower= %d\n", lower_bound);
+					printf("Upper= %d\n", upper_bound);
+				case 4:
+					printf("Radius= %d\n", radius);
+				case 3:
+					printf("Delta= %f\n", delta);
+			}
+
 			ImthresholdGetData(dib, p_im);
 			FreeImage_Unload(dib);
-			threshold = IMTFilterTNiblack(p_im, d_im, height, width, radius, sensitivity, lower_bound, upper_bound);
+			switch(fmode)
+			{
+				case 0:	
+					threshold = IMTFilterTNiblack(p_im, d_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
+					break;
+				case 1:	
+					threshold = IMTFilterTSauvola(p_im, d_im, height, width, radius, sensitivity, dynamic_range, lower_bound, upper_bound, delta);
+					break;
+				case 2:	
+					threshold = IMTFilterTChistian(p_im, d_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
+					break;
+				case 3:	
+					threshold = IMTFilterTBiMod(p_im, d_im, height, width, delta);
+					break;
+				case 4:	
+					threshold = IMTFilterTDalg(p_im, d_im, height, width, radius, delta);
+					break;
+			}
 			threshold = IMTFilterGatosBG(p_im, d_im, bg_im, height, width, radius);
 			printf("q= %f\n", q);
 			printf("p1= %f\n", p1);

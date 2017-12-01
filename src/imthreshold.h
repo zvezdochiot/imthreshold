@@ -180,8 +180,8 @@ int IMTFilterTAbutaleb(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 int IMTFilterTBernsen(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, unsigned contrast_limit, bool set_doubt_to_low);
 int IMTFilterTBHT(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTBiMod(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta);
-int IMTFilterTChistian (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound);
-int IMTFilterTDalg(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int region_size);
+int IMTFilterTChistian (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta);
+int IMTFilterTDalg(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int region_size, int delta);
 int IMTFilterTDither(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTDjVuL(IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, int wbmode, double anisotropic, double doverlay, unsigned fposter);
 int IMTFilterTEnt(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
@@ -192,10 +192,10 @@ int IMTFilterTGrad (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
 int IMTFilterTHalftone2(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTJanni(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTKMeans(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, unsigned knum, unsigned iters);
-int IMTFilterTNiblack(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound);
+int IMTFilterTNiblack(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta);
 int IMTFilterTOtsu(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTRot(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, bool weight);
-int IMTFilterTSauvola(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int dynamic_range, int lower_bound, int upper_bound);
+int IMTFilterTSauvola(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int dynamic_range, int lower_bound, int upper_bound, double delta);
 int IMTFilterTText(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, unsigned contour, unsigned radius);
 int IMTFilterTTsai(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int shift);
 int IMTFilterTWhiteRohrer(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int x_lookahead, int y_lookahead, int bias_mode, int bias_factor, int f_factor, int g_factor);
