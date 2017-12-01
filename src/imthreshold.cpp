@@ -4709,7 +4709,7 @@ int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTChistian (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound)
+int IMTFilterTChistian (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta)
 {
 	unsigned x, y, n;
 	int y1, x1, y2, x2, yf, xf;
@@ -4797,7 +4797,7 @@ int IMTFilterTChistian (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
 				t = upper_bound;
 				val = 255;
 			} else {				
-				t = (imm + sensitivity * (imMg - imm + (imv / imVg) * (imm - imMg)));
+				t = (imm + sensitivity * (imMg - imm + (imv / imVg) * (imm - imMg)) + delta);
 				val = (BYTE) ((imx >= t) ? 255 : 0);
 			}
 			st += t;
@@ -4813,7 +4813,7 @@ int IMTFilterTChistian (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTDalg (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int region_size)
+int IMTFilterTDalg (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int region_size, int delta)
 {
 	unsigned x, y, i, j;
 		
@@ -4870,6 +4870,7 @@ int IMTFilterTDalg (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
 				}
 				if (dst > dsr) {tt++;}
 			}
+			tt += delta;
 			for (j = iy0; j < iyn; j++)
 			{
 				for (i = ix0; i < ixn; i++)
@@ -6168,7 +6169,7 @@ int IMTFilterTKMeans (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wi
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound)
+int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta)
 {
 	unsigned x, y, n;
 	int y1, x1, y2, x2, yf, xf;
@@ -6234,7 +6235,7 @@ int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 				t = upper_bound;
 				val = 255;
 			} else {				
-				t = (imm + sensitivity * imv);
+				t = (imm + sensitivity * imv + delta);
 				val = (BYTE) ((imx >= t) ? 255 : 0);
 			}
 			st += t;
@@ -6389,7 +6390,7 @@ int IMTFilterTRot (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTSauvola (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int dynamic_range, int lower_bound, int upper_bound)
+int IMTFilterTSauvola (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int dynamic_range, int lower_bound, int upper_bound, double delta)
 {
 	unsigned x, y, n;
 	int y1, x1, y2, x2, yf, xf;
@@ -6456,7 +6457,7 @@ int IMTFilterTSauvola (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 				t = upper_bound;
 				val = 255;
 			} else {				
-				t = imm + (1.0 - sensitivity * ima);
+				t = imm + (1.0 - sensitivity * ima) + delta;
 				val = (BYTE) ((imx >= t) ? 255 : 0);
 			}
 			st += t;

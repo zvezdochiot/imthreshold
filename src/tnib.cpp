@@ -72,6 +72,7 @@ void ImthresholdFilterTNiblackUsage()
 	printf("          -s N.N  sensitivity (double, optional, default = -0.2)\n");
 	printf("          -l N    lower bound (int, optional, default = 20)\n");
 	printf("          -u N    upper bound (int, optional, default = 150)\n");
+	printf("          -d N.N  delta (double, optional, default = 5.0)\n");
 	printf("          -h      this help\n");
 }
 
@@ -89,9 +90,10 @@ int main(int argc, char *argv[])
 	double sensitivity = -0.2;
 	int lower_bound = 20;
 	int upper_bound = 150;
+	double delta = 5.0;
 	bool fhelp = false;
 	int threshold = 0;
-	while ((opt = getopt(argc, argv, ":r:s:l:u:h")) != -1)
+	while ((opt = getopt(argc, argv, ":r:s:l:u:d:h")) != -1)
 	{
 		switch(opt)
 		{
@@ -106,6 +108,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'u':
 				upper_bound = atof(optarg);
+				break;
+			case 'd':
+				delta = atof(optarg);
 				break;
 			case 'h':
 				fhelp = true;
@@ -153,10 +158,11 @@ int main(int argc, char *argv[])
 			printf("Sensitivity= %f\n", sensitivity);
 			printf("Lower= %d\n", lower_bound);
 			printf("Upper= %d\n", upper_bound);
+			printf("Delta= %f\n", delta);
 
 			ImthresholdGetData(dib, p_im);
 			FreeImage_Unload(dib);
-			threshold = IMTFilterTNiblack(p_im, d_im, height, width, radius, sensitivity, lower_bound, upper_bound);
+			threshold = IMTFilterTNiblack(p_im, d_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
 			printf("Threshold= %d\n", threshold / 3);
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);
