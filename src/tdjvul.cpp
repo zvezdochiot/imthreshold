@@ -46,6 +46,7 @@ void ImthresholdIMTFilterDjVuLUsage()
 	printf("          -d N    despeckle aperture size (int, optional, default = 0)\n");
 	printf("          -b N    base block size (int, optional, default = 3)\n");
 	printf("          -f N    foreground divide (int, optional, default = 2)\n");
+	printf("          -i      invert station (bool, optional, default = false)\n");
 	printf("          -l N    level (int, optional, default = 10)\n");
 	printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
 	printf("          -p N    posterize fg (int, optional, default = 0)\n");
@@ -72,8 +73,9 @@ int main(int argc, char *argv[])
 	int fclean = 0;
 	int fdespeckle = 0;
 	unsigned fposter = 0;
+	bool finvs = false;
 	bool fhelp = false;
-	while ((opt = getopt(argc, argv, ":a:c:d:b:f:l:p:o:w:h")) != -1)
+	while ((opt = getopt(argc, argv, ":a:c:d:b:f:il:p:o:w:h")) != -1)
 	{
 		switch(opt)
 		{
@@ -85,6 +87,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'l':
 				level = atof(optarg);
+				break;
+			case 'i':
+				finvs = true;
 				break;
 			case 'w':
 				wbmode = atof(optarg);
@@ -219,7 +224,12 @@ int main(int argc, char *argv[])
 				}
 				IMTReduceBW(m_im, fgm_im, height, width, heightfg, widthfg, bgs * fgs, 0, 255);
 				IMTReduceBW(m_im, bgm_im, height, width, heightbg, widthbg, bgs, 255, 0);
-				dst_dib = FreeImage_Allocate(width, height, 1);	
+				dst_dib = FreeImage_Allocate(width, height, 1);
+				if (finvs)
+				{
+					printf("InvertStation= true\n");
+					IMTFilterInvertBW (m_im, height, width);
+				}
 				ImthresholdSetDataBW(dst_dib, m_im);
 				for (y = 0; y < height; y++){free(m_im[y]);}
 				free(m_im);
@@ -232,20 +242,36 @@ int main(int argc, char *argv[])
 					}
 					IMTBlurMask(bg_im, bgm_im, heightbg, widthbg, fclean);
 				}
-				fg_dib = FreeImage_Allocate(widthfg, heightfg, 24);	
-				ImthresholdSetData(fg_dib, fg_im);
+				if (finvs)
+				{
+					fg_dib = FreeImage_Allocate(widthbg, heightbg, 24);
+					ImthresholdSetData(fg_dib, bg_im);
+					bg_dib = FreeImage_Allocate(widthfg, heightfg, 24);	
+					ImthresholdSetData(bg_dib, fg_im);
+				} else {	
+					fg_dib = FreeImage_Allocate(widthfg, heightfg, 24);
+					ImthresholdSetData(fg_dib, fg_im);
+					bg_dib = FreeImage_Allocate(widthbg, heightbg, 24);	
+					ImthresholdSetData(bg_dib, bg_im);
+				}
 				for (y = 0; y < heightfg; y++){free(fg_im[y]);}
 				free(fg_im);
-				bg_dib = FreeImage_Allocate(widthbg, heightbg, 24);	
-				ImthresholdSetData(bg_dib, bg_im);
 				for (y = 0; y < heightbg; y++){free(bg_im[y]);}
 				free(bg_im);
-				fgm_dib = FreeImage_Allocate(widthfg, heightfg, 1);
-				ImthresholdSetDataBW(fgm_dib, fgm_im);
+				if (finvs)
+				{
+					fgm_dib = FreeImage_Allocate(widthbg, heightbg, 1);
+					ImthresholdSetDataBW(fgm_dib, bgm_im);
+					bgm_dib = FreeImage_Allocate(widthfg, heightfg, 1);
+					ImthresholdSetDataBW(bgm_dib, fgm_im);
+				} else {
+					fgm_dib = FreeImage_Allocate(widthfg, heightfg, 1);
+					ImthresholdSetDataBW(fgm_dib, fgm_im);
+					bgm_dib = FreeImage_Allocate(widthbg, heightbg, 1);
+					ImthresholdSetDataBW(bgm_dib, bgm_im);
+				}
 				for (y = 0; y < heightfg; y++){free(fgm_im[y]);}
 				free(fgm_im);
-				bgm_dib = FreeImage_Allocate(widthbg, heightbg, 1);
-				ImthresholdSetDataBW(bgm_dib, bgm_im);
 				for (y = 0; y < heightbg; y++){free(bgm_im[y]);}
 				free(bgm_im);
 
