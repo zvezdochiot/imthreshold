@@ -1,9 +1,9 @@
-// ==========================================================
-// Simple despeckle mean filter (for BW only) based on the FreeImage library
+//	Zlib license
 //
-// This code is taken from the CxImage Library at http://www.xdp.it/cximage.htm
-// and adapted for the FreeImage Library
+// Despeckle filter (for BW only).
 //
+//	Copyright (C) 2017:
+//	zvezdochiot	<zvezdochiot@user.sourceforge.net>
 
 #include <unistd.h>
 #include <FreeImage.h>

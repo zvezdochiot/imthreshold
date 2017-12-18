@@ -1,15 +1,9 @@
-// AForge Image Processing Library
+//	Zlib license
 //
-// Copyright © Andrew Kirillov, 2005-2007
-// andrew.kirillov@gmail.com
-//
-// This algorithm was taken from the AForge.NET sourcecodes
-// and adopted for the FreeImage library
-//
-//	Copyright (C) 2007-2008:
-//	monday2000	monday2000@yandex.ru
-
 // Resize image.
+//
+//	Copyright (C) 2017:
+//	zvezdochiot	<zvezdochiot@user.sourceforge.net>
 
 #include <unistd.h>
 #include <FreeImage.h>

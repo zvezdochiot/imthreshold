@@ -1,27 +1,9 @@
-/*
- DjVuL thresholds an image (Multi-scale binarization).
-
- *binarization*
- A preliminary binarization of the image.
-
- *foreground*
- Estimated foreground of the image.
-
- *background*
- Estimated background of the image.
-
- Own parameters:
-				"b"     base block size (int, optional, default = 3)
-				"f"     foreground divide (int, optional, default = 2)
-				"l"     level (int, optional, default = 10)
-				"r"     reverse FG/BG (bool, optional, default = no[0], recommended = yes[1])
-*/
-
-// This algorithm was taken from the TerraNoNames (http://mykaralw.narod.ru/) sourcecodes
-// and adopted for the FreeImage library
+//	Zlib license
 //
-//	Copyright (C) 2007-2008:
-//	monday2000	monday2000@yandex.ru
+// DjVuL thresholds an image (Multi-scale binarization).
+//
+//	Copyright (C) 2017:
+//	zvezdochiot	<zvezdochiot@user.sourceforge.net>
 
 #include <unistd.h>
 #include <FreeImage.h>
