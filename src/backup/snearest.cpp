@@ -1,7 +1,7 @@
 
 // AForge Image Processing Library
 //
-// Copyright © Andrew Kirillov, 2005-2007
+// Copyright Â© Andrew Kirillov, 2005-2007
 // andrew.kirillov@gmail.com
 //
 // This algorithm was taken from the AForge.NET sourcecodes
