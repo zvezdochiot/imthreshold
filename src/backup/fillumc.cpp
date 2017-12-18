@@ -1,7 +1,7 @@
 // AForge Image Processing Library
 // AForge.NET framework
 //
-// Copyright ©
+// Copyright Â©
 //   Mladen Prajdic  (spirit1_fe@yahoo.com),
 //   Andrew Kirillov (andrew.kirillov@gmail.com)
 // 2005-2008
