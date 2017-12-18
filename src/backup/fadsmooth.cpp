@@ -16,7 +16,7 @@
 // AForge Image Processing Library
 // AForge.NET framework
 //
-// Copyright © Andrew Kirillov, 2005-2007
+// Copyright Â© Andrew Kirillov, 2005-2007
 // andrew.kirillov@gmail.com
 //
 // Found description in
