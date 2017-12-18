@@ -1376,7 +1376,161 @@ void IMTFilterBGFGLsep (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMTpixel IMTFilterGreyWorld (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width)
+IMTpixel IMTFilterGreyNorm (IMTpixel** p_im, unsigned height, unsigned width)
+{
+	unsigned y, x, d, n;
+	int im;
+	double di, dist, sd, mins, maxs, means, ds, ming, maxg, meang, dg;
+	IMTpixel imd;
+	double pc[3];
+	double mc[3];
+	double sc[3];
+	double ac[3];
+	BYTE grey;
+	
+	n = height * width;
+	pc[0]=0.227; pc[1]=0.453; pc[2]=0.320;
+	mins = 768.0;
+	maxs = 0.0;
+	ming = 768.0;
+	maxg = 0.0;
+	for (d = 0; d < 3; d++)
+	{
+		mc[d] = 0;
+		sc[d] = 0;
+	}
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			for (d = 0; d < 3; d++)
+			{
+				im = p_im[y][x].c[d];
+				mc[d] += double(im);
+			}
+			im = p_im[y][x].s;
+			di = im;
+			if (di < mins) {mins = di;}
+			if (di > maxs) {maxs = di;}
+		}
+	}
+	mins /= 3;
+	maxs /= 3;
+	means = (maxs+mins)/2;
+	ds = maxs - mins;
+	if (ds == 0.0)
+	{
+		ds = means;
+		if (ds > 127.5) {ds = 255.0 - ds;}
+	}
+	for (d = 0; d < 3; d++)
+	{
+		mc[d] /= n;
+	}
+	sd = 0;
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			dist = 0;
+			for (d = 0; d < 3; d++)
+			{
+				im = p_im[y][x].c[d];
+				di = im;
+				di -= mc[d];
+				di *= pc[d];
+				if (di < 0) {di = -di;}
+				sc[d] += di;
+				di *= di;
+				dist += di;
+			}
+			dist = sqrt(dist);
+			sd += dist;
+		}
+	}
+	sd /= n;
+	for (d = 0; d < 3; d++)
+	{
+		sc[d] /= n;
+	}
+	if (sd != 0)
+	{
+		for (d = 0; d < 3; d++)
+		{
+			ac[d] = sc[d] / sd;
+		}
+	} else {
+		for (d = 0; d < 3; d++)
+		{
+			ac[d] = 1.0;
+		}
+	}
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			dist = 0;
+			for (d = 0; d < 3; d++)
+			{
+				im = p_im[y][x].c[d];
+				di = im;
+				di -= mc[d];
+				di *= pc[d];
+				di *= ac[d];
+				dist += di;
+			}
+			if (dist < ming) {ming = dist;}
+			if (dist > maxg) {maxg = dist;}
+		}
+	}
+	meang = (maxg + ming) / 2;
+	dg = maxg - ming;
+	if (dg == 0) {dg = 1;}
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			dist = 0;
+			for (d = 0; d < 3; d++)
+			{
+				im = p_im[y][x].c[d];
+				di = im;
+				di -= mc[d];
+				di *= pc[d];
+				di *= ac[d];
+				dist += di;
+			}
+			dist -= meang;
+			dist /= dg;
+			dist *= ds;
+			dist += means;
+			grey = (BYTE)MIN(MAX((int)0, (int)(dist)), (int)255);
+			for (d = 0; d < 3; d++)
+			{
+				p_im[y][x].c[d] = grey;
+			}
+		}
+	}
+	for ( y = 0; y < height; y++ )
+	{
+		for ( x = 0; x < width; x++ )
+		{
+			p_im[y][x] = IMTcalcS (p_im[y][x]);
+		}
+	}
+
+	for (d = 0; d < 3; d++)
+	{
+		imd.c[d] = (BYTE)MIN(MAX((int)0, (int)(ac[d] * 255.0)), (int)255);
+	}
+	imd.s = means;
+	
+	return imd;
+ }
+
+////////////////////////////////////////////////////////////////////////////////
+
+IMTpixel IMTFilterGreyWorld (IMTpixel** p_im, unsigned height, unsigned width)
 {
 	unsigned y, x, d;
 	int im;
@@ -1418,7 +1572,7 @@ IMTpixel IMTFilterGreyWorld (IMTpixel** p_im, IMTpixel** d_im, unsigned height, 
 				im = p_im[y][x].c[d];
 				vt = (double)(im);
 				vt *= kt;
-				d_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)(vt + 0.5)), (int)255);
+				p_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)(vt + 0.5)), (int)255);
 			}
 		}
 	}
@@ -1426,7 +1580,7 @@ IMTpixel IMTFilterGreyWorld (IMTpixel** p_im, IMTpixel** d_im, unsigned height, 
 	{
 		for ( x = 0; x < width; x++ )
 		{
-			d_im[y][x] = IMTcalcS (d_im[y][x]);
+			p_im[y][x] = IMTcalcS (p_im[y][x]);
 		}
 	}
 	
@@ -2658,7 +2812,7 @@ int IMTFilterRetinex (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width, bool finv)
+double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width)
 {
 	unsigned d;
 	int y, x, yp2, xp2, yp1, xp1, yn1, xn1, yn2, xn2;
@@ -2766,7 +2920,6 @@ double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width, bool finv)
 				imx *= imx;
 				ims -= imx;
 				ims /= 81.0;
-				if (finv) {ims = -ims;}
 				if (ims < 0) {imd -= ims;} else {imd += ims;}
 				imx = p_im[y][x].c[d];
 				imx *= imx;
@@ -3377,71 +3530,87 @@ void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, un
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double noise_variance)
+double IMTFilterNoiseVariance (IMTpixel** p_im, unsigned height, unsigned width, int radius)
 {	
-	unsigned x, y, d, n;
+	unsigned x, y, n;
 	int y1, x1, y2, x2, yf, xf;
-	double imx, imm, imv, imn, kvar, var, multiplier;
+	double imx, imm, imv, imn;
 	int h = height;
 	int w = width;
-	int ivar;
+	double noise = 0.0;
 
 	if (radius < 0) {radius = -radius;}
 	
 	imn = 0;
-	if (noise_variance < 0)
+	for (y = 0; y < height; y++)
 	{
-		for (y = 0; y < height; y++)
+		y1 = y;
+		y1 -= radius;
+		if (y1 < 0) {y1 = 0;}
+		y2 = y + 1;
+		y2 += radius;
+		if (y2 > h) {y2 = h;}
+		for (x = 0; x < width; x++)
 		{
-			y1 = y;
-			y1 -= radius;
-			if (y1 < 0) {y1 = 0;}
-			y2 = y + 1;
-			y2 += radius;
-			if (y2 > h) {y2 = h;}
-			for (x = 0; x < width; x++)
+			x1 = x;
+			x1 -= radius;
+			if (x1 < 0) {x1 = 0;}
+			x2 = x + 1;
+			x2 += radius;
+			if (x2 > w) {x2 = w;}
+			imm = 0;
+			n = 0;
+			for (yf = y1; yf < y2; yf++)
 			{
-				x1 = x;
-				x1 -= radius;
-				if (x1 < 0) {x1 = 0;}
-				x2 = x + 1;
-				x2 += radius;
-				if (x2 > w) {x2 = w;}
-				imm = 0;
-				n = 0;
-				for (yf = y1; yf < y2; yf++)
+				for (xf = x1; xf < x2; xf++)
 				{
-					for (xf = x1; xf < x2; xf++)
-					{
-						imx = (double)p_im[yf][xf].s;
-						imm += imx;
-						n++;
-					}
+					imx = (double)p_im[yf][xf].s;
+					imm += imx;
+					n++;
 				}
-				if (n > 0) {imm /= n;}
-				imm /= 3;
-				imv = 0;
-				n = 0;
-				for (yf = y1; yf < y2; yf++)
-				{
-					for (xf = x1; xf < x2; xf++)
-					{
-						imx = (double)p_im[yf][xf].s;
-						imv += (imx * imx);
-						n++;
-					}
-				}
-				if (n > 0) {imv /= n;}
-				imv /= 9;
-				imv -= (imm * imm);
-				imn += imv;
 			}
+			if (n > 0) {imm /= n;}
+			imm /= 3;
+			imv = 0;
+			n = 0;
+			for (yf = y1; yf < y2; yf++)
+			{
+				for (xf = x1; xf < x2; xf++)
+				{
+					imx = (double)p_im[yf][xf].s;
+					imv += (imx * imx);
+					n++;
+				}
+			}
+			if (n > 0) {imv /= n;}
+			imv /= 9;
+			imv -= (imm * imm);
+			imn += imv;
 		}
-		imn /= width;
-		imn /= height;
-		imn *= 0.22531205501218;
-		noise_variance *= -imn;
 	}
+	imn /= width;
+	imn /= height;
+	imn *= 0.25;
+	if (imn < 0) {imn = -imn;}
+	noise = sqrt(imn);
+    
+    return noise;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double noise)
+{	
+	unsigned x, y, d, n;
+	int y1, x1, y2, x2, yf, xf;
+	double imx, imm, imv, kvar, var, multiplier;
+	int h = height;
+	int w = width;
+	int ivar;
+
+	noise *= noise;
+	if (radius < 0) {radius = -radius;}
+	
     for (y = 0; y < height; y++)
 	{
 		y1 = y;
@@ -3487,11 +3656,11 @@ void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
 			imv -= (imm * imm);
 			imx = (double)p_im[y][x].s;
 			imx /= 3;
-            if (imv < noise_variance)
+            if (imv < noise)
             {
 				kvar = imm - imx;
 			} else {
-                multiplier = (imv - noise_variance) / imv;
+                multiplier = (imv - noise) / imv;
 				kvar = imm + multiplier * (imx - imm) - imx;
             }
 			for (d = 0; d < 3; d++)
@@ -4322,7 +4491,7 @@ void IMTFilterSNearest (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTBernsen(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, unsigned contrast_limit, bool set_doubt_to_low)
+int IMTFilterTBernsen(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, unsigned contrast_limit)
 {
 	int x, y, i, j, xt, yt;
 	unsigned im, t;
@@ -4334,10 +4503,7 @@ int IMTFilterTBernsen(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wi
 	
 	if (radius < 0) {radius = -radius;}
 		
-	if (set_doubt_to_low)
-		confused = 0; // black
-	else
-		confused = 255; // white
+	confused = 255; // white
 	
 	for (y = 0; y < h; y++)
 	{
@@ -5367,224 +5533,55 @@ int IMTFilterTEnt (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width
 }
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTEqBright (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int fmode)
+int IMTFilterTEqBright (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
 {
 	unsigned x, y, i;
 	
 	unsigned tx, tt, threshold = 0;
-	double imx, sw, swt, sws = 0, swts = 0, tts = 0, dsr = 0, dst = 0;
+	double imx, sw, swt, dsr = 0, dst = 0;
 	int histogram[768] = {0};
 	BYTE val;
-	int* tlh;
-	int* tlv;
 
-	switch(fmode)
+	for ( i = 0; i < 768; i++ )
 	{
-		case 0:
-			for ( i = 0; i < 768; i++ )
-			{
-				histogram[i] = 0;
-			}
-			sw = 0;
-			for (y = 0; y < height; y++)
-			{
-				for (x = 0; x < width; x++)
-				{
-					tx = p_im[y][x].s;
-					sw += tx;
-					histogram[tx]++;
-				}
-			}
-			tt = 767;
-			swt = 0;
-			while ( swt < sw && tt > 0)
-			{
-				dsr = sw - swt;
-				imx = histogram[tt];
-				swt += (imx * 767);
-				dst = swt - sw;
-				tt--;
-			}
-			if (dst > dsr)
-			{
-				tt++;
-				swt -= (imx*767);
-			}
-			for (y = 0; y < height; y++)
-			{
-				for (x = 0; x < width; x++)
-				{
-					tx = p_im[y][x].s;
-					val = (BYTE) ( ( tx > tt ) ? 255 : 0 );
-					d_im[y][x] = val;
-				}
-			}
-			threshold = tt;
-			break;
-		case 1:
-			for (y = 0; y < height; y++)
-			{
-				for ( i = 0; i < 768; i++ )
-				{
-					histogram[i] = 0;
-				}
-				sw = 0;
-				for (x = 0; x < width; x++)
-				{
-					tx = p_im[y][x].s;
-					sw += tx;
-					histogram[tx]++;
-				}
-				tt = 767;
-				sws += sw;
-				swt = 0;
-				while ( swt < sw && tt > 0)
-				{
-					dsr = sw - swt;
-					imx = histogram[tt];
-					swt += (imx * 767);
-					dst = swt - sw;
-					tt--;
-				}
-				if (dst > dsr)
-				{
-					tt++;
-					swt -= (imx * 767);
-				}
-				swts += swt;
-				tts += tt;
-				for (x = 0; x < width; x++)
-				{
-					tx = p_im[y][x].s;
-					val = (BYTE) ( ( tx > tt ) ? 255 : 0 );
-					d_im[y][x] = val;
-				}
-			}
-			threshold = tts / height;
-			break;
-		case 2:
-			for (x = 0; x < width; x++)
-			{
-				for ( i = 0; i < 768; i++ )
-				{
-					histogram[i] = 0;
-				}
-				sw = 0;
-				for (y = 0; y < height; y++)
-				{
-					tx = p_im[y][x].s;
-					sw += tx;
-					histogram[tx]++;
-				}
-				tt = 767;
-				sws += sw;
-				swt = 0;
-				while ( swt < sw && tt > 0)
-				{
-					dsr = sw - swt;
-					imx = histogram[tt];
-					swt += (imx*767);
-					dst = swt - sw;
-					tt--;
-				}
-				if (dst > dsr)
-				{
-					tt++;
-					swt -= (imx*767);
-				}
-				swts += swt;
-				tts += tt;
-				for (y = 0; y < height; y++)
-				{
-					tx = p_im[y][x].s;
-					val = (BYTE) ( ( tx > tt ) ? 255 : 0 );
-					d_im[y][x] = val;
-				}
-			}
-			threshold = tts / width;
-			break;
-		case 3:
-			tlh = (int*)malloc(height * sizeof(int));
-			tlv = (int*)malloc(width * sizeof(int));
-			for (y = 0; y < height; y++)
-			{
-				for ( i = 0; i < 768; i++ )
-				{
-					histogram[i] = 0;
-				}
-				sw = 0;
-				for (x = 0; x < width; x++)
-				{
-					tx = p_im[y][x].s;
-					sw += tx;
-					histogram[tx]++;
-				}
-				tt = 767;
-				sws += sw;
-				swt = 0;
-				while ( swt < sw && tt > 0)
-				{
-					dsr = sw - swt;
-					imx = histogram[tt];
-					swt += (imx*767);
-					dst = swt - sw;
-					tt--;
-				}
-				if (dst > dsr)
-				{
-					tt++;
-					swt -= (imx*767);
-				}
-				tlh[y] = tt;
-			}
-			for (x = 0; x < width; x++)
-			{
-				for ( i = 0; i < 768; i++ )
-				{
-					histogram[i] = 0;
-				}
-				sw = 0;
-				for (y = 0; y < height; y++)
-				{
-					tx = p_im[y][x].s;
-					sw += tx;
-					histogram[tx]++;
-				}
-				tt = 767;
-				sws += sw;
-				swt = 0;
-				while ( swt < sw && tt > 0)
-				{
-					dsr = sw - swt;
-					imx = histogram[tt];
-					swt += (imx*767);
-					dst = swt - sw;
-					tt--;
-				}
-				if (dst > dsr)
-				{
-					tt++;
-					swt -= (imx*767);
-				}
-				tlv[x] = tt;
-			}
-				
-			for (y = 0; y < height; y++)
-			{
-				for (x = 0; x < width; x++)
-				{
-					tx = p_im[y][x].s;
-					tt = (tlh[y] + tlv[x]) / 2;
-					tts += tt;
-					val = (BYTE) ( ( tx > tt ) ? 255 : 0 );
-					d_im[y][x] = val;
-				}
-			}
-			threshold = tts / height / width;
-			free(tlh);
-			free(tlv);
-			break;
+		histogram[i] = 0;
 	}
+	sw = 0;
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			tx = p_im[y][x].s;
+			sw += tx;
+			histogram[tx]++;
+		}
+	}
+	tt = 767;
+	swt = 0;
+	while ( swt < sw && tt > 0)
+	{
+		dsr = sw - swt;
+		imx = histogram[tt];
+		swt += (imx * 767);
+		dst = swt - sw;
+		tt--;
+	}
+	if (dst > dsr)
+	{
+		tt++;
+		swt -= (imx*767);
+	}
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			tx = p_im[y][x].s;
+			val = (BYTE) ( ( tx > tt ) ? 255 : 0 );
+			d_im[y][x] = val;
+		}
+	}
+	threshold = tt;
+
 	return threshold;
 }
 
@@ -5745,119 +5742,62 @@ int IMTFilterTGatos (IMTpixel** p_im, BYTE** d_im, IMTpixel** bg_im, BYTE** g_im
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTGrad (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, bool contour)
+int IMTFilterTGrad (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
 {
 	int x, y, xp, xn, yp, yn;
-	int i, j, x0, y0, xk, yk;
-	int im, imp, imn, imf;
-	double GX, GY, G, ST, SG = 0, SGI = 0, SI = 0, SN = 0, S = 0, SL = 0, SLS = 0;
+	int im, imp, imn;
+	double GX, GY, G, SG = 0, SGI = 0, SI = 0, SN = 0, S = 0;
 	int threshold = 0;
 	BYTE val;
 	int h = height;
 	int w = width;
 	
-	if (radius < 0) {radius = -radius;}
-	
-	if (!contour)
-	{
-		for (y = 0; y < h; y++)
-		{
-			yp = y -1;
-			if (yp < 0){yp = 0;}
-			yn = y + 1;
-			if (yn >= h) {yn = h - 1;}
-			for (x = 0; x < w; x++)
-			{
-				im = p_im[y][x].s;
-				xp = x -1;
-				if (xp < 0) {xp = 0;}
-				xn = x + 1;
-				if (xn >= w) {xn = w - 1;}
-				imp = p_im[y][xp].s;
-				imn = p_im[y][xn].s;
-				GX = (double)(imn - imp);
-				if (GX < 0){GX = -GX;}
-				imp = p_im[yp][x].s;
-				imn = p_im[yn][x].s;
-				GY = (double)(imn - imp);
-				if (GY < 0){GY = -GY;}
-				G = sqrt(GX * GX + GY * GY);
-				SG += G;
-				SGI += (double(im)*G);
-				SI += double(im);
-				SN++;
-			}
-		}
-		
-		if (SG==0)
-		{
-			S = SI / SN;
-		} else {
-			S = SGI / SG;
-		}
-		
-		threshold = (int)(S);
-	}
-	
 	for (y = 0; y < h; y++)
 	{
-		y0 = y - radius;
-		if (y0 < 0) {y0 = 0;}
-		yk = y + radius;
-		if (yk >= h) {yk = h - 1;}
-		for (x = 0; x < w ; x++)
+		yp = y -1;
+		if (yp < 0){yp = 0;}
+		yn = y + 1;
+		if (yn >= h) {yn = h - 1;}
+		for (x = 0; x < w; x++)
 		{
-			if (radius > 0)
-			{
-				x0 = x - radius;
-				if (x0 < 0) {x0 = 0;}
-				xk = x + radius;
-				if (xk >= w) {xk = w - 1;}
-				SG = 0;
-				SGI = 0;
-				SI = 0;
-				SN = 0;
-				for (i = y0; i <= yk; i++)
-				{
-					yp = i - 1;
-					if (yp < 0) { yp = 0;}
-					yn = i + 1;
-					if (yn >= h) {yn = h - 1;}
-					for (j = x0; j <= xk; j++)
-					{
-						imf = p_im[y][j].s;
-						xp = j - 1;
-						if (xp < 0) {xp = 0;}
-						xn = j + 1;
-						if (xn >= w) {xn = w - 1;}
-						imp = p_im[y][xp].s;
-						imn = p_im[y][xn].s;
-						GX = (double)(imn - imp);
-						if (GX < 0) {GX = -GX;}
-						imp = p_im[yp][x].s;
-						imn = p_im[yn][x].s;
-						GY = (double)(imn - imp);
-						if (GY < 0) {GY = -GY;}
-						G = sqrt(GX * GX + GY * GY);
-						SG += G;
-						SGI += (double(imf)*G);
-						SI += double(imf);
-						SN++;
-					}
-				}
-				if (SG == 0) {SL = SI / SN;} else {SL = SGI / SG;}
-				SLS += SL;
-			}
-			
 			im = p_im[y][x].s;
-			if (radius == 0) {ST = S;} else if (contour == 0) {ST = (S + SL) / 2;} else {ST = SL;}
-			val = (BYTE) ( ( im >= ST ) ? 255 : 0 );
-			d_im[y][x] = val;
+			xp = x -1;
+			if (xp < 0) {xp = 0;}
+			xn = x + 1;
+			if (xn >= w) {xn = w - 1;}
+			imp = p_im[y][xp].s;
+			imn = p_im[y][xn].s;
+			GX = (double)(imn - imp);
+			if (GX < 0){GX = -GX;}
+			imp = p_im[yp][x].s;
+			imn = p_im[yn][x].s;
+			GY = (double)(imn - imp);
+			if (GY < 0){GY = -GY;}
+			G = sqrt(GX * GX + GY * GY);
+			SG += G;
+			SGI += (double(im)*G);
+			SI += double(im);
+			SN++;
 		}
 	}
-	if (radius > 0)
+	
+	if (SG==0)
 	{
-		threshold = (int)(SLS / width / height);
+		S = SI / SN;
+	} else {
+		S = SGI / SG;
+	}
+		
+	threshold = (int)(S);
+
+	for (y = 0; y < h; y++)
+	{
+		for (x = 0; x < w; x++)
+		{
+			im = p_im[y][x].s;
+			val = (BYTE) ( ( im >= S ) ? 255 : 0 );
+			d_im[y][x] = val;
+		}
 	}
 	
 	return threshold;
