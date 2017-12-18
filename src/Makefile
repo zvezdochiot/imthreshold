@@ -90,9 +90,6 @@ imthreshold-tgatos: tgatos.cpp $(COMMON)
 imthreshold-thalftone2: thalftone2.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
 
-imthreshold-totsu: totsu.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
-
 imthreshold-ttext: ttext.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
 
