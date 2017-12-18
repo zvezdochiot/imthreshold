@@ -19,28 +19,27 @@
 */
 
 /*
- Creates a binary image using Sauvola's adaptive algorithm.
+ niblack_threshold
 
- Sauvola, J. and M. Pietikainen. 2000. Adaptive document image
- binarization.  *Pattern Recognition* 33: 225--236.
+ Creates a binary image using Niblack's adaptive algorithm.
   
+ Niblack, W. 1986. *An Introduction to Digital Image Processing.* Englewood
+ Cliffs, NJ: Prentice Hall.
+	
  Like the QGAR library, there are two extra global thresholds for
  the lightest and darkest regions.
-	
- int *region_size* : default=15 (*radius* : default = 7)
- The size of the region in which to calculate a threshold.
 	  
- double *sensitivity* : default=0.5 
- The sensitivity weight on the adjusted variance.
-		
- int *dynamic_range* : range=(1,255), default=128
- The dynamic range of the variance.
+ *region_size* : default = 15 (*radius* : default = 7)
+ The size of the region in which to calculate a threshold.
+	
+ *sensitivity* : default = -0.2
+ The sensitivity weight on the variance.
 		  
- int *lower bound* : range=(0,255), default=20
+ *lower bound* : range=(0,255), default=20
  A global threshold beneath which all pixels are considered black.
 			
- int *upper bound* : range=(0,255), default=150
- A global threshold above which all pixels are considered white. 
+ *upper bound* : range=(0,255), default=150
+ A global threshold above which all pixels are considered white.
 */
 
 // This algorithm was taken from the gamera.sf.net sourcecodes
@@ -55,21 +54,22 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void ImthresholdFilterTSauvolaTitle()
+void ImthresholdFilterTNiblackTitle()
 {
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
-	printf("Creates a binary image using Sauvola's adaptive algorithm.\n");
+	printf("Creates a binary image using Niblack's adaptive algorithm.\n");
 	printf("This algorithm was taken from the gamera.sf.net sourcecodes and adopted for the FreeImage library.\n\n");
 }
 
-void ImthresholdFilterTSauvolaUsage()
+////////////////////////////////////////////////////////////////////////////////
+
+void ImthresholdFilterTNiblackUsage()
 {
-	printf("Usage : imthreshold-tsauvola [options] <input_file> <output_file>(BW)\n\n");
+	printf("Usage : imthreshold-tnib [options] <input_file> <output_file>(BW)\n\n");
 	printf("options:\n");
 	printf("          -r N    radius (int, optional, default = 7)\n");
-	printf("          -s N.N  sensitivity (double, optional, default = 0.5)\n");
-	printf("          -f N    dynamic range (int, optional, default = 128)\n");
+	printf("          -s N.N  sensitivity (double, optional, default = -0.2)\n");
 	printf("          -l N    lower bound (int, optional, default = 20)\n");
 	printf("          -u N    upper bound (int, optional, default = 150)\n");
 	printf("          -d N.N  delta (double, optional, default = 5.0)\n");
@@ -87,14 +87,13 @@ int main(int argc, char *argv[])
 	
 	int opt;
 	int radius = 7;
-	double sensitivity = 0.5;
-	int dynamic_range = 128;
+	double sensitivity = -0.2;
 	int lower_bound = 20;
 	int upper_bound = 150;
 	double delta = 5.0;
 	bool fhelp = false;
 	int threshold = 0;
-	while ((opt = getopt(argc, argv, ":r:s:f:l:u:d:h")) != -1)
+	while ((opt = getopt(argc, argv, ":r:s:l:u:d:h")) != -1)
 	{
 		switch(opt)
 		{
@@ -103,9 +102,6 @@ int main(int argc, char *argv[])
 				break;
 			case 's':
 				sensitivity = atof(optarg);
-				break;
-			case 'f':
-				dynamic_range = atof(optarg);
 				break;
 			case 'l':
 				lower_bound = atof(optarg);
@@ -128,11 +124,11 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	ImthresholdFilterTSauvolaTitle();
+	ImthresholdFilterTNiblackTitle();
 	
 	if(optind + 2 > argc || fhelp || radius <= 0)
 	{
-		ImthresholdFilterTSauvolaUsage();
+		ImthresholdFilterTNiblackUsage();
 		return 0;
 	}
 	const char *src_filename = argv[optind];
@@ -150,6 +146,7 @@ int main(int argc, char *argv[])
 			unsigned width = FreeImage_GetWidth(dib);
 			unsigned height = FreeImage_GetHeight(dib);
 			unsigned y;
+
 			IMTpixel** p_im;
 			p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
 			for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
@@ -159,14 +156,13 @@ int main(int argc, char *argv[])
 
 			printf("Radius= %d\n", radius);
 			printf("Sensitivity= %f\n", sensitivity);
-			printf("Dynamic= %d\n", dynamic_range);
 			printf("Lower= %d\n", lower_bound);
 			printf("Upper= %d\n", upper_bound);
 			printf("Delta= %f\n", delta);
 
 			ImthresholdGetData(dib, p_im);
 			FreeImage_Unload(dib);
-			threshold = IMTFilterTSauvola(p_im, d_im, height, width, radius, sensitivity, dynamic_range, lower_bound, upper_bound, delta);
+			threshold = IMTFilterTNiblack(p_im, d_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
 			printf("Threshold= %d\n", threshold / 3);
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);

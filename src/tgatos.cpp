@@ -1,54 +1,9 @@
-/*
-*
-* Copyright (C) 2005 John Ashley Burgoyne and Ichiro Fujinaga
-*               2007 Uma Kompella and Christoph Dalitz
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the Free
-* Software Foundation; either version 2 of the License, or (at your option)
-* any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-* more details.
-* 
-* You should have received a copy of the GNU General Public License along
-* with this program; if not, write to the Free Software Foundation, Inc., 59
-* Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-*/
-
-/*
- Thresholds an image according to Gatos et al.'s method. See:
-
- Gatos, Basilios, Ioannis Pratikakis, and Stavros
- J. Perantonis. 2004. An adaptive binarization technique for low
- quality historical documents. *Lecture Notes in Computer
- Science* 3163: 102-113.
-
- *background*
- Estimated background of the image.
-
- *binarization*
- A preliminary binarization of the image.
-
- Use the default settings for the other parameters unless you know
- what you are doing.
-
- Uses Gatos Background as an estimated background of the image.
-
- Uses Niblack Thresholding as a preliminary binarization
-
- Own parameters: double "q", default=0.6
-                 double "p1", default=0.5
-                 double "p2", default=0.8
-*/
-
-// This algorithm was taken from the gamera.sf.net sourcecodes
-// and adopted for the FreeImage library
+//	Zlib license
 //
-//	Copyright (C) 2007-2008:
-//	monday2000	monday2000@yandex.ru
+// Thresholds an image according to Gatos et al.'s method.
+//
+//	Copyright (C) 2017:
+//	zvezdochiot	<zvezdochiot@user.sourceforge.net>
 
 #include <unistd.h>
 #include <FreeImage.h>

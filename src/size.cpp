@@ -1,15 +1,9 @@
-// AForge Image Processing Library
+//	Zlib license
 //
-// Copyright © Andrew Kirillov, 2005-2007
-// andrew.kirillov@gmail.com
+// Resize image.
 //
-// This algorithm was taken from the AForge.NET sourcecodes
-// and adopted for the FreeImage library
-//
-//	Copyright (C) 2007-2008:
-//	monday2000	monday2000@yandex.ru
-
-// Resize image using bilinear interpolation
+//	Copyright (C) 2017:
+//	zvezdochiot	<zvezdochiot@user.sourceforge.net>
 
 #include <unistd.h>
 #include <FreeImage.h>
@@ -17,18 +11,23 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void ImthresholdFilterSBilinTitle()
+void ImthresholdFilterSizeTitle()
 {
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
-	printf("Resize image using bilinear interpolation.\n");
-	printf("This algorithm was taken from the AForge.NET sourcecodes and adopted for the FreeImage library.\n\n");
+	printf("Resize image.\n");
+	printf("TerraNoNames: http://mykaralw.narod.ru/.\n\n");
 }
 
-void ImthresholdFilterSBilinUsage()
+void ImthresholdFilterSizeUsage()
 {
-	printf("Usage : imthreshold-sbilin [options] <input_file> <output_file>\n\n");
+	printf("Usage : imthreshold-size [options] <input_image> <output_image>\n\n");
 	printf("options:\n");
+	printf("          -f str  name filter:\n");
+	printf("                    'bicubic'\n");
+	printf("                    'biline'\n");
+	printf("                    'gsample' (default)\n");
+	printf("                    'nearest'\n");
 	printf("          -r N.N  ratio (double, optional, default = 1.0)\n");
 	printf("          -w N    new width (int, optional, default = [auto])\n");
 	printf("          -z N    new height (int, optional, default = [auto])\n");
@@ -49,10 +48,15 @@ int main(int argc, char *argv[])
 	int newh = 0;
 	int neww = 0;
 	bool fhelp = false;
-	while ((opt = getopt(argc, argv, ":r:w:z:h")) != -1)
+	char *namefilter;
+	namefilter="gsample";
+	while ((opt = getopt(argc, argv, ":f:r:w:z:h")) != -1)
 	{
 		switch(opt)
 		{
+			case 'f':
+				namefilter = optarg;
+				break;
 			case 'r':
 				ratio = atof(optarg);
 				break;
@@ -74,11 +78,11 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	ImthresholdFilterSBilinTitle();
+	ImthresholdFilterSizeTitle();
 	
 	if(optind + 2 > argc || fhelp || (ratio <= 0 && (newh <= 0 &&  neww <= 0)))
 	{
-		ImthresholdFilterSBilinUsage();
+		ImthresholdFilterSizeUsage();
 		return 0;
 	}
 	const char *src_filename = argv[optind];
@@ -111,20 +115,32 @@ int main(int argc, char *argv[])
 				new_width = neww;
 				new_height = (height * neww) / width;
 			}
-			
 			IMTpixel** p_im;
 			p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
 			for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 			IMTpixel** d_im;
 			d_im = (IMTpixel**)malloc(new_height * sizeof(IMTpixel*));
 			for (y = 0; y < new_height; y++) {d_im[y] = (IMTpixel*)malloc(new_width * sizeof(IMTpixel));}
-
+			
 			printf("Width= %d\n", new_width);
 			printf("Height= %d\n", new_height);
-
+			
 			ImthresholdGetData(dib, p_im);
-			FreeImage_Unload(dib);				
-			IMTFilterSBilin(p_im, d_im, height, width, new_height, new_width);
+			FreeImage_Unload(dib);
+			if (strcmp(namefilter, "bicubic") == 0)
+			{
+				printf("Filter= %s\n", namefilter);
+				IMTFilterSBicub(p_im, d_im, height, width, new_height, new_width);
+			} else if (strcmp(namefilter, "biline") == 0) {
+				printf("Filter= %s\n", namefilter);
+				IMTFilterSBilin(p_im, d_im, height, width, new_height, new_width);
+			} else if (strcmp(namefilter, "nearest") == 0) {
+				printf("Filter= %s\n", namefilter);
+				IMTFilterSNearest(p_im, d_im, height, width, new_height, new_width);
+			} else {
+				printf("Filter= gsample\n");
+				IMTFilterSGsample(p_im, d_im, height, width, new_height, new_width);
+			}
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);
 			dst_dib = FreeImage_Allocate(new_width, new_height, 24);

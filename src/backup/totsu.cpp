@@ -13,34 +13,8 @@
 //	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //	http://www.gnu.org/copyleft/gpl.html
 
-/*
-* DAVID
-* 
-* This file modified by David Foster to improve clarity.
-*/
-
-/**
-* Automatic thresholding technique based on the entopy of the histogram.
-* See: P.K. Sahoo, S. Soltani, K.C. Wong and, Y.C. Chen "A Survey of
-* Thresholding Techniques", Computer Vision, Graphics, and Image
-* Processing, Vol. 41, pp.233-260, 1988.
-*
-* @author Jarek Sacha
-*/
-
-/*
-This plugin does automatic thresholding based on the entopy of the histogram.
-The method is very similar to Otsu's method. Rather than maximising
-the inter-class variance, it maximises the inter-class entropy.
-Entropy is a measure of the uncertainity of an event taking place.
-You can calculate it as: S = -(sum)p*log2(p) so it is very
-straightforward to do using the histogram data.
-(p is the probability of a pixel greyscale value in the image,
-and (sum) is the greek capital sigma. It is customary to use log in base 2. 
-*/
-
-// This algorithm was taken from the ImageJ sourcecodes
-// http://rsb.info.nih.gov/ij/plugins/entropy.html
+// This algorithm was taken from the C++ Augmented Reality Toolkit sourcecodes
+// http://www.dandiggins.co.uk/arlib-1.html
 // and adopted for the FreeImage library
 //
 // Copyright (C) 2007-2008:
@@ -50,19 +24,29 @@ and (sum) is the greek capital sigma. It is customary to use log in base 2.
 #include <FreeImage.h>
 #include "imthresholdfreeimage.h"
 
+// Otsu thresholding image.
+// 
+// The code implements Otsu thresholding, which is described in
+// N. Otsu, "A threshold selection method from gray-level pdfs", IEEE Trans. Systems,
+// Man and Cybernetics 9(1), pp. 62–66, 1979.
+// This implementation instead of minimizing the weighted within-class variance
+// does maximization of between-class variance, what gives the same result.
+// The approach is described in this presentation:
+// http://sampl.ece.ohio-state.edu/EE863/2004/ECE863-G-segclust2.ppt.
+
 ////////////////////////////////////////////////////////////////////////////////
 
-void ImthresholdFilterTEntTitle()
+void ImthresholdFilterTOtsuTitle()
 {
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
-	printf("Automatic thresholding technique based on the entopy of the histogram.\n");
-	printf("This algorithm was taken from the ImageJ sourcecodes http://rsb.info.nih.gov/ij/plugins/entropy.html and adopted for the FreeImage library.\n\n");
+	printf("Otsu thresholding image.\n");
+	printf("http://sampl.ece.ohio-state.edu/EE863/2004/ECE863-G-segclust2.ppt\n\n");
 }
 
-void ImthresholdFilterTEntUsage()
+void ImthresholdFilterTOtsuUsage()
 {
-	printf("Usage : imthreshold-tent [options] <input_file> <output_file>(BW)\n\n");
+	printf("Usage : imthreshold-totsu [options] <input_file> <output_file>(BW)\n\n");
 	printf("options:\n");
 	printf("          -h      this help\n");
 }
@@ -95,11 +79,11 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	ImthresholdFilterTEntTitle();
+	ImthresholdFilterTOtsuTitle();
 	
 	if(optind + 2 > argc || fhelp)
 	{
-		ImthresholdFilterTEntUsage();
+		ImthresholdFilterTOtsuUsage();
 		return 0;
 	}
 	const char *src_filename = argv[optind];
@@ -127,7 +111,7 @@ int main(int argc, char *argv[])
 
 			ImthresholdGetData(dib, p_im);
 			FreeImage_Unload(dib);
-			threshold = IMTFilterTEnt(p_im, d_im, height, width);
+			threshold = IMTFilterTOtsu(p_im, d_im, height, width);
 			printf("Threshold= %d\n", threshold / 3);
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);

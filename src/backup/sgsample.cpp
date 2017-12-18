@@ -1,7 +1,6 @@
-
 // AForge Image Processing Library
 //
-// Copyright © Andrew Kirillov, 2005-2007
+// Copyright Â© Andrew Kirillov, 2005-2007
 // andrew.kirillov@gmail.com
 //
 // This algorithm was taken from the AForge.NET sourcecodes
@@ -10,7 +9,7 @@
 //	Copyright (C) 2007-2008:
 //	monday2000	monday2000@yandex.ru
 
-// Resize image using nearest neighbor algorithm
+// Resize image using G-sample algoritm
 
 #include <unistd.h>
 #include <FreeImage.h>
@@ -18,17 +17,17 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void ImthresholdFilterSNearestTitle()
+void ImthresholdFilterSGsampleTitle()
 {
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
-	printf("Resize image using nearest neighbor algorithm.\n");
-	printf("This algorithm was taken from the AForge.NET sourcecodes and adopted for the FreeImage library.\n\n");
+	printf("Resize image using G-sample algoritm.\n");
+	printf("TerraNoNames: http://mykaralw.narod.ru/.\n\n");
 }
 
-void ImthresholdFilterSNearestUsage()
+void ImthresholdFilterSGsampleUsage()
 {
-	printf("Usage : imthreshold-snearest [options] <input_file> <output_file>\n\n");
+	printf("Usage : imthreshold-sgsample [options] <input_file> <output_file>\n\n");
 	printf("options:\n");
 	printf("          -r N.N  ratio (double, optional, default = 1.0)\n");
 	printf("          -w N    new width (int, optional, default = [auto])\n");
@@ -75,11 +74,11 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	ImthresholdFilterSNearestTitle();
+	ImthresholdFilterSGsampleTitle();
 	
 	if(optind + 2 > argc || fhelp || (ratio <= 0 && (newh <= 0 &&  neww <= 0)))
 	{
-		ImthresholdFilterSNearestUsage();
+		ImthresholdFilterSGsampleUsage();
 		return 0;
 	}
 	const char *src_filename = argv[optind];
@@ -120,13 +119,12 @@ int main(int argc, char *argv[])
 			d_im = (IMTpixel**)malloc(new_height * sizeof(IMTpixel*));
 			for (y = 0; y < new_height; y++) {d_im[y] = (IMTpixel*)malloc(new_width * sizeof(IMTpixel));}
 
-			ImthresholdGetData(dib, p_im);
-			FreeImage_Unload(dib);
-			
 			printf("Width= %d\n", new_width);
 			printf("Height= %d\n", new_height);
-			IMTFilterSNearest(p_im, d_im, height, width, new_height, new_width);
 
+			ImthresholdGetData(dib, p_im);
+			FreeImage_Unload(dib);
+			IMTFilterSGsample(p_im, d_im, height, width, new_height, new_width);
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);
 			dst_dib = FreeImage_Allocate(new_width, new_height, 24);

@@ -50,22 +50,26 @@ int     threshold; // Threshold (0-255)
 0    // default threshold
 */	
 
-void ImthresholdFilterBgDivTitle()
+////////////////////////////////////////////////////////////////////////////////
+
+void ImthresholdFilterUnsharpMaskTitle()
 {
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
-	printf("Bg div (based Gaussian blur).\n");
-	printf("TerraNoNames: http://mykaralw.narod.ru/.\n\n");
+	printf("UnSharp Filter.\n");
+	printf("This algorithm was taken from the GIMP v2.4.5 sourcecodes and adopted for the FreeImage library.\n\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void ImthresholdFilterBgDivUsage()
+void ImthresholdFilterUnsharpMaskUsage()
 {
-	printf("Usage : imthreshold-fbgdiv [options] <input_file> <output_file>\n\n");
+	printf("Usage : imthreshold-funsharp [options] <input_file> <output_file>\n\n");
 	printf("options:\n");
 	printf("          -r N.N  radius (double, optional, default = 5.0)\n");
-	printf("          -n N    num divide (int, optional, default = 1)\n");
+	printf("          -a N.N  amount (double, optional, default = 0.5)\n");
+	printf("          -t N    threshold (int, optional, default = 0)\n");
+	printf("          -b      only blur (bool, optional)\n");
 	printf("          -h      this help\n");
 }
 
@@ -80,18 +84,25 @@ int main(int argc, char *argv[])
 	
 	int opt;
 	double radius = 5.0;
-	unsigned ndiv = 1;
-	double ims;
+	double amount = 0.5;
+	int threshold = 0;
+	bool only_blur = false;
 	bool fhelp = false;
-	while ((opt = getopt(argc, argv, ":r:n:h")) != -1)
+	while ((opt = getopt(argc, argv, ":r:a:t:bh")) != -1)
 	{
 		switch(opt)
 		{
 			case 'r':
 				radius = atof(optarg);
 				break;
-			case 'n':
-				ndiv = atof(optarg);
+			case 'a':
+				amount = atof(optarg);
+				break;
+			case 't':
+				threshold = atof(optarg);
+				break;
+			case 'b':
+				only_blur = true;
 				break;
 			case 'h':
 				fhelp = true;
@@ -105,11 +116,11 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	ImthresholdFilterBgDivTitle();
+	ImthresholdFilterUnsharpMaskTitle();
 	
 	if(optind + 2 > argc || fhelp || radius == 0)
 	{
-		ImthresholdFilterBgDivUsage();
+		ImthresholdFilterUnsharpMaskUsage();
 		return 0;
 	}
 	const char *src_filename = argv[optind];
@@ -137,21 +148,28 @@ int main(int argc, char *argv[])
 				b_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
 				for (y = 0; y < height; y++) {b_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 				IMTpixel** d_im;
-				d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-				for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 
 				printf("Radius= %f\n", radius);
-				printf("NumDiv= %d\n", ndiv);
+				printf("Amount= %f\n", amount);
+				printf("Threshold= %d\n", threshold);
 
 				ImthresholdGetData(dib, p_im);
 				FreeImage_Unload(dib);
 				IMTFilterGaussBlur(p_im, b_im, height, width, radius);
 				dst_dib = FreeImage_Allocate(width, height, 24);
-				ims = IMTFilterBgDiv(p_im, b_im, d_im, height, width, ndiv);
-				printf("Mean= %f\n", ims);
-				ImthresholdSetData(dst_dib, d_im);
-				for (y = 0; y < height; y++){free(d_im[y]);}
-				free(d_im);
+				if (only_blur)
+				{
+					printf("Mode= Blur\n");
+					ImthresholdSetData(dst_dib, b_im);
+				} else {
+					printf("Mode= Sharpen\n");
+					d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+					for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+					IMTFilterUnsharpMask(p_im, b_im, d_im, height, width, amount, threshold);
+					ImthresholdSetData(dst_dib, d_im);
+					for (y = 0; y < height; y++){free(d_im[y]);}
+					free(d_im);
+				}
 				for (y = 0; y < height; y++){free(b_im[y]);}
 				free(b_im);
 				for (y = 0; y < height; y++){free(p_im[y]);}

@@ -1,38 +1,15 @@
-//	This program is free software; you can redistribute it and/or modify
-//	it under the terms of the GNU General Public License as published by
-//	the Free Software Foundation; either version 2 of the License, or
-//	(at your option) any later version.
-//
-//	This program is distributed in the hope that it will be useful,
-//	but WITHOUT ANY WARRANTY; without even the implied warranty of
-//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//	GNU General Public License for more details.
-//
-//	You should have received a copy of the GNU General Public License
-//	along with this program; if not, write to the Free Software
-//	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//	http://www.gnu.org/copyleft/gpl.html
-
 // AForge Image Processing Library
-// AForge.NET framework
 //
-// Copyright © Andrew Kirillov, 2005-2007
+// Copyright Â© Andrew Kirillov, 2005-2007
 // andrew.kirillov@gmail.com
 //
-// Found description in
-// "An Edge Detection Technique Using the Facet
-// Model and Parameterized Relaxation Labeling"
-// by Ioannis Matalas, Student Member, IEEE, Ralph Benjamin, and Richard Kitney
-
-// Adaptive Smoothing - noise removal with edges preserving.
-
-// This algorithm was taken from the AForge.NET framework sourcecodes
+// This algorithm was taken from the AForge.NET sourcecodes
 // and adopted for the FreeImage library
 //
 //	Copyright (C) 2007-2008:
 //	monday2000	monday2000@yandex.ru
 
-// double radius = 3.0; // default value
+// Resize image using bicubic interpolation
 
 #include <unistd.h>
 #include <FreeImage.h>
@@ -40,21 +17,25 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void ImthresholdFilterAdSmoothTitle()
+void ImthresholdFilterSBicubTitle()
 {
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
-	printf("Adaptive Smoothing - noise removal with edges preserving.\n");
-	printf("This algorithm was taken from the AForge.NET framework sourcecodes and adopted for the FreeImage library.\n\n");
+	printf("Resize image using bicubic interpolation.\n");
+	printf("This algorithm was taken from the AForge.NET sourcecodes and adopted for the FreeImage library.\n\n");
 }
 
-void ImthresholdFilterAdSmoothUsage()
+void ImthresholdFilterSBicubUsage()
 {
-	printf("Usage : imthreshold-fadsmooth [options] <input_file> <output_file>\n\n");
+	printf("Usage : imthreshold-sbicub [options] <input_file> <output_file>\n\n");
 	printf("options:\n");
-	printf("          -r N    radius (double, optional, default = 3.0)\n");
+	printf("          -r N.N  ratio (double, optional, default = 1.0)\n");
+	printf("          -w N    new width (int, optional, default = [auto])\n");
+	printf("          -z N    new height (int, optional, default = [auto])\n");
 	printf("          -h      this help\n");
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char *argv[])
 {
@@ -62,16 +43,24 @@ int main(int argc, char *argv[])
 #ifdef FREEIMAGE_LIB
 	FreeImage_Initialise();
 #endif // FREEIMAGE_LIB
-
+	
 	int opt;
-	double radius = 3.0;
+	double ratio = 1.0;
+	int newh = 0;
+	int neww = 0;
 	bool fhelp = false;
-	while ((opt = getopt(argc, argv, ":r:h")) != -1)
+	while ((opt = getopt(argc, argv, ":r:w:z:h")) != -1)
 	{
 		switch(opt)
 		{
 			case 'r':
-				radius = atof(optarg);
+				ratio = atof(optarg);
+				break;
+			case 'w':
+				neww = atof(optarg);
+				break;
+			case 'z':
+				newh = atof(optarg);
 				break;
 			case 'h':
 				fhelp = true;
@@ -85,16 +74,15 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	ImthresholdFilterAdSmoothTitle();
+	ImthresholdFilterSBicubTitle();
 	
-	if(optind + 2 > argc || fhelp > 0 || radius == 0)
+	if(optind + 2 > argc || fhelp || (ratio <= 0 && (newh <= 0 &&  neww <= 0)))
 	{
-		ImthresholdFilterAdSmoothUsage();
+		ImthresholdFilterSBicubUsage();
 		return 0;
 	}
 	const char *src_filename = argv[optind];
 	const char *output_filename = argv[optind + 1];
-	
 	
 	FreeImage_SetOutputMessage(FreeImageErrorHandler);
 	
@@ -107,42 +95,58 @@ int main(int argc, char *argv[])
 			FIBITMAP* dst_dib;
 			unsigned width = FreeImage_GetWidth(dib);
 			unsigned height = FreeImage_GetHeight(dib);
+			unsigned new_width, new_height;
 			unsigned y;
-
+			if (newh <= 0 && neww <= 0)
+			{
+				new_width = width * ratio;
+				new_height = height * ratio;
+			} else if (newh > 0 && neww > 0) {
+				new_width = neww;
+				new_height = newh;
+			} else if (newh > 0) {
+				new_width = (width * newh) / height;
+				new_height = newh;
+			} else {
+				new_width = neww;
+				new_height = (height * neww) / width;
+			}
+			
 			IMTpixel** p_im;
 			p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
 			for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 			IMTpixel** d_im;
-			d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-			for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+			d_im = (IMTpixel**)malloc(new_height * sizeof(IMTpixel*));
+			for (y = 0; y < new_height; y++) {d_im[y] = (IMTpixel*)malloc(new_width * sizeof(IMTpixel));}
 
-			printf("Radius= %f\n", radius);
+			printf("Width= %d\n", new_width);
+			printf("Height= %d\n", new_height);
 
 			ImthresholdGetData(dib, p_im);
 			FreeImage_Unload(dib);
-			IMTFilterAdSmooth(p_im, d_im, height, width, radius);
+			IMTFilterSBicub(p_im, d_im, height, width, new_height, new_width);
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);
-			dst_dib = FreeImage_Allocate(width, height, 24);
+			dst_dib = FreeImage_Allocate(new_width, new_height, 24);
 			ImthresholdSetData(dst_dib, d_im);
-			for (y = 0; y < height; y++){free(d_im[y]);}
+			for (y = 0; y < new_height; y++){free(d_im[y]);}
 			free(d_im);
 			
 			if (dst_dib)
-			{
+			{					
 				FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(output_filename);
 				if(out_fif != FIF_UNKNOWN)
 				{
 					FreeImage_Save(out_fif, dst_dib, output_filename, 0);
 					printf("Output= %s\n\n", output_filename);
 				}
-				FreeImage_Unload(dst_dib);
+				FreeImage_Unload(dst_dib);					
 			}
 		} else {
 			printf("%s\n", "Unsupported format type.");
 			FreeImage_Unload(dib);
 		}
-	}
+	}	 
 	
 	// call this ONLY when linking with FreeImage as a static library
 #ifdef FREEIMAGE_LIB

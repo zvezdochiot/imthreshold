@@ -1,24 +1,9 @@
-//	This program is free software; you can redistribute it and/or modify
-//	it under the terms of the GNU General Public License as published by
-//	the Free Software Foundation; either version 2 of the License, or
-//	(at your option) any later version.
+//	Zlib license
 //
-//	This program is distributed in the hope that it will be useful,
-//	but WITHOUT ANY WARRANTY; without even the implied warranty of
-//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//	GNU General Public License for more details.
+// ImThreshold header library.
 //
-//	You should have received a copy of the GNU General Public License
-//	along with this program; if not, write to the Free Software
-//	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//	http://www.gnu.org/copyleft/gpl.html
-
-// This algorithm was taken from the C++ Augmented Reality Toolkit sourcecodes
-// http://www.dandiggins.co.uk/arlib-1.html
-// and adopted for the FreeImage library
-//
-// Copyright (C) 2007-2008:
-// monday2000  monday2000@yandex.ru
+//	Copyright (C) 2017:
+//	zvezdochiot	<zvezdochiot@user.sourceforge.net>
 
 #include <inttypes.h>
 #include <math.h>
@@ -136,7 +121,8 @@ void IMTFilterInvert(IMTpixel** p_im, unsigned height, unsigned width);
 void IMTFilterCopy(IMTpixel** p_im, IMTpixel** b_im, unsigned height, unsigned width);
 void IMTFilterAdSmooth(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius);
 void IMTFilterBGFGLsep(IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, double doverlay);
-IMTpixel IMTFilterGreyWorld(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width);
+IMTpixel IMTFilterGreyWorld(IMTpixel** p_im, unsigned height, unsigned width);
+IMTpixel IMTFilterGreyNorm (IMTpixel** p_im, unsigned height, unsigned width);
 double IMTFilterLevelL (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned level, unsigned num);
 double IMTFilterLevelMean(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double contour, double thres, int lower_bound, int upper_bound);
 double IMTFilterLevelSigma(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double thres, double fpart);
@@ -155,7 +141,7 @@ void IMTFilterPeron (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
 double IMTFilterPosterize (IMTpixel** p_im, unsigned height, unsigned width, unsigned thres);
 void IMTFilterPMean(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, int fmode, bool fneared);
 int IMTFilterRetinex(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double sigma);
-double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width, bool finv);
+double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width);
 void IMTSelGaussInitMatrix (double radius, double *mat, int num);
 void IMTFilterSelGauss (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, int maxdelta);
 double IMTFilterShrink(IMTpixel** p_im, unsigned height, unsigned width, int thres);
@@ -165,7 +151,8 @@ void IMTGaussLineMatrix (double *cmatrix, double radius);
 void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius);
 double IMTFilterBgDiv (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned ndiv);
 void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, double amount, int threshold);
-void IMTFilterWiener(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double noise_variance);
+double IMTFilterNoiseVariance (IMTpixel** p_im, unsigned height, unsigned width, int radius);
+void IMTFilterWiener(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double noise);
 int IMTFilterWhiteFill (IMTpixel** p_im, unsigned height, unsigned width);
 double BiCubicKernel(double x);
 void IMTFilterSBicub(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width);
@@ -177,7 +164,7 @@ void IMTFilterSHRIS(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned 
 void IMTFilterSReduce(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int smode);
 void IMTFilterSNearest(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width);
 int IMTFilterTAbutaleb(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius);
-int IMTFilterTBernsen(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, unsigned contrast_limit, bool set_doubt_to_low);
+int IMTFilterTBernsen(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, unsigned contrast_limit);
 int IMTFilterTBHT(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTBiMod(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta);
 int IMTFilterTChistian (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta);
@@ -185,10 +172,10 @@ int IMTFilterTDalg(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width
 int IMTFilterTDither(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTDjVuL(IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, int wbmode, double anisotropic, double doverlay, unsigned fposter);
 int IMTFilterTEnt(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
-int IMTFilterTEqBright(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int fmode);
+int IMTFilterTEqBright(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterGatosBG(IMTpixel** p_im, BYTE** d_im, IMTpixel** bg_im, unsigned height, unsigned width, int radius);
 int IMTFilterTGatos(IMTpixel** p_im, BYTE** d_im, IMTpixel** bg_im, BYTE** g_im, unsigned height, unsigned width, double q, double p1, double p2);
-int IMTFilterTGrad (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, bool contour);
+int IMTFilterTGrad (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTHalftone2(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTJanni(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTKMeans(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, unsigned knum, unsigned iters);

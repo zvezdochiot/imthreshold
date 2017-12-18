@@ -18,28 +18,40 @@
 */
 
 /*
-References:
-&'John Bernsen'
-"Dynamic thresholding of grey-level images", 
-Proc. 8th International Conference on Pattern 
-Recognition (ICPR8), pp 1251-1255, Paris, France, 
-October 1986.
+________________________________________________________________
 
- Original author:
- Øivind Due Trier
-*/
-
-/*
- Creates a binary image by using the Bernsen algorithm.
-
- *region_size* : default = 3
- The size of each region in which to calculate a threshold
+ bin_ab.c
+ $Id: threshold.hpp 962 2007-05-21 13:29:29Z cdalitz $
+ Copyright 1990, Blab, UiO
+ Image processing lab, Department of Informatics
+ University of Oslo
+ E-mail: blab@ifi.uio.no
+ ________________________________________________________________
+ 
+  Permission to use, copy, modify and distribute this software and its
+  documentation for any purpose and without fee is hereby granted, 
+  provided that this copyright notice appear in all copies and that 
+  both that copyright notice and this permission notice appear in supporting
+  documentation and that the name of B-lab, Department of Informatics or
+  University of Oslo not be used in advertising or publicity pertaining 
+  to distribution of the software without specific, written prior permission.
   
- *contrast_limit* : default = 128
- The minimum amount of contrast required to threshold.
+  B-LAB DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL B-LAB
+  BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+  OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
+  CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   
+  References:
+  &Ahmed S. Abutaleb
+  "Automatic thresholding of gray-level pictures using
+  two-dimensional entropy",
+  Computer Vision, Graphics, and Image Processing,
+  vol 47, pp 22-32, 1989.
 	
- *set_doubt_to_low* : default = 0
- The color choice for the doubt pixels
+  Original author:
+  Øivind Due Trier
 */
 
 // This algorithm was taken from the gamera.sf.net sourcecodes
@@ -51,24 +63,25 @@ October 1986.
 #include <unistd.h>
 #include <FreeImage.h>
 #include "imthresholdfreeimage.h"
+#include <limits>
+
+// using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void ImthresholdFilterTBernsenTitle()
+void ImthresholdFilterTAbutalebTitle()
 {
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
-	printf("Bernsen threshold image.\n");
+	printf("Abutaleb threshold image.\n");
 	printf("This algorithm was taken from the gamera.sf.net sourcecodes and adopted for the FreeImage library.\n\n");
 }
 
-void ImthresholdFilterTBernsenUsage()
+void ImthresholdFilterTAbutalebUsage()
 {
-	printf("Usage : imthreshold-tbernsen [options] <input_file> <output_file>(BW)\n\n");
+	printf("Usage : imthreshold-tabutaleb [options] <input_file> <output_file>(BW)\n\n");
 	printf("options:\n");
-	printf("          -r N    radius (int, optional, default = 4)\n");
-	printf("          -c N    contrast limit (int, optional, default = 128)\n");
-	printf("          -s      set doubt to low (bool, optional)\n");
+	printf("          -r N    radius (int, optional, default = 1)\n");
 	printf("          -h      this help\n");
 }
 
@@ -82,23 +95,15 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 	
 	int opt;
-	int radius = 4;
-	unsigned contrast_limit = 128;
-	bool set_doubt_to_low = false;
+	int radius = 1;
 	bool fhelp = false;
 	int threshold = 0;
-	while ((opt = getopt(argc, argv, ":r:c:sh")) != -1)
+	while ((opt = getopt(argc, argv, ":r:h")) != -1)
 	{
 		switch(opt)
 		{
 			case 'r':
 				radius = atof(optarg);
-				break;
-			case 'c':
-				contrast_limit = atof(optarg);
-				break;
-			case 's':
-				set_doubt_to_low = true;
 				break;
 			case 'h':
 				fhelp = true;
@@ -112,11 +117,11 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	ImthresholdFilterTBernsenTitle();
+	ImthresholdFilterTAbutalebTitle();
 	
 	if(optind + 2 > argc || fhelp || radius <= 0)
 	{
-		ImthresholdFilterTBernsenUsage();
+		ImthresholdFilterTAbutalebUsage();
 		return 0;
 	}
 	const char *src_filename = argv[optind];
@@ -134,6 +139,7 @@ int main(int argc, char *argv[])
 			unsigned width = FreeImage_GetWidth(dib);
 			unsigned height = FreeImage_GetHeight(dib);
 			unsigned y;
+
 			IMTpixel** p_im;
 			p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
 			for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
@@ -141,12 +147,9 @@ int main(int argc, char *argv[])
 			d_im = (BYTE**)malloc(height * sizeof(BYTE*));
 			for (y = 0; y < height; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
 
-			printf("Radius= %d\n", radius);
-			printf("Contrast= %d\n", contrast_limit);
-
 			ImthresholdGetData(dib, p_im);
 			FreeImage_Unload(dib);
-			threshold = IMTFilterTBernsen(p_im, d_im, height, width, radius, contrast_limit, set_doubt_to_low);
+			threshold = IMTFilterTAbutaleb(p_im, d_im, height, width, radius);
 			printf("Threshold= %d\n", threshold / 3);
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);
