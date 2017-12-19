@@ -1,0 +1,18 @@
+ImThreshold.
+
+NAME
+
+ Make (Mask-Foreground-Background)-djvu file of colors image.
+
+DESCRIPTION
+
+ A set of scripts for encoding images in a format djvu.
+
+DEPENDS
+
+ bash, djvulibre-bin, netpbm, imthreshold.
+
+CONTACTS
+
+ Website: http://djvu-soft.narod.ru/
+ Email: monday2000@yandex.ru
