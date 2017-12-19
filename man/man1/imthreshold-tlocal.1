@@ -1,0 +1,86 @@
+.TH "ImThreshold User Manual" 1 "19 Dec 2017" "ImThreshold documentation"
+
+.SH NAME
+imthreshold-tlocal
+
+.SH DESCRIPTION
+Local adaptive thresholding image.
+
+.SH SYNOPSIS
+imthreshold-tlocal [options] <input_image> <output_image>(BW)
+
+.SH OPTIONS
+.TP
+-f str
+name filter:
+                    'abutaleb'
+                    'bernsen'
+                    'chistian'
+                    'niblack'
+                    'sauvola' (default)
+.TP
+-c N
+contrast limit (int, optional, default = 128)
+.TP
+-d N.N
+delta (double, optional, default = -5.0)
+.TP
+-l N
+lower bound (int, optional, default = 0)
+.TP
+-g N
+dynamic range (int, optional, default = 128)
+.TP
+-r N
+radius (int, optional, default = 7)
+.TP
+-s N.N
+sensitivity (double, optional, default = 0.5)
+.TP
+-u N
+upper bound (int, optional, default = 255)
+.TP
+-h
+help
+
+.SH EXAMPLE
+imthreshold-tlocal -f chistian sample.tif sample.tlocal.tif
+
+.SH COPYRIGHT
+Copyright 2017 zvezdochiot.
+ All rights reserved.
+
+.SH SEE ALSO
+ imthreshold,
+ imthreshold-anytodjvu,
+ imthreshold-anytominidjvu,
+ imthreshold-deskew,
+ imthreshold-fautoinv,
+ imthreshold-fbgfglsep,
+ imthreshold-fdespeckle,
+ imthreshold-filter,
+ imthreshold-finfo,
+ imthreshold-flevell,
+ imthreshold-fpmean,
+ imthreshold-rotate,
+ imthreshold-sbwmag2,
+ imthreshold-scris,
+ imthreshold-shris,
+ imthreshold-size,
+ imthreshold-tdalg,
+ imthreshold-tdjvul,
+ imthreshold-tgatos,
+ imthreshold-tglobal,
+ imthreshold-thalftone2,
+ imthreshold-tlocal,
+ imthreshold-ttext,
+ imthreshold-twhiterohrer,
+ imthreshold-bash-scripts.
+
+.SH CONTACTS
+BookScanLib Project:
+ Website: http://djvu-soft.narod.ru/
+
+Imthreshold Project:
+ Website: https://sourceforge.net/projects/imthreshold/
+ Email: zvezdochiot@users.sourceforge.net

@@ -1,0 +1,117 @@
+.TH "ImThreshold User Manual" 1 "19 Dec 2017" "ImThreshold documentation"
+
+.SH NAME
+imthreshold-filter
+
+.SH DESCRIPTION
+Filter image.
+
+.SH SYNOPSIS
+imthreshold-filter [options] <input_image> <output_image>
+
+.SH OPTIONS
+.TP
+-f str
+name filter:
+                    'adsmooth'
+                    'bgdiv'
+                    'blur'
+                    'greynorm'
+                    'greyworld'
+                    'illumc'
+                    'invert'
+                    'kmeans'
+                    'levelmean'
+                    'levelsigma'
+                    'none' (default)
+                    'peron'
+                    'posterize'
+                    'retinex'
+                    'rs'
+                    'selgauss'
+                    'shrink'
+                    'unripple'
+                    'unsharp'
+                    'whitefill'
+                    'wiener'
+.TP
+-a N.N
+amount (double, optional, default = 0.5)
+.TP
+-c N.N
+contour factor (double, optional, default = -1[auto])
+.TP
+-d N
+max delta (int, optional, default = 50)
+.TP
+-i N
+num divide (int, optional, default = 1)
+.TP
+-k N
+K num (int, optional, default = 2)
+.TP
+-l N
+lower bound (int, optional, default = 32)
+.TP
+-n N.N
+noise size (double, optional, default = -1.0[auto])
+.TP
+-p N
+posterize divide factor (int, optional, default = 16)
+.TP
+-r N.N
+radius (double, optional, default = 3.0)
+.TP
+-s N.N
+sigma (double, optional, default = 4.0)
+.TP
+-t N.N
+threshold (double, optional, default = 0.0)
+.TP
+-u N
+upper bound (int, optional, default = 223)
+.TP
+-h
+help
+
+.SH EXAMPLE
+imthreshold-filter -f wiener sample.tif sample.filter.tif
+
+.SH COPYRIGHT
+Copyright 2017 zvezdochiot.
+ All rights reserved.
+
+.SH SEE ALSO
+ imthreshold,
+ imthreshold-anytodjvu,
+ imthreshold-anytominidjvu,
+ imthreshold-deskew,
+ imthreshold-fautoinv,
+ imthreshold-fbgfglsep,
+ imthreshold-fdespeckle,
+ imthreshold-filter,
+ imthreshold-finfo,
+ imthreshold-flevell,
+ imthreshold-fpmean,
+ imthreshold-rotate,
+ imthreshold-sbwmag2,
+ imthreshold-scris,
+ imthreshold-shris,
+ imthreshold-size,
+ imthreshold-tdalg,
+ imthreshold-tdjvul,
+ imthreshold-tgatos,
+ imthreshold-tglobal,
+ imthreshold-thalftone2,
+ imthreshold-tlocal,
+ imthreshold-ttext,
+ imthreshold-twhiterohrer,
+ imthreshold-bash-scripts.
+
+.SH CONTACTS
+BookScanLib Project:
+ Website: http://djvu-soft.narod.ru/
+
+Imthreshold Project:
+ Website: https://sourceforge.net/projects/imthreshold/
+ Email: zvezdochiot@users.sourceforge.net

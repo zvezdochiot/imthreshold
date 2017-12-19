@@ -1,0 +1,89 @@
+.TH "ImThreshold User Manual" 1 "19 Dec 2017" "ImThreshold documentation"
+
+.SH NAME
+imthreshold-tgatos
+
+.SH DESCRIPTION
+Thresholds an image according to Gatos et al.'s method.
+ This algorithm was taken from the gamera.sf.net sourcecodes and adopted for the FreeImage library.
+
+.SH SYNOPSIS
+imthreshold-tgatos [options] <input_file> <output_file>(BW) \\
+ [niblack_file](BW) [bg_file]
+
+.SH OPTIONS
+.TP
+-m str
+mode {niblack, sauvola, chistian, bimod, dalg, default = niblack)
+.TP
+-r N
+radius (int, optional, default = 7)
+.TP
+-s N.N
+sensitivity (double, optional, default = -0.2)
+.TP
+-f N
+dynamic range (int, optional, default = 128)
+.TP
+-l N
+lower bound (int, optional, default = 20)
+.TP
+-u N
+upper bound (int, optional, default = 150)
+.TP
+-d N.N
+delta (double, optional, default = 0.0)
+.TP
+-q N.N
+q (double, optional, default = 0.6)
+.TP
+-1 N.N
+p1 (double, optional, default = 0.5)
+.TP
+-2 N.N
+p2 (double, optional, default = 0.8)
+.TP
+-h
+help
+
+.SH EXAMPLE
+imthreshold-tgatos sample.tif sample.bw.gatos.tif
+
+.SH COPYRIGHT
+Copyright 2017 zvezdochiot.
+ All rights reserved.
+
+.SH SEE ALSO
+ imthreshold,
+ imthreshold-anytodjvu,
+ imthreshold-anytominidjvu,
+ imthreshold-deskew,
+ imthreshold-fautoinv,
+ imthreshold-fbgfglsep,
+ imthreshold-fdespeckle,
+ imthreshold-filter,
+ imthreshold-finfo,
+ imthreshold-flevell,
+ imthreshold-fpmean,
+ imthreshold-rotate,
+ imthreshold-sbwmag2,
+ imthreshold-scris,
+ imthreshold-shris,
+ imthreshold-size,
+ imthreshold-tdalg,
+ imthreshold-tdjvul,
+ imthreshold-tgatos,
+ imthreshold-tglobal,
+ imthreshold-thalftone2,
+ imthreshold-tlocal,
+ imthreshold-ttext,
+ imthreshold-twhiterohrer,
+ imthreshold-bash-scripts.
+
+.SH CONTACTS
+BookScanLib Project:
+ Website: http://djvu-soft.narod.ru/
+
+Imthreshold Project:
+ Website: https://sourceforge.net/projects/imthreshold/
+ Email: zvezdochiot@users.sourceforge.net
