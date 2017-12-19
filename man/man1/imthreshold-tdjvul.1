@@ -1,0 +1,87 @@
+.TH "ImThreshold User Manual" 1 "19 Dec 2017" "ImThreshold documentation"
+
+.SH NAME
+imthreshold-tdjvul
+
+.SH DESCRIPTION
+DjVuL thresholds an image (Multi-scale binarization).
+
+.SH SYNOPSIS
+imthreshold-tdjvul [options] <input_file> <output_file>(BW) [fg_file] [bg_file] [fg_mask_file] [bg_mask_file]
+
+.SH OPTIONS
+.TP
+-a N.N
+anisotropic (double, optional, default = 0.0)
+.TP
+-c N
+clean fg, bg blur radius (int, optional, default = 0)
+.TP
+-d N
+despeckle aperture size (int, optional, default = 0)
+.TP
+-b N
+base block size (int, optional, default = 3)
+.TP
+-f N
+foreground divide (int, optional, default = 2)
+.TP
+-l N
+level (int, optional, default = 10)
+.TP
+-i
+invert station (bool, optional, default = false)
+.TP
+-o N.N
+overlay (double, optional, default = 0.5)
+.TP
+-p N
+posterize fg (int, optional, default = 0)
+.TP
+-w N
+w/b mode (int, optional, default = 0 [auto], >0-white, <0-black)
+.TP
+-h
+help
+
+.SH EXAMPLE
+imthreshold-tdjvu sample.tif bw.djvul.tif fg.djvul.tif bg.djvul.tif
+
+.SH COPYRIGHT
+Copyright 2017 zvezdochiot.
+ All rights reserved.
+
+.SH SEE ALSO
+ imthreshold,
+ imthreshold-anytodjvu,
+ imthreshold-anytominidjvu,
+ imthreshold-deskew,
+ imthreshold-fautoinv,
+ imthreshold-fbgfglsep,
+ imthreshold-fdespeckle,
+ imthreshold-filter,
+ imthreshold-finfo,
+ imthreshold-flevell,
+ imthreshold-fpmean,
+ imthreshold-rotate,
+ imthreshold-sbwmag2,
+ imthreshold-scris,
+ imthreshold-shris,
+ imthreshold-size,
+ imthreshold-tdalg,
+ imthreshold-tdjvul,
+ imthreshold-tgatos,
+ imthreshold-tglobal,
+ imthreshold-thalftone2,
+ imthreshold-tlocal,
+ imthreshold-ttext,
+ imthreshold-twhiterohrer,
+ imthreshold-bash-scripts.
+
+.SH CONTACTS
+BookScanLib Project:
+ Website: http://djvu-soft.narod.ru/
+
+Imthreshold Project:
+ Website: https://sourceforge.net/projects/imthreshold/
+ Email: zvezdochiot@users.sourceforge.net

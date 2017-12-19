@@ -1,0 +1,18 @@
+ImThreshold.
+
+NAME
+
+ Metadata manipulation djvu file.
+
+DESCRIPTION
+
+ A set of scripts to change the metadata in a format djvu.
+
+DEPENDS
+
+ bash, djvulibre-bin, gawk, uni2ascii.
+
+CONTACTS
+
+ Website: http://djvu-soft.narod.ru/
+ Email: monday2000@yandex.ru

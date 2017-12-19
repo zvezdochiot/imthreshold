@@ -1,0 +1,72 @@
+.TH "ImThreshold User Manual" 1 "19 Dec 2017" "ImThreshold documentation"
+
+.SH NAME
+imthreshold-fbgfglsep
+
+.SH DESCRIPTION
+DjVuL thresholds an image (Multi-scale binarization).
+
+.SH SYNOPSIS
+imthreshold-fbgfglsep [options] <input_file> <input_mask_file>(BW) <output_fg_file> <output_bg_file>
+
+.SH OPTIONS
+.TP
+-c N
+clean blur radius (int, optional, default = 0)
+.TP
+-b N
+base block size (int, optional, default = 3)
+.TP
+-f N
+foreground divide (int, optional, default = 2)
+.TP
+-l N
+level (int, optional, default = 10)
+.TP
+-o N.N
+overlay (double, optional, default = 0.5)
+.TP
+-h
+help
+
+.SH EXAMPLE
+imthreshold-tdjvu sample.tif bw.djvul.tif fg.djvul.tif bg.djvul.tif
+
+.SH COPYRIGHT
+Copyright 2017 zvezdochiot.
+ All rights reserved.
+
+.SH SEE ALSO
+ imthreshold,
+ imthreshold-anytodjvu,
+ imthreshold-anytominidjvu,
+ imthreshold-deskew,
+ imthreshold-fautoinv,
+ imthreshold-fbgfglsep,
+ imthreshold-fdespeckle,
+ imthreshold-filter,
+ imthreshold-finfo,
+ imthreshold-flevell,
+ imthreshold-fpmean,
+ imthreshold-rotate,
+ imthreshold-sbwmag2,
+ imthreshold-scris,
+ imthreshold-shris,
+ imthreshold-size,
+ imthreshold-tdalg,
+ imthreshold-tdjvul,
+ imthreshold-tgatos,
+ imthreshold-tglobal,
+ imthreshold-thalftone2,
+ imthreshold-tlocal,
+ imthreshold-ttext,
+ imthreshold-twhiterohrer,
+ imthreshold-bash-scripts.
+
+.SH CONTACTS
+BookScanLib Project:
+ Website: http://djvu-soft.narod.ru/
+
+Imthreshold Project:
+ Website: https://sourceforge.net/projects/imthreshold/
+ Email: zvezdochiot@users.sourceforge.net

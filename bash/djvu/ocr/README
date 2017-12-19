@@ -1,0 +1,18 @@
+ImThreshold.
+
+NAME
+
+ Recognize text in multipage djvu file.
+
+DESCRIPTION
+
+ A set of scripts to recognize text in a format djvu.
+
+DEPENDS
+
+ bash, djvulibre-bin, netpbm, sed, tesseract, cuneiform, ocrodjvu.
+
+CONTACTS
+
+ Website: http://djvu-soft.narod.ru/
+ Email: monday2000@yandex.ru

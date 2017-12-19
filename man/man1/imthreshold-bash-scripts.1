@@ -1,0 +1,81 @@
+.TH "ImThreshold User Manual" 1 "19 Dec 2017" "ImThreshold documentation"
+
+.SH NAME
+imthreshold-bash-scripts
+
+.SH DESCRIPTION
+A set of scripts for encoding images in a format djvu and manipulate djvu file.
+
+.SH SYNOPSIS
+imthreshold-bash-scripts
+
+or
+
+ls -R1 /usr/share/scripts/bash/djvu
+
+.SH CONTENTS
+ MFB-make
+ [Make (Mask-Foreground-Background)-djvu file of colors image]:
+  djvu-pnm-tdjvul.sh
+  djvu-pnm-ush-tbimod.sh
+  djvu-pnm-ush-tgrad.sh
+  djvu-pnm-ush-totsu.sh
+  djvu-pnm-ush-trot.sh
+ meta
+ [Metadata manipulation djvu file]:
+    djvu-meta-get.sh
+    djvu-meta-make.sh
+    djvu-meta-set.sh
+ ocr
+ [Recognize text in multipage djvu file]:
+    djvu-cuneiform-pbm.sh
+    djvu-tesseract-be.sh
+    djvu-tesseract-pbm.sh
+    djvu-tesseract-rs.sh
+    djvu-tesseract.sh
+ outline
+ [Outline manipulation djvu file]:
+    djvu-outline-offset.sh
+    djvu-outline.sh
+
+.SH DEPENDS
+ bash, djvulibre-bin, netpbm, imthreshold, [gawk, uni2ascii], [sed, tesseract-ocr, cuneiform, ocrodjvu].
+
+.SH COPYRIGHT
+Copyright 2017 zvezdochiot.
+ All rights reserved.
+
+.SH SEE ALSO
+ imthreshold,
+ imthreshold-anytodjvu,
+ imthreshold-anytominidjvu,
+ imthreshold-deskew,
+ imthreshold-fautoinv,
+ imthreshold-fbgfglsep,
+ imthreshold-fdespeckle,
+ imthreshold-filter,
+ imthreshold-finfo,
+ imthreshold-flevell,
+ imthreshold-fpmean,
+ imthreshold-rotate,
+ imthreshold-sbwmag2,
+ imthreshold-scris,
+ imthreshold-shris,
+ imthreshold-size,
+ imthreshold-tdalg,
+ imthreshold-tdjvul,
+ imthreshold-tgatos,
+ imthreshold-tglobal,
+ imthreshold-thalftone2,
+ imthreshold-tlocal,
+ imthreshold-ttext,
+ imthreshold-twhiterohrer,
+ imthreshold-bash-scripts.
+
+.SH CONTACTS
+BookScanLib Project:
+ Website: http://djvu-soft.narod.ru/
+
+Imthreshold Project:
+ Website: https://sourceforge.net/projects/imthreshold/
+ Email: zvezdochiot@users.sourceforge.net

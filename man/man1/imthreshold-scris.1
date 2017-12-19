@@ -1,0 +1,66 @@
+.TH "ImThreshold User Manual" 1 "19 Dec 2017" "ImThreshold documentation"
+
+.SH NAME
+imthreshold-scris
+
+.SH DESCRIPTION
+Resize image using bicubic Reverse Interpolate Scale (CRIS).
+
+.SH SYNOPSIS
+imthreshold-scris [options] <input_file> <output_file>
+
+.SH OPTIONS
+.TP
+-r N.N
+ratio, scale factor (double, optional, default = 1.0)
+.TP
+-w N
+new width (int, optional, default = [auto])
+.TP
+-z N
+new height (int, optional, default = [auto])
+.TP
+-h
+help
+
+.SH EXAMPLE
+imthreshold-scris -r 0.5 sample.tif sample.cris.0_5.tif
+
+.SH COPYRIGHT
+Copyright 2017 zvezdochiot.
+ All rights reserved.
+
+.SH SEE ALSO
+ imthreshold,
+ imthreshold-anytodjvu,
+ imthreshold-anytominidjvu,
+ imthreshold-deskew,
+ imthreshold-fautoinv,
+ imthreshold-fbgfglsep,
+ imthreshold-fdespeckle,
+ imthreshold-filter,
+ imthreshold-finfo,
+ imthreshold-flevell,
+ imthreshold-fpmean,
+ imthreshold-rotate,
+ imthreshold-sbwmag2,
+ imthreshold-scris,
+ imthreshold-shris,
+ imthreshold-size,
+ imthreshold-tdalg,
+ imthreshold-tdjvul,
+ imthreshold-tgatos,
+ imthreshold-tglobal,
+ imthreshold-thalftone2,
+ imthreshold-tlocal,
+ imthreshold-ttext,
+ imthreshold-twhiterohrer,
+ imthreshold-bash-scripts.
+
+.SH CONTACTS
+BookScanLib Project:
+ Website: http://djvu-soft.narod.ru/
+
+Imthreshold Project:
+ Website: https://sourceforge.net/projects/imthreshold/
+ Email: zvezdochiot@users.sourceforge.net

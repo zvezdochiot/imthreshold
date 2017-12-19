@@ -16,7 +16,7 @@ void ImthresholdFilterAutoInvTitle()
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
 	printf("AutoInvert colors filter image.\n");
-	printf("TerraNoNames: http://mykaralw.narod.ru/.\n\n");
+	printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

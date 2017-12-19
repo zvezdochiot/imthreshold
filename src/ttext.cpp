@@ -16,7 +16,7 @@ void ImthresholdFilterTTextTitle()
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
 	printf("Text thresholding image.\n");
-	printf("TerraNoNames: http://mykaralw.narod.ru/.\n\n");
+	printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
 }
 
 void ImthresholdFilterTTextUsage()

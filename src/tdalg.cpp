@@ -18,7 +18,7 @@ void ImthresholdFilterTDalgTitle()
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
 	printf("D-algoritm thresholding image.\n");
-	printf("Uprint Image Processing Group: http://www.uipg.ru/\n\n");
+	printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
 }
 
 void ImthresholdFilterTDalgUsage()

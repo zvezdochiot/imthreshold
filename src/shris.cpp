@@ -16,7 +16,7 @@ void ImthresholdFilterSHRISTitle()
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
 	printf("Half Reverse Interpolate Scale image (HRIS).\n");
-	printf("TerraNoNames: http://mykaralw.narod.ru/.\n\n");
+	printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
 }
 
 void ImthresholdFilterSHRISUsage()
