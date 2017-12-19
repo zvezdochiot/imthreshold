@@ -16,7 +16,7 @@ void ImthresholdFilterTHalftone2Title()
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
 	printf("Halftone thresholding image.\n");
-	printf("HalftoneARM9: https://github.com/BrenoRM/HalftoneARM9.\n\n");
+	printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
 }
 
 void ImthresholdFilterTHalftone2Usage()

@@ -16,7 +16,7 @@ void ImthresholdFilterLevelLTitle()
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
 	printf("LevelL filter image.\n");
-	printf("TerraNoNames: http://mykaralw.narod.ru/.\n\n");
+	printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
 }
 
 void ImthresholdFilterLevelLUsage()

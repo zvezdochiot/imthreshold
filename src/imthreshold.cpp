@@ -4,6 +4,7 @@
 //
 //	Copyright (C) 2017:
 //	zvezdochiot	<zvezdochiot@user.sourceforge.net>
+//  Homepage: https://sourceforge.net/projects/imthreshold/
 
 #include "imthreshold.h"
 

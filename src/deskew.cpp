@@ -16,7 +16,7 @@ void ImthresholdFilterDeskewTitle()
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
 	printf("The Deskew algorithm adapted for the FreeImage\n");
-	printf("TerraNoNames: http://mykaralw.narod.ru/.\n\n");
+	printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

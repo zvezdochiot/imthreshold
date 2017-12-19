@@ -16,7 +16,7 @@ void ImthresholdIMTFilterDjVuLTitle()
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
 	printf("DjVuL thresholds an image (Multi-scale binarization).\n");
-	printf("TerraNoNames: http://mykaralw.narod.ru/.\n\n");
+	printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
 }
 
 void ImthresholdIMTFilterDjVuLUsage()

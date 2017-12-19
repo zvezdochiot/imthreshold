@@ -16,13 +16,12 @@ void ImthresholdFilterTSauvolaTitle()
 	printf("ImThreshold.\n");
 	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
 	printf("Local adaptive thresholding image.\n");
-	printf("TerraNoNames: http://mykaralw.narod.ru/.\n\n");
+	printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
 }
 
 void ImthresholdFilterTSauvolaUsage()
 {
 	printf("Usage : imthreshold-tlocal [options] <input_image> <output_image>(BW)\n\n");
-	printf("options:\n");
 	printf("options:\n");
 	printf("          -f str  name filter:\n");
 	printf("                    'abutaleb'\n");
