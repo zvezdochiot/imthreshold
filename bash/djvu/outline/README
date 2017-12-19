@@ -1,0 +1,18 @@
+ImThreshold.
+
+NAME
+
+ Outline manipulation djvu file.
+
+DESCRIPTION
+
+ A set of scripts to change the outline in a format djvu.
+
+DEPENDS
+
+ bash, djvulibre-bin, sed.
+
+CONTACTS
+
+ Website: http://djvu-soft.narod.ru/
+ Email: monday2000@yandex.ru
