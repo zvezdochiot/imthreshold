@@ -1,0 +1,19 @@
+ImThreshold.
+
+NAME
+
+ Working with layers in single-page djvu.
+
+DESCRIPTION
+
+ A set of scripts for the expansion and build back the djvu files on layers.
+ (In order to use minidjvu)
+
+DEPENDS
+
+ bash, djvulibre-bin, netpbm, imthreshold.
+
+CONTACTS
+
+ Website: http://djvu-soft.narod.ru/
+ Email: monday2000@yandex.ru
