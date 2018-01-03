@@ -35,6 +35,7 @@ void ImthresholdFilterTGlobalUsage()
 	printf("                    'otsu'\n");
 	printf("                    'rot'\n");
 	printf("                    'tsai'\n");
+	printf("                    'use'\n");
 	printf("          -d N    delta (int, optional, default = 0)\n");
 	printf("          -k N    K par (k/2) (int, optional, default = 1)\n");
 	printf("          -m N    max iteration (int, optional, default = 10)\n");
@@ -132,33 +133,37 @@ int main(int argc, char *argv[])
 			{
 				printf("Filter= %s\n", namefilter);
 				threshold = IMTFilterTBHT(p_im, d_im, height, width);
-			} if (strcmp(namefilter, "dither") == 0) {
+			} else if (strcmp(namefilter, "dither") == 0) {
 				printf("Filter= %s\n", namefilter);
 				threshold = IMTFilterTDither(p_im, d_im, height, width);
-			} if (strcmp(namefilter, "entropy") == 0) {
+			} else if (strcmp(namefilter, "entropy") == 0) {
 				printf("Filter= %s\n", namefilter);
 				threshold = IMTFilterTEnt(p_im, d_im, height, width);
-			} if (strcmp(namefilter, "eqbright") == 0) {
+			} else if (strcmp(namefilter, "eqbright") == 0) {
 				printf("Filter= %s\n", namefilter);
 				threshold = IMTFilterTEqBright(p_im, d_im, height, width);
-			} if (strcmp(namefilter, "grad") == 0) {
+			} else if (strcmp(namefilter, "grad") == 0) {
 				printf("Filter= %s\n", namefilter);
 				threshold = IMTFilterTGrad(p_im, d_im, height, width);
-			} if (strcmp(namefilter, "janni") == 0) {
+			} else if (strcmp(namefilter, "janni") == 0) {
 				printf("Filter= %s\n", namefilter);
 				threshold = IMTFilterTJanni(p_im, d_im, height, width);
-			} if (strcmp(namefilter, "kmeans") == 0) {
+			} else if (strcmp(namefilter, "kmeans") == 0) {
 				printf("Filter= %s\n", namefilter);
 				threshold = IMTFilterTKMeans(p_im, d_im, height, width, knum, iters);
-			} if (strcmp(namefilter, "otsu") == 0) {
+			} else if (strcmp(namefilter, "otsu") == 0) {
 				printf("Filter= %s\n", namefilter);
 				threshold = IMTFilterTOtsu(p_im, d_im, height, width);
-			} if (strcmp(namefilter, "rot") == 0) {
+			} else if (strcmp(namefilter, "rot") == 0) {
 				printf("Filter= %s\n", namefilter);
 				threshold = IMTFilterTRot(p_im, d_im, height, width, weight);
-			} if (strcmp(namefilter, "tsai") == 0) {
+			} else if (strcmp(namefilter, "tsai") == 0) {
 				threshold = IMTFilterTTsai(p_im, d_im, height, width, shift);
 				printf("Filter= %s\n", namefilter);
+			} else if (strcmp(namefilter, "use") == 0) {
+				printf("Filter= %s\n", namefilter);
+				printf("Delta= %d\n", delta);
+				threshold = IMTFilterThreshold(p_im, d_im, height, width, delta);
 			} else {
 				printf("Filter= bimod\n");
 				printf("Delta= %d\n", delta);

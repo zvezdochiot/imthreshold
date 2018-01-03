@@ -5849,6 +5849,28 @@ int IMTFilterTHalftone2 (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned
 
 ////////////////////////////////////////////////////////////////////////////////
 
+int IMTFilterThreshold (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta)
+{
+	unsigned y, x, im;
+	BYTE val;
+	int threshold = 0;
+	
+	threshold = 382 + delta;
+	for (y = 0; y < height; y++ )
+	{
+		for (x = 0; x < width; x++)
+		{
+			im = p_im[y][x].s;
+			val = (BYTE) ((im > threshold) ? 255 : 0 );
+			d_im[y][x] = val;
+		}
+	}
+	
+	return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 int IMTFilterTJanni (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
 {
 	unsigned y, x, i, cn = 768, im;

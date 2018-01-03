@@ -178,6 +178,7 @@ int IMTFilterGatosBG(IMTpixel** p_im, BYTE** d_im, IMTpixel** bg_im, unsigned he
 int IMTFilterTGatos(IMTpixel** p_im, BYTE** d_im, IMTpixel** bg_im, BYTE** g_im, unsigned height, unsigned width, double q, double p1, double p2);
 int IMTFilterTGrad (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTHalftone2(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
+int IMTFilterThreshold (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta);
 int IMTFilterTJanni(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTKMeans(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, unsigned knum, unsigned iters);
 int IMTFilterTNiblack(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta);
