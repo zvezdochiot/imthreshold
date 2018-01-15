@@ -1,14 +1,14 @@
-//	Zlib license
+//  Zlib license
 //
 // ImThreshold header library.
 //
-//	Copyright (C) 2017:
-//	zvezdochiot	<zvezdochiot@user.sourceforge.net>
+//  Copyright (C) 2017:
+//  zvezdochiot <zvezdochiot@user.sourceforge.net>
 //  Homepage: https://sourceforge.net/projects/imthreshold/
 
 #include <inttypes.h>
 #include <math.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <memory.h>
 
 #ifndef IMTHRESHOLD_H
@@ -21,29 +21,29 @@ typedef uint16_t  WORD;
 
 typedef struct mpixel
 {
-	BYTE c[3];
-	WORD s;
+    BYTE c[3];
+    WORD s;
 }
 IMTpixel;
 
 typedef struct mcluster
 {
-	int c[3];
-	unsigned n;
+    int c[3];
+    unsigned n;
 }
 IMTcluster;
 
 typedef struct minfo
 {
-	unsigned width;
-	unsigned height;
-	unsigned bpp;
-	unsigned min;
-	unsigned max;
-	double mid;
-	double mean;
-	double std;
-	double wb;
+    unsigned width;
+    unsigned height;
+    unsigned bpp;
+    unsigned min;
+    unsigned max;
+    double mid;
+    double mean;
+    double std;
+    double wb;
 }
 IMTinfo;
 
@@ -51,43 +51,43 @@ IMTinfo;
 
 /// Max function
 template <class T> T MAX(T a, T b) {
-	return (a > b) ? a: b;
+    return (a > b) ? a: b;
 }
 
 /// Min function
 template <class T> T MIN(T a, T b) {
-	return (a < b) ? a: b;
+    return (a < b) ? a: b;
 }
 
 /** This procedure computes minimum min and maximum max
  of n numbers using only (3n/2) - 2 comparisons.
  min = L[i1] and max = L[i2].
- ref: Aho A.V., Hopcroft J.E., Ullman J.D., 
- The design and analysis of computer algorithms, 
+ ref: Aho A.V., Hopcroft J.E., Ullman J.D.,
+ The design and analysis of computer algorithms,
  Addison-Wesley, Reading, 1974.
 */
-template <class T> void 
+template <class T> void
 MAXMIN(const T* L, long n, T& max, T& min) {
-	long i1, i2, i, j;
-	T x1, x2;
-	long k1, k2;
+    long i1, i2, i, j;
+    T x1, x2;
+    long k1, k2;
 
-	i1 = 0; i2 = 0; min = L[0]; max = L[0]; j = 0;
-	if((n % 2) != 0)  j = 1;
-	for(i = j; i < n; i+= 2) {
-		k1 = i; k2 = i+1;
-		x1 = L[k1]; x2 = L[k2];
-		if(x1 > x2)	{
-			k1 = k2;  k2 = i;
-			x1 = x2;  x2 = L[k2];
-		}
-		if(x1 < min) {
-			min = x1;  i1 = k1;
-		}
-		if(x2 > max) {
-			max = x2;  i2 = k2;
-		}
-	}
+    i1 = 0; i2 = 0; min = L[0]; max = L[0]; j = 0;
+    if((n % 2) != 0)  j = 1;
+    for(i = j; i < n; i+= 2) {
+        k1 = i; k2 = i+1;
+        x1 = L[k1]; x2 = L[k2];
+        if(x1 > x2) {
+            k1 = k2;  k2 = i;
+            x1 = x2;  x2 = L[k2];
+        }
+        if(x1 < min) {
+            min = x1;  i1 = k1;
+        }
+        if(x2 > max) {
+            max = x2;  i2 = k2;
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -129,6 +129,7 @@ double IMTFilterLevelMean(IMTpixel** p_im, IMTpixel** d_im, unsigned height, uns
 double IMTFilterLevelSigma(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double thres, double fpart);
 double IMTFilterMirror (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width);
 double IMTFilterMirrorHalf (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width);
+void IMTFilterMonoColor (IMTpixel** p_im, unsigned height, unsigned width);
 IMTpixel IMTmeanIcM(IMTpixel** IMTim, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx);
 IMTpixel IMTmeanPtIcM(IMTpixel** IMTim, IMTpixel IMTimm, double* linfilt, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx);
 double IMTwbIcM(IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx);

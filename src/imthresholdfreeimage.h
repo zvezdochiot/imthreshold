@@ -1,16 +1,16 @@
-//	Zlib license
+//    Zlib license
 //
 // ImThreshold header library (freeimage api).
 //
-//	Copyright (C) 2017:
-//	zvezdochiot	<zvezdochiot@user.sourceforge.net>
+//    Copyright (C) 2017:
+//    zvezdochiot    <zvezdochiot@user.sourceforge.net>
 //  Homepage: https://sourceforge.net/projects/imthreshold/
 
 #ifndef IMTHRESHOLD_FREEIMAGE_H
 #define IMTHRESHOLD_FREEIMAGE_H
 
 #include <math.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <memory.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,7 +31,7 @@
 //   Bitmap palette and pixels alignment
 // ==========================================================
 
-#define FIBITMAP_ALIGNMENT	16	// We will use a 16 bytes alignment boundary
+#define FIBITMAP_ALIGNMENT    16    // We will use a 16 bytes alignment boundary
 
 // Memory allocation on a specified alignment boundary
 // defined in BitmapAccess.cpp
@@ -81,13 +81,13 @@ typedef struct tagFILE_BGR {
 #ifndef _WIN32
 inline char*
 i2a(unsigned i, char *a, unsigned r) {
-	if (i/r > 0) a = i2a(i/r,a,r);
-	*a = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i%r];
-	return a+1;
+    if (i/r > 0) a = i2a(i/r,a,r);
+    *a = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i%r];
+    return a+1;
 }
 
-/** 
- Transforms integer i into an ascii string and stores the result in a; 
+/**
+ Transforms integer i into an ascii string and stores the result in a;
  string is encoded in the base indicated by r.
  @param i Number to be converted
  @param a String result
@@ -96,80 +96,80 @@ i2a(unsigned i, char *a, unsigned r) {
 */
 inline char *
 _itoa(int i, char *a, int r) {
-	r = ((r < 2) || (r > 36)) ? 10 : r;
-	if(i < 0) {
-		*a = '-';
-		*i2a(-i, a+1, r) = 0;
-	}
-	else *i2a(i, a, r) = 0;
-	return a;
+    r = ((r < 2) || (r > 36)) ? 10 : r;
+    if(i < 0) {
+        *a = '-';
+        *i2a(-i, a+1, r) = 0;
+    }
+    else *i2a(i, a, r) = 0;
+    return a;
 }
 
 #endif // !_WIN32
 
 inline unsigned char
 HINIBBLE (unsigned char byte) {
-	return byte & 0xF0;
+    return byte & 0xF0;
 }
 
 inline unsigned char
 LOWNIBBLE (unsigned char byte) {
-	return byte & 0x0F;
+    return byte & 0x0F;
 }
 
 inline int
 CalculateUsedBits(int bits) {
-	int bit_count = 0;
-	unsigned bit = 1;
+    int bit_count = 0;
+    unsigned bit = 1;
 
-	for (unsigned i = 0; i < 32; i++) {
-		if ((bits & bit) == bit) {
-			bit_count++;
-		}
+    for (unsigned i = 0; i < 32; i++) {
+        if ((bits & bit) == bit) {
+            bit_count++;
+        }
 
-		bit <<= 1;
-	}
+        bit <<= 1;
+    }
 
-	return bit_count;
+    return bit_count;
 }
 
 inline int
 CalculateLine(int width, int bitdepth) {
-	return ((width * bitdepth) + 7) / 8;
+    return ((width * bitdepth) + 7) / 8;
 }
 
 inline int
 CalculatePitch(int line) {
-	return ((line + 3) & ~3);
+    return ((line + 3) & ~3);
 }
 
 inline int
 CalculateUsedPaletteEntries(int bit_count) {
-	if ((bit_count >= 1) && (bit_count <= 8))
-		return 1 << bit_count;
+    if ((bit_count >= 1) && (bit_count <= 8))
+        return 1 << bit_count;
 
-	return 0;
+    return 0;
 }
 
 inline unsigned char *
 CalculateScanLine(unsigned char *bits, unsigned pitch, int scanline) {
-	return (bits + (pitch * scanline));
+    return (bits + (pitch * scanline));
 }
 
 inline void
 ReplaceExtension(char *result, const char *filename, const char *extension) {
-	for (int i = strlen(filename) - 1; i > 0; --i) {
-		if (filename[i] == '.') {
-			memcpy(result, filename, i);
-			result[i] = '.';
-			memcpy(result + i + 1, extension, strlen(extension) + 1);
-			return;
-		}
-	}
+    for (int i = strlen(filename) - 1; i > 0; --i) {
+        if (filename[i] == '.') {
+            memcpy(result, filename, i);
+            result[i] = '.';
+            memcpy(result + i + 1, extension, strlen(extension) + 1);
+            return;
+        }
+    }
 
-	memcpy(result, filename, strlen(filename));
-	result[strlen(filename)] = '.';
-	memcpy(result + strlen(filename) + 1, extension, strlen(extension) + 1);
+    memcpy(result, filename, strlen(filename));
+    result[strlen(filename)] = '.';
+    memcpy(result + strlen(filename) + 1, extension, strlen(extension) + 1);
 }
 
 // ==========================================================
@@ -178,31 +178,31 @@ ReplaceExtension(char *result, const char *filename, const char *extension) {
 
 inline void
 SwapShort(WORD *sp) {
-	BYTE *cp = (BYTE *)sp, t = cp[0]; cp[0] = cp[1]; cp[1] = t;
+    BYTE *cp = (BYTE *)sp, t = cp[0]; cp[0] = cp[1]; cp[1] = t;
 }
 
 inline void
 SwapLong(DWORD *lp) {
-	BYTE *cp = (BYTE *)lp, t = cp[0]; cp[0] = cp[3]; cp[3] = t;
-	t = cp[1]; cp[1] = cp[2]; cp[2] = t;
+    BYTE *cp = (BYTE *)lp, t = cp[0]; cp[0] = cp[3]; cp[3] = t;
+    t = cp[1]; cp[1] = cp[2]; cp[2] = t;
 }
 
 // ==========================================================
 //   Greyscale conversion
 // ==========================================================
 
-#define GREY(r, g, b) (BYTE)(((WORD)r * 77 + (WORD)g * 150 + (WORD)b * 29) >> 8)	// .299R + .587G + .114B
+#define GREY(r, g, b) (BYTE)(((WORD)r * 77 + (WORD)g * 150 + (WORD)b * 29) >> 8)    // .299R + .587G + .114B
 /*
-#define GREY(r, g, b) (BYTE)(((WORD)r * 169 + (WORD)g * 256 + (WORD)b * 87) >> 9)	// .33R + 0.5G + .17B
+#define GREY(r, g, b) (BYTE)(((WORD)r * 169 + (WORD)g * 256 + (WORD)b * 87) >> 9)    // .33R + 0.5G + .17B
 */
 
 // ==========================================================
 //   Template utility functions
 // ==========================================================
 
-/// INPLACESWAP adopted from codeguru.com 
+/// INPLACESWAP adopted from codeguru.com
 template <class T> void INPLACESWAP(T& a, T& b) {
-	a ^= b; b ^= a; a ^= b;
+    a ^= b; b ^= a; a ^= b;
 }
 
 

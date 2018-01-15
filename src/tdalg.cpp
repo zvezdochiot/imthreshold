@@ -1,9 +1,9 @@
-//	Zlib license
+//    Zlib license
 //
 // D-algoritm thresholding image.
 //
-//	Copyright (C) 2017:
-//	zvezdochiot	<zvezdochiot@user.sourceforge.net>
+//    Copyright (C) 2017:
+//    zvezdochiot    <zvezdochiot@user.sourceforge.net>
 
 #include <unistd.h>
 #include <FreeImage.h>
@@ -15,130 +15,130 @@
 
 void ImthresholdFilterTDalgTitle()
 {
-	printf("ImThreshold.\n");
-	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
-	printf("D-algoritm thresholding image.\n");
-	printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
+    printf("ImThreshold.\n");
+    printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
+    printf("D-algoritm thresholding image.\n");
+    printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
 }
 
 void ImthresholdFilterTDalgUsage()
 {
-	printf("Usage : imthreshold-tdalg [options] <input_file> <output_file>(BW)\n\n");
-	printf("options:\n");
-	printf("          -d N    delta (int, optional, default = 0)\n");
-	printf("          -n      norm (bool, optional, default = false)\n");
-	printf("          -r N    region size (int, optional, default = 4)\n");
-	printf("          -h      this help\n");
+    printf("Usage : imthreshold-tdalg [options] <input_file> <output_file>(BW)\n\n");
+    printf("options:\n");
+    printf("          -d N    delta (int, optional, default = 0)\n");
+    printf("          -n      norm (bool, optional, default = false)\n");
+    printf("          -r N    region size (int, optional, default = 4)\n");
+    printf("          -h      this help\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char *argv[])
 {
-	// call this ONLY when linking with FreeImage as a static library
+    // call this ONLY when linking with FreeImage as a static library
 #ifdef FREEIMAGE_LIB
-	FreeImage_Initialise();
+    FreeImage_Initialise();
 #endif // FREEIMAGE_LIB
-	
-	int opt;
-	int region_size = 4;
-	int delta = 0;
-	bool fnorm = false;
-	bool fhelp = false;
-	int threshold = 0;
-	while ((opt = getopt(argc, argv, ":d:nr:h")) != -1)
-	{
-		switch(opt)
-		{
-			case 'd':
-				delta = atof(optarg);
-				break;
-			case 'n':
-				fnorm = true;
-				break;
-			case 'r':
-				region_size = atof(optarg);
-				break;
-			case 'h':
-				fhelp = true;
-				break;
-			case ':':
-				printf("option needs a value\n");
-				break;
-			case '?':
-				printf("unknown option: %c\n", optopt);
-				break;
-		}
-	}
-	
-	ImthresholdFilterTDalgTitle();
-	
-	if(optind + 2 > argc || fhelp || region_size <= 0)
-	{
-		ImthresholdFilterTDalgUsage();
-		return 0;
-	}
-	const char *src_filename = argv[optind];
-	const char *output_filename = argv[optind + 1];
-	
-	FreeImage_SetOutputMessage(FreeImageErrorHandler);
-	
-	printf("Input= %s\n", src_filename);
-	FIBITMAP *dib = ImthresholdGenericLoader(src_filename, 0);
-	if (dib)
-	{
-		if (FreeImage_GetImageType(dib) == FIT_BITMAP)
-		{
-			FIBITMAP* dst_dib;
-			unsigned width = FreeImage_GetWidth(dib);
-			unsigned height = FreeImage_GetHeight(dib);
-			unsigned y;
 
-			IMTpixel** p_im;
-			p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-			for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-			BYTE** d_im;
-			d_im = (BYTE**)malloc(height * sizeof(BYTE*));
-			for (y = 0; y < height; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+    int opt;
+    int region_size = 4;
+    int delta = 0;
+    bool fnorm = false;
+    bool fhelp = false;
+    int threshold = 0;
+    while ((opt = getopt(argc, argv, ":d:nr:h")) != -1)
+    {
+        switch(opt)
+        {
+            case 'd':
+                delta = atof(optarg);
+                break;
+            case 'n':
+                fnorm = true;
+                break;
+            case 'r':
+                region_size = atof(optarg);
+                break;
+            case 'h':
+                fhelp = true;
+                break;
+            case ':':
+                printf("option needs a value\n");
+                break;
+            case '?':
+                printf("unknown option: %c\n", optopt);
+                break;
+        }
+    }
 
-			ImthresholdGetData(dib, p_im);
-			FreeImage_Unload(dib);
-			if (fnorm)
-			{
-				threshold = IMTFilterSNorm(p_im, height, width);
-				printf("Norm= %d\n", threshold);
-			}
-			printf("Region= %d\n", region_size);
-			printf("Delta= %d\n", delta);
-			threshold = IMTFilterTDalg(p_im, d_im, height, width, region_size, delta);
-			printf("Threshold= %d\n", threshold / 3);
-			for (y = 0; y < height; y++){free(p_im[y]);}
-			free(p_im);
-			dst_dib = FreeImage_Allocate(width, height, 1);
-			ImthresholdSetDataBW(dst_dib, d_im);
-			for (y = 0; y < height; y++){free(d_im[y]);}
-			free(d_im);
-			
-			if (dst_dib)
-			{
-				FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(output_filename);
-				if(out_fif != FIF_UNKNOWN)
-				{
-					FreeImage_Save(out_fif, dst_dib, output_filename, 0);
-					printf("Output= %s\n\n", output_filename);
-				}
-				FreeImage_Unload(dst_dib);
-			}
-		} else {
-			printf("%s\n", "Unsupported format type.");
-			FreeImage_Unload(dib);
-		}
-	}
-	
-	// call this ONLY when linking with FreeImage as a static library
+    ImthresholdFilterTDalgTitle();
+
+    if(optind + 2 > argc || fhelp || region_size <= 0)
+    {
+        ImthresholdFilterTDalgUsage();
+        return 0;
+    }
+    const char *src_filename = argv[optind];
+    const char *output_filename = argv[optind + 1];
+
+    FreeImage_SetOutputMessage(FreeImageErrorHandler);
+
+    printf("Input= %s\n", src_filename);
+    FIBITMAP *dib = ImthresholdGenericLoader(src_filename, 0);
+    if (dib)
+    {
+        if (FreeImage_GetImageType(dib) == FIT_BITMAP)
+        {
+            FIBITMAP* dst_dib;
+            unsigned width = FreeImage_GetWidth(dib);
+            unsigned height = FreeImage_GetHeight(dib);
+            unsigned y;
+
+            IMTpixel** p_im;
+            p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+            for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+            BYTE** d_im;
+            d_im = (BYTE**)malloc(height * sizeof(BYTE*));
+            for (y = 0; y < height; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+
+            ImthresholdGetData(dib, p_im);
+            FreeImage_Unload(dib);
+            if (fnorm)
+            {
+                threshold = IMTFilterSNorm(p_im, height, width);
+                printf("Norm= %d\n", threshold);
+            }
+            printf("Region= %d\n", region_size);
+            printf("Delta= %d\n", delta);
+            threshold = IMTFilterTDalg(p_im, d_im, height, width, region_size, delta);
+            printf("Threshold= %d\n", threshold / 3);
+            for (y = 0; y < height; y++){free(p_im[y]);}
+            free(p_im);
+            dst_dib = FreeImage_Allocate(width, height, 1);
+            ImthresholdSetDataBW(dst_dib, d_im);
+            for (y = 0; y < height; y++){free(d_im[y]);}
+            free(d_im);
+
+            if (dst_dib)
+            {
+                FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(output_filename);
+                if(out_fif != FIF_UNKNOWN)
+                {
+                    FreeImage_Save(out_fif, dst_dib, output_filename, 0);
+                    printf("Output= %s\n\n", output_filename);
+                }
+                FreeImage_Unload(dst_dib);
+            }
+        } else {
+            printf("%s\n", "Unsupported format type.");
+            FreeImage_Unload(dib);
+        }
+    }
+
+    // call this ONLY when linking with FreeImage as a static library
 #ifdef FREEIMAGE_LIB
-	FreeImage_DeInitialise();
+    FreeImage_DeInitialise();
 #endif // FREEIMAGE_LIB
-	
-	return 0;
+
+    return 0;
 }

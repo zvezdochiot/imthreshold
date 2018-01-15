@@ -1,9 +1,9 @@
-//	Zlib license
+//    Zlib license
 //
 // Magnification BW image.
 //
-//	Copyright (C) 2017:
-//	zvezdochiot	<zvezdochiot@user.sourceforge.net>
+//    Copyright (C) 2017:
+//    zvezdochiot    <zvezdochiot@user.sourceforge.net>
 
 #include <unistd.h>
 #include <FreeImage.h>
@@ -13,136 +13,136 @@
 
 void ImthresholdFilterSBWMag2Title()
 {
-	printf("ImThreshold.\n");
-	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
-	printf("Magnification BW image.\n");
-	printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
+    printf("ImThreshold.\n");
+    printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
+    printf("Magnification BW image.\n");
+    printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
 }
 
 void ImthresholdFilterSBWMag2Usage()
 {
-	printf("Usage : imthreshold-sbwmag2 [options] <input_file>(BW) <output_file>(BW)\n\n");
-	printf("options:\n");
-	printf("          -r      reduce (bool, optional, default = false)\n");
-	printf("          -h      this help\n");
+    printf("Usage : imthreshold-sbwmag2 [options] <input_file>(BW) <output_file>(BW)\n\n");
+    printf("options:\n");
+    printf("          -r      reduce (bool, optional, default = false)\n");
+    printf("          -h      this help\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char *argv[])
 {
-	// call this ONLY when linking with FreeImage as a static library
+    // call this ONLY when linking with FreeImage as a static library
 #ifdef FREEIMAGE_LIB
-	FreeImage_Initialise();
+    FreeImage_Initialise();
 #endif // FREEIMAGE_LIB
-	
-	int opt;
-	bool freduce = 0;
-	bool fhelp = false;
-	int threshold = 0;
-	while ((opt = getopt(argc, argv, ":rh")) != -1)
-	{
-		switch(opt)
-		{
-			case 'r':
-				freduce = true;
-				break;
-			case 'h':
-				fhelp = true;
-				break;
-			case ':':
-				printf("option needs a value\n");
-				break;
-			case '?':
-				printf("unknown option: %c\n", optopt);
-				break;
-		}
-	}
-	
-	ImthresholdFilterSBWMag2Title();
-	
-	if(optind + 2 > argc || fhelp)
-	{
-		ImthresholdFilterSBWMag2Usage();
-		return 0;
-	}
-	const char *src_filename = argv[optind];
-	const char *output_filename = argv[optind + 1];
-	
-	FreeImage_SetOutputMessage(FreeImageErrorHandler);
-	
-	printf("Input= %s\n", src_filename);
-	FIBITMAP *dib = ImthresholdGenericLoader(src_filename, 0);
-	if (dib)
-	{
-		if (FreeImage_GetImageType(dib) == FIT_BITMAP)
-		{
-			if (FreeImage_GetBPP(dib) == 1)
-			{
-				FIBITMAP* dst_dib;
-				unsigned width = FreeImage_GetWidth(dib);
-				unsigned height = FreeImage_GetHeight(dib);
-				unsigned width2, height2;
-				unsigned y;
-				if (freduce)
-				{
-					width2 = (width + 1) / 2;
-					height2 = (height + 1) / 2;
-				} else {
-					width2 = width * 2;
-					height2 = height * 2;
-				}
-				printf("Width= %d\n", width2);
-				printf("Height= %d\n", height2);
-				BYTE** d_im;
-				d_im = (BYTE**)malloc(height * sizeof(BYTE*));
-				for (y = 0; y < height; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
-				BYTE** r_im;
-				r_im = (BYTE**)malloc(height2 * sizeof(BYTE*));
-				for (y = 0; y < height2; y++) {r_im[y] = (BYTE*)malloc(width2 * sizeof(BYTE));}
 
-				ImthresholdGetDataBW(dib, d_im);
-				FreeImage_Unload(dib);
-				if (freduce)
-				{
-					threshold = IMTFilterSBWReduce2(d_im, r_im, height, width, height2, width2);
-					printf("Reduce= %d\n", threshold);
-				} else {
-					threshold = IMTFilterSBWMag2(d_im, r_im, height, width, height2, width2);
-					printf("Mag= %d\n", threshold);
-				}
+    int opt;
+    bool freduce = 0;
+    bool fhelp = false;
+    int threshold = 0;
+    while ((opt = getopt(argc, argv, ":rh")) != -1)
+    {
+        switch(opt)
+        {
+            case 'r':
+                freduce = true;
+                break;
+            case 'h':
+                fhelp = true;
+                break;
+            case ':':
+                printf("option needs a value\n");
+                break;
+            case '?':
+                printf("unknown option: %c\n", optopt);
+                break;
+        }
+    }
 
-				for (y = 0; y < height; y++){free(d_im[y]);}
-				free(d_im);
-				dst_dib = FreeImage_Allocate(width2, height2, 1);
-				ImthresholdSetDataBW(dst_dib, r_im);
-				for (y = 0; y < height2; y++){free(r_im[y]);}
-				free(r_im);
-				
-				if (dst_dib)
-				{
-					FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(output_filename);
-					if(out_fif != FIF_UNKNOWN)
-					{
-						FreeImage_Save(out_fif, dst_dib, output_filename, 0);
-						printf("Output= %s\n\n", output_filename);
-					}
-					FreeImage_Unload(dst_dib);
-				}
-			} else {
-				printf("%s\n", "Unsupported color mode.");
-				FreeImage_Unload(dib);
-			}
-		} else {
-			printf("%s\n", "Unsupported format type.");
-			FreeImage_Unload(dib);
-		}
-	}
-	
-	// call this ONLY when linking with FreeImage as a static library
+    ImthresholdFilterSBWMag2Title();
+
+    if(optind + 2 > argc || fhelp)
+    {
+        ImthresholdFilterSBWMag2Usage();
+        return 0;
+    }
+    const char *src_filename = argv[optind];
+    const char *output_filename = argv[optind + 1];
+
+    FreeImage_SetOutputMessage(FreeImageErrorHandler);
+
+    printf("Input= %s\n", src_filename);
+    FIBITMAP *dib = ImthresholdGenericLoader(src_filename, 0);
+    if (dib)
+    {
+        if (FreeImage_GetImageType(dib) == FIT_BITMAP)
+        {
+            if (FreeImage_GetBPP(dib) == 1)
+            {
+                FIBITMAP* dst_dib;
+                unsigned width = FreeImage_GetWidth(dib);
+                unsigned height = FreeImage_GetHeight(dib);
+                unsigned width2, height2;
+                unsigned y;
+                if (freduce)
+                {
+                    width2 = (width + 1) / 2;
+                    height2 = (height + 1) / 2;
+                } else {
+                    width2 = width * 2;
+                    height2 = height * 2;
+                }
+                printf("Width= %d\n", width2);
+                printf("Height= %d\n", height2);
+                BYTE** d_im;
+                d_im = (BYTE**)malloc(height * sizeof(BYTE*));
+                for (y = 0; y < height; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+                BYTE** r_im;
+                r_im = (BYTE**)malloc(height2 * sizeof(BYTE*));
+                for (y = 0; y < height2; y++) {r_im[y] = (BYTE*)malloc(width2 * sizeof(BYTE));}
+
+                ImthresholdGetDataBW(dib, d_im);
+                FreeImage_Unload(dib);
+                if (freduce)
+                {
+                    threshold = IMTFilterSBWReduce2(d_im, r_im, height, width, height2, width2);
+                    printf("Reduce= %d\n", threshold);
+                } else {
+                    threshold = IMTFilterSBWMag2(d_im, r_im, height, width, height2, width2);
+                    printf("Mag= %d\n", threshold);
+                }
+
+                for (y = 0; y < height; y++){free(d_im[y]);}
+                free(d_im);
+                dst_dib = FreeImage_Allocate(width2, height2, 1);
+                ImthresholdSetDataBW(dst_dib, r_im);
+                for (y = 0; y < height2; y++){free(r_im[y]);}
+                free(r_im);
+
+                if (dst_dib)
+                {
+                    FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(output_filename);
+                    if(out_fif != FIF_UNKNOWN)
+                    {
+                        FreeImage_Save(out_fif, dst_dib, output_filename, 0);
+                        printf("Output= %s\n\n", output_filename);
+                    }
+                    FreeImage_Unload(dst_dib);
+                }
+            } else {
+                printf("%s\n", "Unsupported color mode.");
+                FreeImage_Unload(dib);
+            }
+        } else {
+            printf("%s\n", "Unsupported format type.");
+            FreeImage_Unload(dib);
+        }
+    }
+
+    // call this ONLY when linking with FreeImage as a static library
 #ifdef FREEIMAGE_LIB
-	FreeImage_DeInitialise();
+    FreeImage_DeInitialise();
 #endif // FREEIMAGE_LIB
-	
-	return 0;
+
+    return 0;
 }

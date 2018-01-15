@@ -1,9 +1,9 @@
-//	Zlib license
+//    Zlib license
 //
 // Text thresholding image.
 //
-//	Copyright (C) 2017:
-//	zvezdochiot	<zvezdochiot@user.sourceforge.net>
+//    Copyright (C) 2017:
+//    zvezdochiot    <zvezdochiot@user.sourceforge.net>
 
 #include <unistd.h>
 #include <FreeImage.h>
@@ -13,152 +13,152 @@
 
 void ImthresholdFilterTTextTitle()
 {
-	printf("ImThreshold.\n");
-	printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
-	printf("Text thresholding image.\n");
-	printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
+    printf("ImThreshold.\n");
+    printf("BookScanLib Project: http://djvu-soft.narod.ru/\n\n");
+    printf("Text thresholding image.\n");
+    printf("Homepage: https://sourceforge.net/projects/imthreshold/.\n\n");
 }
 
 void ImthresholdFilterTTextUsage()
 {
-	printf("Usage : imthreshold-ttext [options] <input_file> <output_file>(BW) [textg_file]\n\n");
-	printf("options:\n");
-	printf("          -c N    contour amplitude (int, optional, default = 5)\n");
-	printf("          -r N    radius (int, optional, default = 5)\n");
-	printf("          -h      this help\n");
+    printf("Usage : imthreshold-ttext [options] <input_file> <output_file>(BW) [textg_file]\n\n");
+    printf("options:\n");
+    printf("          -c N    contour amplitude (int, optional, default = 5)\n");
+    printf("          -r N    radius (int, optional, default = 5)\n");
+    printf("          -h      this help\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char *argv[])
 {
-	// call this ONLY when linking with FreeImage as a static library
+    // call this ONLY when linking with FreeImage as a static library
 #ifdef FREEIMAGE_LIB
-	FreeImage_Initialise();
+    FreeImage_Initialise();
 #endif // FREEIMAGE_LIB
-	
-	int opt;
-	int contour = 5;
-	int radius = 5;
-	bool fhelp = false;
-	int threshold = 0;
-	while ((opt = getopt(argc, argv, ":c:r:h")) != -1)
-	{
-		switch(opt)
-		{
-			case 'c':
-				contour = atof(optarg);
-				break;
-			case 'r':
-				radius = atof(optarg);
-				break;
-			case 'h':
-				fhelp = true;
-				break;
-			case ':':
-				printf("option needs a value\n");
-				break;
-			case '?':
-				printf("unknown option: %c\n", optopt);
-				break;
-		}
-	}
-	
-	ImthresholdFilterTTextTitle();
-	
-	if(optind + 2 > argc || contour < 1 || radius < 1 || fhelp)
-	{
-		ImthresholdFilterTTextUsage();
-		return 0;
-	}
-	const char *src_filename = argv[optind];
-	const char *output_filename = argv[optind + 1];
-	const char *txtg_filename;
-	if(optind + 2 < argc)
-	{
-		txtg_filename = argv[optind + 2];
-	}
-	
-	FreeImage_SetOutputMessage(FreeImageErrorHandler);
-	
-	printf("Input= %s\n", src_filename);
-	FIBITMAP *dib = ImthresholdGenericLoader(src_filename, 0);
-	if (dib)
-	{
-		if (FreeImage_GetImageType(dib) == FIT_BITMAP)
-		{
-			FIBITMAP* dst_dib;
-			FIBITMAP* txt_dib;
-			unsigned width = FreeImage_GetWidth(dib);
-			unsigned height = FreeImage_GetHeight(dib);
-			unsigned y, x;
-			IMTpixel** p_im;
-			p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-			for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-			BYTE** d_im;
-			d_im = (BYTE**)malloc(height * sizeof(BYTE*));
-			for (y = 0; y < height; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
 
-			printf("Contour= %d\n", contour);
-			printf("Radius= %d\n", radius);
-			
-			ImthresholdGetData(dib, p_im);
-			FreeImage_Unload(dib);
-			threshold = IMTFilterTText(p_im, d_im, height, width, contour, radius);
-			printf("Threshold= %d\n", threshold / 3);
-			dst_dib = FreeImage_Allocate(width, height, 1);
-			ImthresholdSetDataBW(dst_dib, d_im);
-			for (y = 0; y < height; y++)
-			{
-				for (x = 0; x < width; x++)
-				{
-					if (d_im[y][x] == 0)
-					{
-						p_im[y][x] = IMTset(255, 255, 255);
-					}
-				}
-			}
-			for (y = 0; y < height; y++){free(d_im[y]);}
-			free(d_im);
-			txt_dib = FreeImage_Allocate(width, height, 24);
-			ImthresholdSetData(txt_dib, p_im);
-			for (y = 0; y < height; y++){free(p_im[y]);}
-			free(p_im);
-			
-			if (dst_dib)
-			{
-				FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(output_filename);
-				if(out_fif != FIF_UNKNOWN)
-				{
-					FreeImage_Save(out_fif, dst_dib, output_filename, 0);
-					printf("Output= %s\n", output_filename);
-				}
-				FreeImage_Unload(dst_dib);
-			}
-			if (txt_dib)
-			{
-				if(optind + 2 < argc)
-				{
-					FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(txtg_filename);
-					if(out_fif != FIF_UNKNOWN)
-					{
-						FreeImage_Save(out_fif, txt_dib, txtg_filename, 0);
-						printf("Output= %s\n", txtg_filename);
-					}
-				}
-				FreeImage_Unload(txt_dib);					
-			}
-			printf("\n");
-		} else {
-			printf("%s\n", "Unsupported format type.");
-			FreeImage_Unload(dib);
-		}
-	}
-	
-	// call this ONLY when linking with FreeImage as a static library
+    int opt;
+    int contour = 5;
+    int radius = 5;
+    bool fhelp = false;
+    int threshold = 0;
+    while ((opt = getopt(argc, argv, ":c:r:h")) != -1)
+    {
+        switch(opt)
+        {
+            case 'c':
+                contour = atof(optarg);
+                break;
+            case 'r':
+                radius = atof(optarg);
+                break;
+            case 'h':
+                fhelp = true;
+                break;
+            case ':':
+                printf("option needs a value\n");
+                break;
+            case '?':
+                printf("unknown option: %c\n", optopt);
+                break;
+        }
+    }
+
+    ImthresholdFilterTTextTitle();
+
+    if(optind + 2 > argc || contour < 1 || radius < 1 || fhelp)
+    {
+        ImthresholdFilterTTextUsage();
+        return 0;
+    }
+    const char *src_filename = argv[optind];
+    const char *output_filename = argv[optind + 1];
+    const char *txtg_filename;
+    if(optind + 2 < argc)
+    {
+        txtg_filename = argv[optind + 2];
+    }
+
+    FreeImage_SetOutputMessage(FreeImageErrorHandler);
+
+    printf("Input= %s\n", src_filename);
+    FIBITMAP *dib = ImthresholdGenericLoader(src_filename, 0);
+    if (dib)
+    {
+        if (FreeImage_GetImageType(dib) == FIT_BITMAP)
+        {
+            FIBITMAP* dst_dib;
+            FIBITMAP* txt_dib;
+            unsigned width = FreeImage_GetWidth(dib);
+            unsigned height = FreeImage_GetHeight(dib);
+            unsigned y, x;
+            IMTpixel** p_im;
+            p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+            for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+            BYTE** d_im;
+            d_im = (BYTE**)malloc(height * sizeof(BYTE*));
+            for (y = 0; y < height; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+
+            printf("Contour= %d\n", contour);
+            printf("Radius= %d\n", radius);
+
+            ImthresholdGetData(dib, p_im);
+            FreeImage_Unload(dib);
+            threshold = IMTFilterTText(p_im, d_im, height, width, contour, radius);
+            printf("Threshold= %d\n", threshold / 3);
+            dst_dib = FreeImage_Allocate(width, height, 1);
+            ImthresholdSetDataBW(dst_dib, d_im);
+            for (y = 0; y < height; y++)
+            {
+                for (x = 0; x < width; x++)
+                {
+                    if (d_im[y][x] == 0)
+                    {
+                        p_im[y][x] = IMTset(255, 255, 255);
+                    }
+                }
+            }
+            for (y = 0; y < height; y++){free(d_im[y]);}
+            free(d_im);
+            txt_dib = FreeImage_Allocate(width, height, 24);
+            ImthresholdSetData(txt_dib, p_im);
+            for (y = 0; y < height; y++){free(p_im[y]);}
+            free(p_im);
+
+            if (dst_dib)
+            {
+                FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(output_filename);
+                if(out_fif != FIF_UNKNOWN)
+                {
+                    FreeImage_Save(out_fif, dst_dib, output_filename, 0);
+                    printf("Output= %s\n", output_filename);
+                }
+                FreeImage_Unload(dst_dib);
+            }
+            if (txt_dib)
+            {
+                if(optind + 2 < argc)
+                {
+                    FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(txtg_filename);
+                    if(out_fif != FIF_UNKNOWN)
+                    {
+                        FreeImage_Save(out_fif, txt_dib, txtg_filename, 0);
+                        printf("Output= %s\n", txtg_filename);
+                    }
+                }
+                FreeImage_Unload(txt_dib);
+            }
+            printf("\n");
+        } else {
+            printf("%s\n", "Unsupported format type.");
+            FreeImage_Unload(dib);
+        }
+    }
+
+    // call this ONLY when linking with FreeImage as a static library
 #ifdef FREEIMAGE_LIB
-	FreeImage_DeInitialise();
+    FreeImage_DeInitialise();
 #endif // FREEIMAGE_LIB
-	
-	return 0;
+
+    return 0;
 }
