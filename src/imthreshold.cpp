@@ -42,6 +42,24 @@ IMTpixel IMTcalcS (IMTpixel im)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+IMTpixel IMTdiffS (IMTpixel im)
+{
+    unsigned immax, immin, d;
+
+    immax = im.c[0];
+    immin = im.c[0];
+    for (d = 1; d < 3; d++)
+    {
+        if (im.c[d] > immax) {immax = im.c[d];}
+        if (im.c[d] < immin) {immin = im.c[d];}
+    }
+    im.s = (immax - immin) * 3;
+
+    return im;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 IMTpixel IMTrefilter1p (IMTpixel IMTim, IMTpixel IMTimf)
 {
     unsigned d;
@@ -1358,6 +1376,168 @@ void IMTFilterBGFGLsep (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel
 
     for (y = 0; y < heightbg; y++){free(fgt_im[y]);}
     free(fgt_im);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterInpaint (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned height, unsigned width, unsigned value)
+{
+    unsigned y, x, d, nb, nn, ns, yp, xp, yn, xn, yf, xf;
+    double cs[3];
+    BYTE csb[3];
+
+    BYTE** mg_im;
+    mg_im = (BYTE**)malloc(height * sizeof(BYTE*));
+    for (y = 0; y < height; y++) {mg_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+    BYTE** md_im;
+    md_im = (BYTE**)malloc(height * sizeof(BYTE*));
+    for (y = 0; y < height; y++) {md_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+
+    nb = 0;
+    nn = 0;
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            mg_im[y][x] = m_im[y][x];
+            g_im[y][x] = p_im[y][x];
+            if (mg_im[y][x] == value)
+            {
+                nb++;
+            } else {
+                nn++;
+            }
+        }
+    }
+
+    if (nb > 0)
+    {
+        if (nn > 0)
+        {
+            while (nn > 0)
+            {
+                nn = 0;
+                for (y = 0; y < height; y++)
+                {
+                    yp = y;
+                    if (yp > 0) {yp--;}
+                    yn = y + 1;
+                    if (yn >= height) {yn = height - 1;}
+                    for (x = 0; x < width; x++)
+                    {
+                        xp = x;
+                        if (xp > 0) {xp--;}
+                        xn = x + 1;
+                        if (xn >= width) {xn = width - 1;}
+                        md_im[y][x] = 0;
+                        if (mg_im[y][x] != value)
+                        {
+                            ns = 0;
+                            if (mg_im[yp][x] == value || mg_im[yn][x] == value || mg_im[y][xp] == value || mg_im[y][xn] == value)
+                            {
+                                ns++;
+                            }
+                            if (ns > 0)
+                            {
+                                md_im[y][x] = 255;
+                            } else {
+                                nn++;
+                            }
+                        }
+                    }
+                }
+                for (y = 0; y < height; y++)
+                {
+                    yp = y;
+                    if (yp > 0) {yp--;}
+                    yn = y + 1;
+                    if (yn >= height) {yn = height - 1;}
+                    for (x = 0; x < width; x++)
+                    {
+                        xp = x;
+                        if (xp > 0) {xp--;}
+                        xn = x + 1;
+                        if (xn >= width) {xn = width - 1;}
+                        if (md_im[y][x] > 0)
+                        {
+                            ns = 0;
+                            for (d = 0; d < 3; d++)
+                            {
+                                cs[d] = 0;
+                            }
+                            for (yf = yp; yf <= yn; yf++)
+                            {
+                                for (xf = xp; xf <= xn; xf++)
+                                {
+                                    if (mg_im[yf][xf] == value)
+                                    {
+                                        for (d = 0; d < 3; d++)
+                                        {
+                                            cs[d] += (int)g_im[yf][xf].c[d];
+                                        }
+                                        ns++;
+                                    }
+                                }
+                            }
+                            if (ns > 0)
+                            {
+                                for (d = 0; d < 3; d++)
+                                {
+                                    cs[d] /= ns;
+                                    csb[d] = (BYTE)MIN(MAX((int)0, (int)(cs[d] + 0.5)), (int)255);
+                                }
+                                g_im[y][x] = IMTset(csb[0], csb[1], csb[2]);
+                            } else {
+                                g_im[y][x] = IMTset(255, 255, 255);
+                            }
+                            mg_im[y][x] = value;
+                        }
+                    }
+                }
+            }
+            for (y = 0; y < height; y++)
+            {
+                for (x = 0; x < width; x++)
+                {
+                    g_im[y][x] = IMTcalcS (g_im[y][x]);
+                }
+            }
+        }
+    } else {
+        for (y = 0; y < height; y++)
+        {
+            for (x = 0; x < width; x++)
+            {
+                g_im[y][x] = IMTset(255, 255, 255);
+            }
+        }
+    }
+
+    for (y = 0; y < height; y++){free(md_im[y]);}
+    free(md_im);
+    for (y = 0; y < height; y++){free(mg_im[y]);}
+    free(mg_im);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterSeparate (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned height, unsigned width, unsigned value)
+{
+    unsigned y, x;
+    IMTpixel gim;
+
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            gim = p_im[y][x];
+            if (m_im[y][x] != value)
+            {
+                gim = IMTset(255, 255, 255);
+            }
+            g_im[y][x] = gim;
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4896,6 +5076,25 @@ int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
             d_im[y][x] = val;
         }
     }
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTColor (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta)
+{
+    unsigned y, x;
+    int threshold;
+
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            p_im[y][x] = IMTdiffS (p_im[y][x]);
+        }
+    }
+    threshold = IMTFilterTBiMod(p_im, d_im, height, width, delta);
 
     return threshold;
 }

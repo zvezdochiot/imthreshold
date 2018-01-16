@@ -1,16 +1,22 @@
-.TH "ImThreshold User Manual" 1 "19 Dec 2017" "ImThreshold documentation"
+.TH "ImThreshold User Manual" 1 "17 Jan 2018" "ImThreshold documentation"
 
 .SH NAME
-imthreshold-fbgfglsep
+imthreshold-separate
 
 .SH DESCRIPTION
-DjVuL thresholds an image (Multi-scale binarization).
+Separate image.
 
 .SH SYNOPSIS
-imthreshold-fbgfglsep [options] <input_file> <input_mask_file>(BW) <output_fg_file> <output_bg_file>
+imthreshold-separate [options] <input_file> <input_mask_file>(BW) <output_fg_file> <output_bg_file>
 
 .SH OPTIONS
 .TP
+-m str
+name method:
+                    'inpaint'
+                    'mscale'
+                    'simple' (default).
+TP
 -c N
 clean blur radius (int, optional, default = 0)
 .TP
@@ -30,7 +36,7 @@ overlay (double, optional, default = 0.5)
 help
 
 .SH EXAMPLE
-imthreshold-tdjvu sample.tif bw.djvul.tif fg.djvul.tif bg.djvul.tif
+imthreshold-separate input.png input.bw.tif output.fg.png output.bg.png
 
 .SH COPYRIGHT
 Copyright 2017 zvezdochiot.
@@ -42,7 +48,6 @@ Copyright 2017 zvezdochiot.
  imthreshold-anytominidjvu,
  imthreshold-deskew,
  imthreshold-fautoinv,
- imthreshold-fbgfglsep,
  imthreshold-fdespeckle,
  imthreshold-filter,
  imthreshold-finfo,
@@ -61,6 +66,7 @@ Copyright 2017 zvezdochiot.
  imthreshold-tlocal,
  imthreshold-ttext,
  imthreshold-twhiterohrer,
+ imthreshold-separate,
  imthreshold-bash-scripts.
 
 .SH CONTACTS

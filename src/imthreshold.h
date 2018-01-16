@@ -94,6 +94,7 @@ MAXMIN(const T* L, long n, T& max, T& min) {
 
 IMTpixel IMTset(BYTE c0, BYTE c1, BYTE c2);
 IMTpixel IMTcalcS (IMTpixel im);
+IMTpixel IMTdiffS (IMTpixel im);
 IMTpixel IMTrefilter1p(IMTpixel IMTim, IMTpixel IMTimf);
 IMTpixel IMTinterpolation(IMTpixel** p_im, unsigned height, unsigned width, double y, double x);
 BYTE IMTmax(IMTpixel** IMTim, unsigned height, unsigned width);
@@ -122,6 +123,8 @@ void IMTFilterInvert(IMTpixel** p_im, unsigned height, unsigned width);
 void IMTFilterCopy(IMTpixel** p_im, IMTpixel** b_im, unsigned height, unsigned width);
 void IMTFilterAdSmooth(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius);
 void IMTFilterBGFGLsep(IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, double doverlay);
+void IMTFilterInpaint (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned height, unsigned width, unsigned value);
+void IMTFilterSeparate (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned height, unsigned width, unsigned value);
 IMTpixel IMTFilterGreyWorld(IMTpixel** p_im, unsigned height, unsigned width);
 IMTpixel IMTFilterGreyNorm (IMTpixel** p_im, unsigned height, unsigned width);
 double IMTFilterLevelL (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned level, unsigned num);
@@ -169,6 +172,7 @@ int IMTFilterTAbutaleb(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 int IMTFilterTBernsen(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, unsigned contrast_limit);
 int IMTFilterTBHT(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTBiMod(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta);
+int IMTFilterTColor (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta);
 int IMTFilterTChistian (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta);
 int IMTFilterTDalg(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int region_size, int delta);
 int IMTFilterTDither(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);

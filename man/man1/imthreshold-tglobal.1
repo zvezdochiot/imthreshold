@@ -1,4 +1,4 @@
-.TH "ImThreshold User Manual" 1 "19 Dec 2017" "ImThreshold documentation"
+.TH "ImThreshold User Manual" 1 "17 Jan 2018" "ImThreshold documentation"
 
 .SH NAME
 imthreshold-tglobal
@@ -15,6 +15,7 @@ imthreshold-tglobal [options] <input_image> <output_image>(BW)
 name filter:
                     'bht'
                     'bimod' (default)
+                    'color'
                     'dither'
                     'entropy'
                     'eqbright'
@@ -27,6 +28,9 @@ name filter:
 .TP
 -d N
 delta (int, optional, default = 0)
+.TP
+-i
+invert (bool, optional, default = false)
 .TP
 -k N
 K par (k/2) (int, optional, default = 1)
@@ -56,7 +60,6 @@ Copyright 2017 zvezdochiot.
  imthreshold-anytominidjvu,
  imthreshold-deskew,
  imthreshold-fautoinv,
- imthreshold-fbgfglsep,
  imthreshold-fdespeckle,
  imthreshold-filter,
  imthreshold-finfo,
@@ -75,6 +78,7 @@ Copyright 2017 zvezdochiot.
  imthreshold-tlocal,
  imthreshold-ttext,
  imthreshold-twhiterohrer,
+ imthreshold-separate,
  imthreshold-bash-scripts.
 
 .SH CONTACTS

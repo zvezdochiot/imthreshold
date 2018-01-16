@@ -26,6 +26,7 @@ void ImthresholdFilterTGlobalUsage()
     printf("          -f str  name filter:\n");
     printf("                    'bht'\n");
     printf("                    'bimod' (default)\n");
+    printf("                    'color'\n");
     printf("                    'dither'\n");
     printf("                    'entropy'\n");
     printf("                    'eqbright'\n");
@@ -37,6 +38,7 @@ void ImthresholdFilterTGlobalUsage()
     printf("                    'tsai'\n");
     printf("                    'use'\n");
     printf("          -d N    delta (int, optional, default = 0)\n");
+    printf("          -i      invert (bool, optional, default = false)\n");
     printf("          -k N    K par (k/2) (int, optional, default = 1)\n");
     printf("          -m N    max iteration (int, optional, default = 10)\n");
     printf("          -s N    shift (int, optional, default = -32)\n");
@@ -59,11 +61,12 @@ int main(int argc, char *argv[])
     int iters = 10;
     int shift = -32;
     bool weight = false;
+    bool finv = false;
     bool fhelp = false;
     int threshold;
     char *namefilter;
     namefilter="bimod";
-    while ((opt = getopt(argc, argv, ":f:d:k:m:s:wh")) != -1)
+    while ((opt = getopt(argc, argv, ":f:d:ik:m:s:wh")) != -1)
     {
         switch(opt)
         {
@@ -72,6 +75,9 @@ int main(int argc, char *argv[])
                 break;
             case 'd':
                 delta = atof(optarg);
+                break;
+            case 'i':
+                finv = true;
                 break;
             case 'k':
                 knum = atof(optarg);
@@ -133,6 +139,10 @@ int main(int argc, char *argv[])
             {
                 printf("Filter= %s\n", namefilter);
                 threshold = IMTFilterTBHT(p_im, d_im, height, width);
+            } else if (strcmp(namefilter, "color") == 0) {
+                printf("Delta= %d\n", delta);
+                printf("Filter= %s\n", namefilter);
+                threshold = IMTFilterTColor(p_im, d_im, height, width, delta);
             } else if (strcmp(namefilter, "dither") == 0) {
                 printf("Filter= %s\n", namefilter);
                 threshold = IMTFilterTDither(p_im, d_im, height, width);
@@ -172,6 +182,7 @@ int main(int argc, char *argv[])
             printf("Threshold= %d\n", (threshold + 1) / 3);
             for (y = 0; y < height; y++){free(p_im[y]);}
             free(p_im);
+            if (finv) {IMTFilterInvertBW(d_im, height, width);}
             dst_dib = FreeImage_Allocate(width, height, 1);
             ImthresholdSetDataBW(dst_dib, d_im);
             for (y = 0; y < height; y++){free(d_im[y]);}
