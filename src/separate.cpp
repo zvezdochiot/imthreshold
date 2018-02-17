@@ -31,6 +31,7 @@ void ImthresholdFilterSeparateUsage()
     printf("          -b N    base block size (int, optional, default = 3)\n");
     printf("          -f N    foreground divide (int, optional, default = 2)\n");
     printf("          -l N    level (int, optional, default = 10)\n");
+    printf("          -r      rewrite mask (bool, optional, default = false)\n");
     printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
     printf("          -h      this help\n");
 }
@@ -50,9 +51,10 @@ int main(int argc, char *argv[])
     int fgs = 2;
     int level = 10;
     int fclean = 0;
+    bool frewrite = false;
     bool fhelp = false;
     char *namefilter;
-    while ((opt = getopt(argc, argv, ":b:c:f:l:m:o:h")) != -1)
+    while ((opt = getopt(argc, argv, ":b:c:f:l:m:o:rh")) != -1)
     {
         switch(opt)
         {
@@ -73,6 +75,9 @@ int main(int argc, char *argv[])
                 break;
             case 'c':
                 fclean = atof(optarg);
+                break;
+            case 'r':
+                frewrite = true;
                 break;
             case 'h':
                 fhelp = true;
@@ -141,7 +146,6 @@ int main(int argc, char *argv[])
                             for (y = 0; y < height; y++) {m_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
 
                             ImthresholdGetDataBW(dib, m_im);
-                            FreeImage_Unload(dib);
                             if (strcmp(namefilter, "inpaint") == 0)
                             {
                                 printf("Filter= %s\n", namefilter);
@@ -222,6 +226,14 @@ int main(int argc, char *argv[])
                                 for (y = 0; y < height; y++){free(g_im[y]);}
                                 free(g_im);
                             }
+                            if (frewrite)
+                            {
+                                ImthresholdSetDataBW(dib, m_im);
+                                FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(mask_filename);
+                                FreeImage_Save(out_fif, dib, mask_filename, 0);
+                                printf("Output= %s\n", mask_filename);                              
+                            }
+                            FreeImage_Unload(dib);
                             for (y = 0; y < height; y++){free(m_im[y]);}
                             free(m_im);
 

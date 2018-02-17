@@ -3,7 +3,7 @@ CPP           = g++
 CFLAGS        = -DUNIX -O2 -Wall
 LIBS          = -lfreeimage
 VER           = 0
-VERB          = 20180117
+VERB          = 20180217
 COMMON        = libimthreshold.so.$(VER) libimthresholdfreeimage.so.$(VER)
 PREFIX        = /usr/local
 INCPREFIX     = $(PREFIX)/include
@@ -20,14 +20,14 @@ clean:
 	rm -f $(PROGNAME) libimthreshold.so* libimthresholdfreeimage.so*
 
 libimthreshold.so.$(VER): imthreshold.cpp
-	$(CPP) $(CFLAGS) -shared $< -s -o $@
+	$(CPP) $(CFLAGS) -shared -Wl,-soname,$@ $< -s -o $@
 	chmod 644 $@
 	mv $@ $@.$(VERB)
 	ln -s $@.$(VERB) $@
 	ln -s $@ libimthreshold.so
 
 libimthresholdfreeimage.so.$(VER): imthresholdfreeimage.cpp
-	$(CPP) $(CFLAGS) $(LIBS) -shared $< -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) -shared -Wl,-soname,$@ $< -s -o $@
 	chmod 644 $@
 	mv $@ $@.$(VERB)
 	ln -s $@.$(VERB) $@

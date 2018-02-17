@@ -1246,7 +1246,7 @@ void IMTFilterBGFGLsep (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel
     unsigned heightbg = (height + bgs - 1) / bgs;
     unsigned widthfg = (widthbg + fgs - 1) / fgs;
     unsigned heightfg = (heightbg + fgs - 1) / fgs;
-    unsigned y, x, d, l, i, j, y0, x0, y1, x1, y0b, x0b, y1b, x1b;
+    unsigned y, x, d, l, i, j, y0, x0, y1, x1, y0b, x0b, y1b, x1b, yb, xb, yf, xf;
     unsigned blsz = 1;
     BYTE fgbase, bgbase, mim;
     unsigned cnth, cntw;
@@ -1373,6 +1373,27 @@ void IMTFilterBGFGLsep (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel
 
         }
     }
+    for (y = 0; y < height; y++)
+    {
+        yb = y / bgs;
+        yf = yb / fgs;
+        for (x = 0; x < width; x++)
+        {
+            xb = x /bgs;
+            xf = xb / fgs;
+            pim = p_im[y][x];
+            fgim = fg_im[yf][xf];
+            bgim = bg_im[yb][xb];
+            fgdist = IMTdist(pim, fgim);
+            bgdist = IMTdist(pim, bgim);
+            if (fgdist < bgdist)
+            {
+                m_im[y][x] = 0;
+            } else {
+                m_im[y][x] = 255;
+            }
+        }
+    }       
 
     for (y = 0; y < heightbg; y++){free(fgt_im[y]);}
     free(fgt_im);
