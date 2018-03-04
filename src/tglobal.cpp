@@ -41,6 +41,7 @@ void ImthresholdFilterTGlobalUsage()
     printf("          -i      invert (bool, optional, default = false)\n");
     printf("          -k N    K par (k/2) (int, optional, default = 1)\n");
     printf("          -m N    max iteration (int, optional, default = 10)\n");
+    printf("          -n      norm (bool, optional, default = false)\n");
     printf("          -s N    shift (int, optional, default = -32)\n");
     printf("          -w      weight colors (bool, optional)\n");
     printf("          -h      this help\n");
@@ -61,12 +62,13 @@ int main(int argc, char *argv[])
     int iters = 10;
     int shift = -32;
     bool weight = false;
+    bool fnorm = false;
     bool finv = false;
     bool fhelp = false;
     int threshold;
     char *namefilter;
     namefilter="bimod";
-    while ((opt = getopt(argc, argv, ":f:d:ik:m:s:wh")) != -1)
+    while ((opt = getopt(argc, argv, ":f:d:ik:m:ns:wh")) != -1)
     {
         switch(opt)
         {
@@ -84,6 +86,9 @@ int main(int argc, char *argv[])
                 break;
             case 'm':
                 iters = atof(optarg);
+                break;
+            case 'n':
+                fnorm = true;
                 break;
             case 's':
                 shift = atof(optarg);
@@ -135,6 +140,11 @@ int main(int argc, char *argv[])
 
             ImthresholdGetData(dib, p_im);
             FreeImage_Unload(dib);
+            if (fnorm)
+            {
+                threshold = IMTFilterSNorm(p_im, height, width);
+                printf("Norm= %d\n", threshold);
+            }
             if (strcmp(namefilter, "bht") == 0)
             {
                 printf("Filter= %s\n", namefilter);

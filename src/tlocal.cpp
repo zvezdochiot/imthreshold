@@ -33,6 +33,7 @@ void ImthresholdFilterTSauvolaUsage()
     printf("          -d N.N  delta (double, optional, default = -5.0)\n");
     printf("          -l N    lower bound (int, optional, default = 0)\n");
     printf("          -g N    dynamic range (int, optional, default = 128)\n");
+    printf("          -n      norm (bool, optional, default = false)\n");
     printf("          -r N    radius (int, optional, default = 7)\n");
     printf("          -s N.N  sensitivity (double, optional, default = 0.5)\n");
     printf("          -u N    upper bound (int, optional, default = 255)\n");
@@ -56,11 +57,12 @@ int main(int argc, char *argv[])
     int lower_bound = 0;
     int upper_bound = 255;
     double delta = -5.0;
+    bool fnorm = false;
     bool fhelp = false;
     int threshold = 0;
     char *namefilter;
     namefilter="sauvola";
-    while ((opt = getopt(argc, argv, ":f:c:d:g:l:r:s:u:h")) != -1)
+    while ((opt = getopt(argc, argv, ":f:c:d:g:l:nr:s:u:h")) != -1)
     {
         switch(opt)
         {
@@ -78,6 +80,9 @@ int main(int argc, char *argv[])
                 break;
             case 'l':
                 lower_bound = atof(optarg);
+                break;
+            case 'n':
+                fnorm = true;
                 break;
             case 'r':
                 radius = atof(optarg);
@@ -133,6 +138,11 @@ int main(int argc, char *argv[])
 
             ImthresholdGetData(dib, p_im);
             FreeImage_Unload(dib);
+            if (fnorm)
+            {
+                threshold = IMTFilterSNorm(p_im, height, width);
+                printf("Norm= %d\n", threshold);
+            }
             if (strcmp(namefilter, "abutaleb") == 0)
             {
                 printf("Filter= %s\n", namefilter);

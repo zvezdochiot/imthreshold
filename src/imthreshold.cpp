@@ -268,12 +268,8 @@ int IMTFilterSNorm (IMTpixel** p_im, unsigned height, unsigned width)
             }
         }
     }
-
-    threshold = 381 - immin;
-    threshold -= immin;
-    threshold *= 765;
-    threshold /= imd;
-    threshold /= 3;
+    threshold = immax + immin;
+    threshold /= 6;
 
     return threshold;
 }
