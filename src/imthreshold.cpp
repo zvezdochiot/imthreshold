@@ -1559,6 +1559,60 @@ void IMTFilterSeparate (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned 
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void IMTFilterSeparateDelta (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned height, unsigned width, int value, double kdelta)
+{
+    unsigned y, x, d;
+    int im, img, imd;
+    double simd, simp;
+    IMTpixel gim;
+
+    simd = 0;
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            im = m_im[y][x];
+            for (d = 0; d < 3; d++)
+            {
+                img = p_im[y][x].c[d];
+                imd = im - img;
+                if (imd < 0) {imd = -imd;}
+                simd += imd;
+            }
+        }
+    }
+    simd /= width;
+    simd /= height;
+    simd /= 3;
+    simd *= value;
+    simd *= kdelta;
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            im = m_im[y][x];
+            simp = 0;
+            for (d = 0; d < 3; d++)
+            {
+                img = p_im[y][x].c[d];
+                imd = im - img;
+                if (imd < 0) {imd = -imd;}
+                simp += imd;
+            }
+            simp /= 3;
+            simp *= value;
+            gim = p_im[y][x];
+            if (simp > simd)
+            {
+                gim = IMTset(im, im, im);
+            }
+            g_im[y][x] = gim;
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 IMTpixel IMTFilterGreyNorm (IMTpixel** p_im, unsigned height, unsigned width)
 {
     unsigned y, x, d, n;

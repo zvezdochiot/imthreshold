@@ -24,12 +24,14 @@ void ImthresholdFilterSeparateUsage()
     printf("Usage : imthreshold-separate [options] <input_file> <input_mask_file>(BW) <output_fg_file> <output_bg_file>\n\n");
     printf("options:\n");
     printf("          -m str  name metod:\n");
+    printf("                    'delta'\n");
     printf("                    'inpaint'\n");
     printf("                    'mscale'\n");
     printf("                    'simple (default)'\n");
     printf("          -c N    clean blur radius (int, optional, default = 0)\n");
     printf("          -b N    base block size (int, optional, default = 3)\n");
     printf("          -f N    foreground divide (int, optional, default = 2)\n");
+    printf("          -k N.N  coefficient delta threshold (double, optional, default = 2.0)\n");
     printf("          -l N    level (int, optional, default = 10)\n");
     printf("          -r      rewrite mask (bool, optional, default = false)\n");
     printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
@@ -47,6 +49,7 @@ int main(int argc, char *argv[])
 
     int opt;
     double doverlay = 0.5;
+    double kdelta = 2.0;
     int bgs = 3;
     int fgs = 2;
     int level = 10;
@@ -54,7 +57,8 @@ int main(int argc, char *argv[])
     bool frewrite = false;
     bool fhelp = false;
     char *namefilter;
-    while ((opt = getopt(argc, argv, ":b:c:f:l:m:o:rh")) != -1)
+    namefilter="simple";
+    while ((opt = getopt(argc, argv, ":b:c:f:k:l:m:o:rh")) != -1)
     {
         switch(opt)
         {
@@ -66,6 +70,9 @@ int main(int argc, char *argv[])
                 break;
             case 'f':
                 fgs = atof(optarg);
+                break;
+            case 'k':
+                kdelta = atof(optarg);
                 break;
             case 'l':
                 level = atof(optarg);
@@ -146,7 +153,26 @@ int main(int argc, char *argv[])
                             for (y = 0; y < height; y++) {m_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
 
                             ImthresholdGetDataBW(dib, m_im);
-                            if (strcmp(namefilter, "inpaint") == 0)
+                            if (strcmp(namefilter, "delta") == 0)
+                            {
+                                printf("Filter= %s\n", namefilter);
+
+                                IMTpixel** g_im;
+                                g_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                                for (y = 0; y < height; y++) {g_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+
+                                printf("Kdelta= %f\n", kdelta);
+
+                                IMTFilterSeparateDelta(p_im, m_im, g_im, height, width, 1, kdelta);
+                                fg_dib = FreeImage_Allocate(width, height, 24);
+                                ImthresholdSetData(fg_dib, g_im);
+                                IMTFilterSeparateDelta(p_im, m_im, g_im, height, width, -1, kdelta);
+                                bg_dib = FreeImage_Allocate(width, height, 24);
+                                ImthresholdSetData(bg_dib, g_im);
+                                for (y = 0; y < height; y++){free(g_im[y]);}
+                                free(g_im);
+                            }
+                            else if (strcmp(namefilter, "inpaint") == 0)
                             {
                                 printf("Filter= %s\n", namefilter);
 

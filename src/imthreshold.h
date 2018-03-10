@@ -125,6 +125,7 @@ void IMTFilterAdSmooth(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsign
 void IMTFilterBGFGLsep(IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, double doverlay);
 void IMTFilterInpaint (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned height, unsigned width, unsigned value);
 void IMTFilterSeparate (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned height, unsigned width, unsigned value);
+void IMTFilterSeparateDelta (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned height, unsigned width, int value, double kdelta);
 IMTpixel IMTFilterGreyWorld(IMTpixel** p_im, unsigned height, unsigned width);
 IMTpixel IMTFilterGreyNorm (IMTpixel** p_im, unsigned height, unsigned width);
 double IMTFilterLevelL (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned level, unsigned num);
