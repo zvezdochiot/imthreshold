@@ -104,7 +104,10 @@ double IMTdev(IMTpixel** IMTim, double immean, unsigned height, unsigned width);
 double IMTwb(IMTpixel** IMTim, double immean, unsigned height, unsigned width);
 int IMTFilterSNorm(IMTpixel** p_im, unsigned height, unsigned width);
 void IMTFilterInvertBW(BYTE** p_im, unsigned height, unsigned width);
+/*
 double IMTdist(IMTpixel IMTim0, IMTpixel IMTim1);
+*/
+unsigned IMTdist(IMTpixel IMTim0, IMTpixel IMTim1);
 double IMTdist3c2p(IMTpixel IMTim, double* IMTimc);
 IMTpixel IMTmeanIc(IMTpixel** IMTim, unsigned y0, unsigned x0, unsigned y1, unsigned x1);
 IMTpixel IMTmaxIc(IMTpixel** IMTim, unsigned y0, unsigned x0, unsigned y1, unsigned x1);
@@ -156,6 +159,7 @@ void IMTFilterUnRipple(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsign
 void IMTGaussLineMatrix (double *cmatrix, double radius);
 void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius);
 double IMTFilterBgDiv (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned ndiv);
+double IMTFilterClusterBWC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned radius);
 void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, double amount, int threshold);
 double IMTFilterNoiseVariance (IMTpixel** p_im, unsigned height, unsigned width, int radius);
 void IMTFilterWiener(IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double noise);

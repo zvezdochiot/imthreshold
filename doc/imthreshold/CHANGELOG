@@ -1,7 +1,12 @@
+0.20180317
+
+    Filter image: add bwc method
+    Dist pixel: int version -> acceleration DjVuL
+
 0.20180310
 
     Fix Separate image: default method
-    Separate image: delta method
+    Separate image: add delta method
 
 0.20180303
 
@@ -9,7 +14,7 @@
 
 0.20180217
 
-    Separate image: rewrite mask
+    Separate image: add rewrite mask
 
 0.20180117
 

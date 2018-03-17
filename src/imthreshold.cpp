@@ -290,7 +290,7 @@ void IMTFilterInvertBW (BYTE** p_im, unsigned height, unsigned width)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
+/*
 double IMTdist (IMTpixel IMTim0, IMTpixel IMTim1)
 {
     unsigned d;
@@ -307,6 +307,24 @@ double IMTdist (IMTpixel IMTim0, IMTpixel IMTim1)
     imds /= 3;
 
     return sqrt(imds);
+}
+*/
+////////////////////////////////////////////////////////////////////////////////
+
+unsigned IMTdist (IMTpixel IMTim0, IMTpixel IMTim1)
+{
+    unsigned d, imds = 0;
+    int imd;
+
+    for (d = 0; d < 3; d++)
+    {
+        imd = (int)IMTim0.c[d];
+        imd -= (int)IMTim1.c[d];
+        if (imd < 0) {imd = -imd;}
+        imds += imd;
+    }
+
+    return imds;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3734,6 +3752,137 @@ double IMTFilterBgDiv (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsign
         }
     }
     return ims;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double IMTFilterClusterBWC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned radius)
+{
+    unsigned y, x, d, y1, x1, y2, x2, i, j, distw, distb, gpart, bc, bs;
+    IMTpixel pim, gim, bim, fim, cimw, cimb, cim;
+    unsigned bwcsw[3], bwcsb[3], bwcnw, bwcnb, cw, cb;
+    double kwb = 0.5;
+
+    if (radius == 0)
+    {
+        for ( y = 0; y < height; y++ )
+        {
+            for ( x = 0; x < width; x++ )
+            {
+                d_im[y][x] = p_im[y][x];
+            }
+        }
+    } else {
+        cw = 0;
+        cb = 0;
+        gim = IMTmeanIc(p_im, 0, 0, height, width);
+        gpart = height;
+        gpart += width;
+        gpart /= radius;
+        gpart /= 2;
+        gpart++;
+        gpart /= 2;
+        if (gpart == 0) {gpart = 1;}
+        for (y = 0; y < height; y++)
+        {
+            
+            if (y <= radius) {y1 = 0;} else {y1 = y - radius;}
+            y2 = y;
+            y2 += radius;
+            y2++;
+            if (y2 > height) {y2 = height;}
+            for (x = 0; x < width; x++)
+            {
+                if (x <= radius) {x1 = 0;} else {x1 = x - radius;}
+                x2 = x;
+                x2 += radius;
+                x2++;
+                if (x2 > width) {x2 = width;}
+                pim = p_im[y][x];
+                cim = pim;
+                bim = IMTmeanIc(p_im, y1, x1, y2, x2);
+                bs = 0;
+                for (d = 0; d < 3; d++)
+                {
+                    bc = bim.c[d];
+                    bc *= gpart;
+                    bc += gim.c[d];
+                    bc /= (gpart + 1);
+                    bim.c[d] = bc;
+                    bs += bc;
+                }
+                bim.s = bs;
+                bwcnw = 0;
+                bwcnb = 0;
+                for (d = 0; d < 3; d++)
+                {
+                    bwcsw[d] = 0;
+                    bwcsb[d] = 0;
+                }
+                for (i = y1; i < y2; i++)
+                {
+                    for (j = x1; j < x2; j++)
+                    {
+                        fim = p_im[i][j];
+                        if (fim.s >= bim.s)
+                        {
+                            for (d = 0; d < 3; d++)
+                            {
+                                bwcsw[d] += fim.c[d];
+                            }
+                            bwcnw++;
+                        }
+                        if (fim.s <= bim.s)
+                        {
+                            for (d = 0; d < 3; d++)
+                            {
+                                bwcsb[d] += fim.c[d];
+                            }
+                            bwcnb++;
+                        }
+                    }
+                }
+                if (bwcnw > 0)
+                {
+                    for (d = 0; d < 3; d++)
+                    {
+                        bwcsw[d] /= bwcnw;
+                        bwcsw[d] = MIN(MAX((int)0, (int)(bwcsw[d] + 0.5)), (int)255);
+                    }
+                    cimw = IMTset(BYTE(bwcsw[0]),BYTE(bwcsw[1]),BYTE(bwcsw[2]));
+                } else {
+                    cimw = IMTset(255,255,255);
+                }
+                if (bwcnb > 0)
+                {
+                    for (d = 0; d < 3; d++)
+                    {
+                        bwcsb[d] /= bwcnb;
+                        bwcsb[d] = MIN(MAX((int)0, (int)(bwcsb[d] + 0.5)), (int)255);
+                    }
+                    cimb = IMTset(BYTE(bwcsb[0]),BYTE(bwcsb[1]),BYTE(bwcsb[2]));
+                } else {
+                    cimb = IMTset(0,0,0);
+                }
+                distw = IMTdist(pim, cimw);
+                distb = IMTdist(pim, cimb);
+                d_im[y][x] = p_im[y][x];
+                if (distb < distw)
+                {
+                    cim = cimb;
+                    cb++;
+                } else {
+                    cim = cimw;
+                    cw++;
+                }
+                d_im[y][x] = cim;
+            }
+        }
+        kwb = cw;
+        kwb /= (cw + cb);
+    }
+
+    return kwb;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
