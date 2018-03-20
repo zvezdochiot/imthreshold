@@ -102,7 +102,8 @@ BYTE IMTmin(IMTpixel** IMTim, unsigned height, unsigned width);
 double IMTmean(IMTpixel** IMTim, unsigned height, unsigned width);
 double IMTdev(IMTpixel** IMTim, double immean, unsigned height, unsigned width);
 double IMTwb(IMTpixel** IMTim, double immean, unsigned height, unsigned width);
-int IMTFilterSNorm(IMTpixel** p_im, unsigned height, unsigned width);
+void IMTFilterSMirror (IMTpixel** p_im, unsigned height, unsigned width);
+int IMTFilterSNorm (IMTpixel** p_im, unsigned height, unsigned width);
 void IMTFilterInvertBW(BYTE** p_im, unsigned height, unsigned width);
 /*
 double IMTdist(IMTpixel IMTim0, IMTpixel IMTim1);

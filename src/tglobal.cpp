@@ -44,6 +44,7 @@ void ImthresholdFilterTGlobalUsage()
     printf("          -n      norm (bool, optional, default = false)\n");
     printf("          -s N    shift (int, optional, default = -32)\n");
     printf("          -w      weight colors (bool, optional)\n");
+    printf("          -z      mirror of mean (bool, optional, default = false)\n");
     printf("          -h      this help\n");
 }
 
@@ -63,12 +64,13 @@ int main(int argc, char *argv[])
     int shift = -32;
     bool weight = false;
     bool fnorm = false;
+    bool fmirror = false;
     bool finv = false;
     bool fhelp = false;
     int threshold;
     char *namefilter;
     namefilter="bimod";
-    while ((opt = getopt(argc, argv, ":f:d:ik:m:ns:wh")) != -1)
+    while ((opt = getopt(argc, argv, ":f:d:ik:m:ns:wzh")) != -1)
     {
         switch(opt)
         {
@@ -95,6 +97,9 @@ int main(int argc, char *argv[])
                 break;
             case 'w':
                 weight = true;
+                break;
+            case 'z':
+                fmirror = true;
                 break;
             case 'h':
                 fhelp = true;
@@ -140,6 +145,11 @@ int main(int argc, char *argv[])
 
             ImthresholdGetData(dib, p_im);
             FreeImage_Unload(dib);
+            if (fmirror)
+            {
+                IMTFilterSMirror(p_im, height, width);
+                printf("Mirror= true\n");
+            }
             if (fnorm)
             {
                 threshold = IMTFilterSNorm(p_im, height, width);
@@ -192,7 +202,11 @@ int main(int argc, char *argv[])
             printf("Threshold= %d\n", (threshold + 1) / 3);
             for (y = 0; y < height; y++){free(p_im[y]);}
             free(p_im);
-            if (finv) {IMTFilterInvertBW(d_im, height, width);}
+            if (finv)
+            {
+                printf("Invert= true\n");
+                IMTFilterInvertBW(d_im, height, width);
+            }
             dst_dib = FreeImage_Allocate(width, height, 1);
             ImthresholdSetDataBW(dst_dib, d_im);
             for (y = 0; y < height; y++){free(d_im[y]);}

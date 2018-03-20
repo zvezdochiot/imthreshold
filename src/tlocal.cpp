@@ -31,12 +31,14 @@ void ImthresholdFilterTSauvolaUsage()
     printf("                    'sauvola' (default)\n");
     printf("          -c N    contrast limit (int, optional, default = 128)\n");
     printf("          -d N.N  delta (double, optional, default = -5.0)\n");
+    printf("          -i      invert (bool, optional, default = false)\n");
     printf("          -l N    lower bound (int, optional, default = 0)\n");
     printf("          -g N    dynamic range (int, optional, default = 128)\n");
     printf("          -n      norm (bool, optional, default = false)\n");
     printf("          -r N    radius (int, optional, default = 7)\n");
     printf("          -s N.N  sensitivity (double, optional, default = 0.5)\n");
     printf("          -u N    upper bound (int, optional, default = 255)\n");
+    printf("          -z      mirror of mean (bool, optional, default = false)\n");
     printf("          -h      this help\n");
 }
 
@@ -57,12 +59,14 @@ int main(int argc, char *argv[])
     int lower_bound = 0;
     int upper_bound = 255;
     double delta = -5.0;
+    bool finv = false;
     bool fnorm = false;
+    bool fmirror = false;
     bool fhelp = false;
     int threshold = 0;
     char *namefilter;
     namefilter="sauvola";
-    while ((opt = getopt(argc, argv, ":f:c:d:g:l:nr:s:u:h")) != -1)
+    while ((opt = getopt(argc, argv, ":f:c:d:ig:l:nr:s:u:zh")) != -1)
     {
         switch(opt)
         {
@@ -74,6 +78,9 @@ int main(int argc, char *argv[])
                 break;
             case 'd':
                 delta = atof(optarg);
+                break;
+            case 'i':
+                finv = true;
                 break;
             case 'g':
                 dynamic_range = atof(optarg);
@@ -92,6 +99,9 @@ int main(int argc, char *argv[])
                 break;
             case 'u':
                 upper_bound = atof(optarg);
+                break;
+            case 'z':
+                fmirror = true;
                 break;
             case 'h':
                 fhelp = true;
@@ -138,6 +148,11 @@ int main(int argc, char *argv[])
 
             ImthresholdGetData(dib, p_im);
             FreeImage_Unload(dib);
+            if (fmirror)
+            {
+                IMTFilterSMirror(p_im, height, width);
+                printf("Mirror= true\n");
+            }
             if (fnorm)
             {
                 threshold = IMTFilterSNorm(p_im, height, width);
@@ -177,6 +192,11 @@ int main(int argc, char *argv[])
             printf("Threshold= %d\n", threshold / 3);
             for (y = 0; y < height; y++){free(p_im[y]);}
             free(p_im);
+            if (finv)
+            {
+                printf("Invert= true\n");
+                IMTFilterInvertBW(d_im, height, width);
+            }
             dst_dib = FreeImage_Allocate(width, height, 1);
             ImthresholdSetDataBW(dst_dib, d_im);
             for (y = 0; y < height; y++){free(d_im[y]);}

@@ -238,6 +238,25 @@ double IMTwb (IMTpixel** IMTim, double immean, unsigned height, unsigned width)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void IMTFilterSMirror (IMTpixel** p_im, unsigned height, unsigned width)
+{
+    unsigned y, x, ims;
+    IMTpixel pim, mim;
+
+    mim = IMTmeanIc(p_im, 0, 0, height, width);
+    for (y = 0; y < height; y++ )
+    {
+        for (x = 0; x < width; x++)
+        {
+            pim = p_im[y][x];
+            ims = IMTdist(pim, mim);
+            p_im[y][x].s = (WORD)ims;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 int IMTFilterSNorm (IMTpixel** p_im, unsigned height, unsigned width)
 {
     unsigned y, x, im, immin, immax, imd, threshold;
@@ -5666,8 +5685,7 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
     unsigned heightbg = (height + bgs - 1) / bgs;
     unsigned widthfg = (widthbg + fgs - 1) / fgs;
     unsigned heightfg = (heightbg + fgs - 1) / fgs;
-    unsigned y, x, d, l, i, j, y0, x0, y1, x1, y0b, x0b, y1b, x1b, yb, xb, yf, xf;
-    unsigned blsz = 1;
+    unsigned whcp, y, x, d, l, i, j, y0, x0, y1, x1, y0b, x0b, y1b, x1b, yb, xb, yf, xf, blsz;
     double immean, imwb;
     BYTE fgbase, bgbase;
     unsigned cnth, cntw;
@@ -5679,9 +5697,22 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
     fgt_im = (IMTpixel**)malloc(heightbg * sizeof(IMTpixel*));
     for (y = 0; y < heightbg; y++) {fgt_im[y] = (IMTpixel*)malloc(widthbg * sizeof(IMTpixel));}
 
-    for (l = 0; l < level; l++)
+    whcp = height;
+    whcp += width;
+    whcp /= 2;
+    blsz = 1;
+    if (level == 0)
     {
-        blsz *= 2;
+        while (bgs * blsz < whcp)
+        {
+            level++;
+            blsz *= 2;
+        }
+    } else {
+        for (l = 0; l < level; l++)
+        {
+            blsz *= 2;
+        }
     }
     immean = IMTmean(p_im, height, width);
     imwb = IMTwb(p_im, immean, height, width);

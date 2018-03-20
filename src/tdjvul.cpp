@@ -29,7 +29,7 @@ void ImthresholdIMTFilterDjVuLUsage()
     printf("          -b N    base block size (int, optional, default = 3)\n");
     printf("          -f N    foreground divide (int, optional, default = 2)\n");
     printf("          -i      invert station (bool, optional, default = false)\n");
-    printf("          -l N    level (int, optional, default = 10)\n");
+    printf("          -l N    level (int, optional, default = 0 [auto])\n");
     printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
     printf("          -p N    posterize fg (int, optional, default = 0)\n");
     printf("          -w N    w/b mode (int, optional, default = 0 [auto], >0-white, <0-black)\n");
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     double doverlay = 0.5;
     int bgs = 3;
     int fgs = 2;
-    int level = 10;
+    int level = 0;
     int wbmode = 0;
     int fclean = 0;
     int fdespeckle = 0;
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
     ImthresholdIMTFilterDjVuLTitle();
 
-    if(optind + 2 > argc || fhelp || bgs < 1 || fgs < 1 || level < 1)
+    if(optind + 2 > argc || fhelp || bgs < 1 || fgs < 1 || level < 0)
     {
         ImthresholdIMTFilterDjVuLUsage();
         return 0;

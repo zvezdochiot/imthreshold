@@ -1,9 +1,9 @@
 PROGNAME      = imthreshold-deskew imthreshold-rotate imthreshold-filter imthreshold-fautoinv imthreshold-fdespeckle imthreshold-finfo imthreshold-flevell imthreshold-fpmean imthreshold-separate imthreshold-size imthreshold-sbwmag2 imthreshold-scris imthreshold-shris imthreshold-tglobal imthreshold-tlocal imthreshold-tdalg imthreshold-tdjvul imthreshold-tgatos imthreshold-thalftone2 imthreshold-ttext imthreshold-twhiterohrer
 CPP           = g++
-CFLAGS        = -DUNIX -O2 -Wall
+CFLAGS        = -DUNIX -O2 -Wall -s
 LIBS          = -lfreeimage
 VER           = 0
-VERB          = 20180317
+VERB          = 20180320
 COMMON        = libimthreshold.so.$(VER) libimthresholdfreeimage.so.$(VER)
 PREFIX        = /usr/local
 INCPREFIX     = $(PREFIX)/include
@@ -20,81 +20,81 @@ clean:
 	rm -f $(PROGNAME) libimthreshold.so* libimthresholdfreeimage.so*
 
 libimthreshold.so.$(VER): imthreshold.cpp
-	$(CPP) $(CFLAGS) -shared -Wl,-soname,$@ $< -s -o $@
+	$(CPP) $(CFLAGS) -shared -Wl,-soname,$@ $< -o $@
 	chmod 644 $@
 	mv $@ $@.$(VERB)
 	ln -s $@.$(VERB) $@
 	ln -s $@ libimthreshold.so
 
 libimthresholdfreeimage.so.$(VER): imthresholdfreeimage.cpp
-	$(CPP) $(CFLAGS) $(LIBS) -shared -Wl,-soname,$@ $< -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) -shared -Wl,-soname,$@ $< -o $@
 	chmod 644 $@
 	mv $@ $@.$(VERB)
 	ln -s $@.$(VERB) $@
 	ln -s $@ libimthresholdfreeimage.so
 
 imthreshold-deskew: deskew.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-rotate: rotate.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-filter: filter.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-fautoinv: fautoinv.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-fdespeckle: fdespeckle.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-finfo: finfo.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-flevell: flevell.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-fpmean: fpmean.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-separate: separate.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-size: size.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-sbwmag2: sbwmag2.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-scris: scris.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-shris: shris.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-tglobal: tglobal.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-tlocal: tlocal.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-tdalg: tdalg.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-tdjvul: tdjvul.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-tgatos: tgatos.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-thalftone2: thalftone2.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-ttext: ttext.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-twhiterohrer: twhiterohrer.cpp $(COMMON)
-	$(CPP) $(CFLAGS) $(LIBS) $^ -s -o $@
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 install: $(PROGNAME)
 	$(INSTALL) -d $(LIBPREFIX)
