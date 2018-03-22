@@ -32,7 +32,7 @@ void ImthresholdFilterSeparateUsage()
     printf("          -b N    base block size (int, optional, default = 3)\n");
     printf("          -f N    foreground divide (int, optional, default = 2)\n");
     printf("          -k N.N  coefficient delta threshold (double, optional, default = 2.0)\n");
-    printf("          -l N    level (int, optional, default = 10)\n");
+    printf("          -l N    level (int, optional, default = 0[auto])\n");
     printf("          -r      rewrite mask (bool, optional, default = false)\n");
     printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
     printf("          -h      this help\n");
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     double kdelta = 2.0;
     int bgs = 3;
     int fgs = 2;
-    int level = 10;
+    int level = 0;
     int fclean = 0;
     bool frewrite = false;
     bool fhelp = false;
@@ -98,11 +98,11 @@ int main(int argc, char *argv[])
         }
     }
 
-    ImthresholdFilterSeparateTitle();
+    ImthresholdFilterSeparateTitle ();
 
     if(optind + 4 > argc || fhelp)
     {
-        ImthresholdFilterSeparateUsage();
+        ImthresholdFilterSeparateUsage ();
         return 0;
     }
     const char *src_filename = argv[optind];
@@ -112,22 +112,22 @@ int main(int argc, char *argv[])
 
     if (bgs < 1) {bgs = 1;}
     if (fgs < 1) {fgs = 1;}
-    if (level < 1) {level = 1;}
-    FreeImage_SetOutputMessage(FreeImageErrorHandler);
+    if (level < 0) {level = 0;}
+    FreeImage_SetOutputMessage (FreeImageErrorHandler);
 
-    printf("Input= %s\n", src_filename);
-    FIBITMAP *dib = ImthresholdGenericLoader(src_filename, 0);
+    printf ("Input= %s\n", src_filename);
+    FIBITMAP *dib = ImthresholdGenericLoader (src_filename, 0);
     if (dib)
     {
         if (FreeImage_GetImageType(dib) == FIT_BITMAP)
         {
-            unsigned width = FreeImage_GetWidth(dib);
-            unsigned height = FreeImage_GetHeight(dib);
+            unsigned width = FreeImage_GetWidth (dib);
+            unsigned height = FreeImage_GetHeight (dib);
             unsigned y;
 
             IMTpixel** p_im;
-            p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-            for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+            p_im = (IMTpixel**)malloc (height * sizeof(IMTpixel*));
+            for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc (width * sizeof(IMTpixel));}
 
             ImthresholdGetData(dib, p_im);
             FreeImage_Unload(dib);
@@ -140,8 +140,8 @@ int main(int argc, char *argv[])
                 {
                     if (FreeImage_GetBPP(dib) == 1)
                     {
-                        unsigned widthm = FreeImage_GetWidth(dib);
-                        unsigned heightm = FreeImage_GetHeight(dib);
+                        unsigned widthm = FreeImage_GetWidth (dib);
+                        unsigned heightm = FreeImage_GetHeight (dib);
 
                         if ((height == heightm) && (width == widthm))
                         {
@@ -163,12 +163,12 @@ int main(int argc, char *argv[])
 
                                 printf("Kdelta= %f\n", kdelta);
 
-                                IMTFilterSeparateDelta(p_im, m_im, g_im, height, width, 1, kdelta);
-                                fg_dib = FreeImage_Allocate(width, height, 24);
-                                ImthresholdSetData(fg_dib, g_im);
-                                IMTFilterSeparateDelta(p_im, m_im, g_im, height, width, -1, kdelta);
-                                bg_dib = FreeImage_Allocate(width, height, 24);
-                                ImthresholdSetData(bg_dib, g_im);
+                                IMTFilterSeparateDelta (p_im, m_im, g_im, height, width, 1, kdelta);
+                                fg_dib = FreeImage_Allocate (width, height, 24);
+                                ImthresholdSetData (fg_dib, g_im);
+                                IMTFilterSeparateDelta (p_im, m_im, g_im, height, width, -1, kdelta);
+                                bg_dib = FreeImage_Allocate (width, height, 24);
+                                ImthresholdSetData (bg_dib, g_im);
                                 for (y = 0; y < height; y++){free(g_im[y]);}
                                 free(g_im);
                             }
@@ -180,12 +180,12 @@ int main(int argc, char *argv[])
                                 g_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
                                 for (y = 0; y < height; y++) {g_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 
-                                IMTFilterInpaint(p_im, m_im, g_im, height, width, 0);
-                                fg_dib = FreeImage_Allocate(width, height, 24);
-                                ImthresholdSetData(fg_dib, g_im);
-                                IMTFilterInpaint(p_im, m_im, g_im, height, width, 255);
+                                IMTFilterInpaint (p_im, m_im, g_im, height, width, 0);
+                                fg_dib = FreeImage_Allocate (width, height, 24);
+                                ImthresholdSetData (fg_dib, g_im);
+                                IMTFilterInpaint (p_im, m_im, g_im, height, width, 255);
                                 bg_dib = FreeImage_Allocate(width, height, 24);
-                                ImthresholdSetData(bg_dib, g_im);
+                                ImthresholdSetData (bg_dib, g_im);
                                 for (y = 0; y < height; y++){free(g_im[y]);}
                                 free(g_im);
                             }
@@ -214,9 +214,9 @@ int main(int argc, char *argv[])
                                 bgm_im = (BYTE**)malloc(heightbg * sizeof(BYTE*));
                                 for (y = 0; y < heightbg; y++) {bgm_im[y] = (BYTE*)malloc(widthbg * sizeof(BYTE));}
 
-                                IMTFilterBGFGLsep(p_im, m_im, fg_im, bg_im, height, width, bgs, fgs, level, doverlay);
-                                IMTReduceBW(m_im, fgm_im, height, width, heightfg, widthfg, bgs * fgs, 0, 255);
-                                IMTReduceBW(m_im, bgm_im, height, width, heightbg, widthbg, bgs, 255, 0);
+                                IMTFilterSeparateBGFGL (p_im, m_im, fg_im, bg_im, height, width, bgs, fgs, level, doverlay);
+                                IMTReduceBW (m_im, fgm_im, height, width, heightfg, widthfg, bgs * fgs, 0, 255);
+                                IMTReduceBW (m_im, bgm_im, height, width, heightbg, widthbg, bgs, 255, 0);
 
                                 if (fclean > 0)
                                 {
@@ -228,12 +228,12 @@ int main(int argc, char *argv[])
                                 free(fgm_im);
                                 for (y = 0; y < heightbg; y++){free(bgm_im[y]);}
                                 free(bgm_im);
-                                fg_dib = FreeImage_Allocate(widthfg, heightfg, 24);
-                                ImthresholdSetData(fg_dib, fg_im);
+                                fg_dib = FreeImage_Allocate (widthfg, heightfg, 24);
+                                ImthresholdSetData (fg_dib, fg_im);
                                 for (y = 0; y < heightfg; y++){free(fg_im[y]);}
                                 free(fg_im);
-                                bg_dib = FreeImage_Allocate(widthbg, heightbg, 24);
-                                ImthresholdSetData(bg_dib, bg_im);
+                                bg_dib = FreeImage_Allocate (widthbg, heightbg, 24);
+                                ImthresholdSetData (bg_dib, bg_im);
                                 for (y = 0; y < heightbg; y++){free(bg_im[y]);}
                                 free(bg_im);
                             } else {
@@ -243,20 +243,20 @@ int main(int argc, char *argv[])
                                 g_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
                                 for (y = 0; y < height; y++) {g_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 
-                                IMTFilterSeparate(p_im, m_im, g_im, height, width, 0);
-                                fg_dib = FreeImage_Allocate(width, height, 24);
-                                ImthresholdSetData(fg_dib, g_im);
-                                IMTFilterSeparate(p_im, m_im, g_im, height, width, 255);
-                                bg_dib = FreeImage_Allocate(width, height, 24);
-                                ImthresholdSetData(bg_dib, g_im);
+                                IMTFilterSeparate (p_im, m_im, g_im, height, width, 0);
+                                fg_dib = FreeImage_Allocate (width, height, 24);
+                                ImthresholdSetData (fg_dib, g_im);
+                                IMTFilterSeparate (p_im, m_im, g_im, height, width, 255);
+                                bg_dib = FreeImage_Allocate (width, height, 24);
+                                ImthresholdSetData (bg_dib, g_im);
                                 for (y = 0; y < height; y++){free(g_im[y]);}
                                 free(g_im);
                             }
                             if (frewrite)
                             {
-                                ImthresholdSetDataBW(dib, m_im);
-                                FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(mask_filename);
-                                FreeImage_Save(out_fif, dib, mask_filename, 0);
+                                ImthresholdSetDataBW (dib, m_im);
+                                FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename (mask_filename);
+                                FreeImage_Save (out_fif, dib, mask_filename, 0);
                                 printf("Output= %s\n", mask_filename);                              
                             }
                             FreeImage_Unload(dib);
@@ -265,35 +265,35 @@ int main(int argc, char *argv[])
 
                             if (fg_dib)
                             {
-                                FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(fg_filename);
+                                FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename (fg_filename);
                                 if(out_fif != FIF_UNKNOWN)
                                 {
-                                    FreeImage_Save(out_fif, fg_dib, fg_filename, 0);
+                                    FreeImage_Save (out_fif, fg_dib, fg_filename, 0);
                                     printf("Output= %s\n", fg_filename);
                                 }
                                 FreeImage_Unload(fg_dib);
                             }
                             if (bg_dib)
                             {
-                                FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename(bg_filename);
+                                FREE_IMAGE_FORMAT out_fif = FreeImage_GetFIFFromFilename (bg_filename);
                                 if(out_fif != FIF_UNKNOWN)
                                 {
-                                    FreeImage_Save(out_fif, bg_dib, bg_filename, 0);
+                                    FreeImage_Save (out_fif, bg_dib, bg_filename, 0);
                                     printf("Output= %s\n", bg_filename);
                                 }
-                                FreeImage_Unload(bg_dib);
+                                FreeImage_Unload (bg_dib);
                             }
                         } else {
                             printf("%s\n", "Size mask uncorect.");
-                            FreeImage_Unload(dib);
+                            FreeImage_Unload (dib);
                         }
                     } else {
                         printf("%s\n", "Unsupported color mode.");
-                        FreeImage_Unload(dib);
+                        FreeImage_Unload (dib);
                     }
                 } else {
                     printf("%s\n", "Unsupported color mode.");
-                    FreeImage_Unload(dib);
+                    FreeImage_Unload (dib);
                 }
             }
             for (y = 0; y < height; y++){free(p_im[y]);}
@@ -302,13 +302,13 @@ int main(int argc, char *argv[])
             printf("\n");
         } else {
             printf("%s\n", "Unsupported format type.");
-            FreeImage_Unload(dib);
+            FreeImage_Unload (dib);
         }
     }
 
     // call this ONLY when linking with FreeImage as a static library
 #ifdef FREEIMAGE_LIB
-    FreeImage_DeInitialise();
+    FreeImage_DeInitialise ();
 #endif // FREEIMAGE_LIB
 
     return 0;

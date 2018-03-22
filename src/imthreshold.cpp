@@ -295,6 +295,60 @@ int IMTFilterSNorm (IMTpixel** p_im, unsigned height, unsigned width)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void IMTFilterSCompare (IMTpixel** p_im, IMTpixel** b_im, unsigned height, unsigned width)
+{
+    unsigned y, x;
+    int ims, imsd;
+    IMTpixel pim, bim;
+
+    for (y = 0; y < height; y++ )
+    {
+        for (x = 0; x < width; x++)
+        {
+            pim = p_im[y][x];
+            bim = b_im[y][x];
+            ims = pim.s;
+            ims -= 384;
+            imsd = 765 + IMTdist(pim, bim);
+            ims *= imsd;
+            ims /= 765;
+            ims *= imsd;
+            ims /= 765;
+            ims += 384;
+            if (ims < 0) {ims = 0;}
+            if (ims > 765) {ims = 765;}
+            p_im[y][x].s = (WORD)ims;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterSEdge (IMTpixel** p_im, IMTpixel** b_im, unsigned height, unsigned width)
+{
+    unsigned y, x;
+    int ims, imsd;
+    IMTpixel pim, bim;
+
+    for (y = 0; y < height; y++ )
+    {
+        for (x = 0; x < width; x++)
+        {
+            pim = p_im[y][x];
+            bim = b_im[y][x];
+            ims = pim.s;
+            ims -= bim.s;
+            imsd = IMTdist(pim, bim);
+            if (ims < 0) {ims = 384 - imsd;} else {ims = 384 + imsd;}
+            if (ims < 0) {ims = 0;}
+            if (ims > 765) {ims = 765;}
+            p_im[y][x].s = (WORD)ims;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void IMTFilterInvertBW (BYTE** p_im, unsigned height, unsigned width)
 {
     unsigned y, x;
@@ -1273,167 +1327,6 @@ void IMTFilterAdSmooth (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterBGFGLsep (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, double doverlay)
-{
-    unsigned widthbg = (width + bgs - 1) / bgs;
-    unsigned heightbg = (height + bgs - 1) / bgs;
-    unsigned widthfg = (widthbg + fgs - 1) / fgs;
-    unsigned heightfg = (heightbg + fgs - 1) / fgs;
-    unsigned y, x, d, l, i, j, y0, x0, y1, x1, y0b, x0b, y1b, x1b, yb, xb, yf, xf;
-    unsigned blsz = 1;
-    BYTE fgbase, bgbase, mim;
-    unsigned cnth, cntw;
-    IMTpixel pim, fgim, bgim;
-    double fgdist, bgdist, kover, fgpart, bgpart;
-    unsigned maskbl, maskover, bgsover, fgsum[3], bgsum[3], fgnum, bgnum;
-
-    IMTpixel** fgt_im;
-    fgt_im = (IMTpixel**)malloc(heightbg * sizeof(IMTpixel*));
-    for (y = 0; y < heightbg; y++) {fgt_im[y] = (IMTpixel*)malloc(widthbg * sizeof(IMTpixel));}
-
-    for (l = 0; l < level; l++)
-    {
-        blsz *= 2;
-    }
-    fgbase = 127;
-    bgbase = 127;
-    for (y = 0; y < heightbg; y++)
-    {
-        for (x = 0; x < widthbg; x++)
-        {
-            fgt_im[y][x] = IMTset(fgbase, fgbase, fgbase);
-            bg_im[y][x] = IMTset(bgbase, bgbase, bgbase);
-        }
-    }
-    if (doverlay < 0) {doverlay = 0;}
-    kover = doverlay + 1.0;
-    for (l = 0; l < level; l++)
-    {
-        cnth = (heightbg + blsz - 1) / blsz;
-        cntw = (widthbg + blsz - 1) / blsz;
-        maskbl = bgs * blsz;
-        maskover = (kover * maskbl);
-        bgsover = (kover * blsz);
-        for (i = 0; i < cnth; i++)
-        {
-            y0 = i * maskbl;
-            y1 = y0 + maskover;
-            if (y1 > height) {y1 = height;}
-            y0b = i * blsz;
-            y1b = y0b + bgsover;
-            if (y1b > heightbg) {y1b = heightbg;}
-            for (j = 0; j < cntw; j++)
-            {
-                x0 = j * maskbl;
-                x1 = x0 + maskover;
-                if (x1 > width) {x1 = width;}
-                x0b = j * blsz;
-                x1b = x0b + bgsover;
-                if (x1b > widthbg) {x1b = widthbg;}
-
-                for (d = 0; d < 3; d++)
-                {
-                    fgsum[d] = 0;
-                    bgsum[d] = 0;
-                }
-                fgnum = 0;
-                bgnum = 0;
-                for (y = y0; y < y1; y++)
-                {
-                    for (x = x0; x < x1; x++)
-                    {
-                        pim = p_im[y][x];
-                        mim = m_im[y][x];
-                        if (mim == 0)
-                        {
-                            for (d = 0; d < 3; d++)
-                            {
-                                fgsum[d] += (int)pim.c[d];
-                            }
-                            fgnum++;
-                        } else {
-                            for (d = 0; d < 3; d++)
-                            {
-                                bgsum[d] += (int)pim.c[d];
-                            }
-                            bgnum++;
-                        }
-                    }
-                }
-                if (fgnum > 0)
-                {
-                    for (d = 0; d < 3; d++)
-                    {
-                        fgsum[d] /= fgnum;
-                        fgim.c[d] = fgsum[d];
-                    }
-                }
-                if (bgnum > 0)
-                {
-                    for (d = 0; d < 3; d++)
-                    {
-                        bgsum[d] /= bgnum;
-                        bgim.c[d] = bgsum[d];
-                    }
-                }
-                pim = IMTmeanIc(p_im, y0, x0, y1, x1);
-                fgdist = IMTdist(pim, fgim);
-                bgdist = IMTdist(pim, bgim);
-                fgpart = 1.0;
-                bgpart = 1.0;
-                if ((fgdist + bgdist)> 0)
-                {
-                    fgpart += (2.0 * fgdist / (fgdist + bgdist));
-                    bgpart += (2.0 * bgdist / (fgdist + bgdist));
-                }
-                fgim = IMTaverageIc(fgt_im, fgim, y0b, x0b, y1b, x1b, fgpart);
-                bgim = IMTaverageIc(bg_im, bgim, y0b, x0b, y1b, x1b, bgpart);
-            }
-        }
-        blsz /= 2;
-    }
-    for (y = 0; y < heightfg; y++)
-    {
-        y0 = y * fgs;
-        y1 = y0 + fgs;
-        if (y1 > heightbg) {y1 = heightbg;}
-        for (x = 0; x < widthfg; x++)
-        {
-            x0 = x * fgs;
-            x1 = x0 + fgs;
-            if (x1 > widthbg) {x1 = widthbg;}
-            fg_im[y][x] = IMTmeanIc(fgt_im, y0, x0, y1, x1);
-
-        }
-    }
-    for (y = 0; y < height; y++)
-    {
-        yb = y / bgs;
-        yf = yb / fgs;
-        for (x = 0; x < width; x++)
-        {
-            xb = x /bgs;
-            xf = xb / fgs;
-            pim = p_im[y][x];
-            fgim = fg_im[yf][xf];
-            bgim = bg_im[yb][xb];
-            fgdist = IMTdist(pim, fgim);
-            bgdist = IMTdist(pim, bgim);
-            if (fgdist < bgdist)
-            {
-                m_im[y][x] = 0;
-            } else {
-                m_im[y][x] = 255;
-            }
-        }
-    }       
-
-    for (y = 0; y < heightbg; y++){free(fgt_im[y]);}
-    free(fgt_im);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void IMTFilterInpaint (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned height, unsigned width, unsigned value)
 {
     unsigned y, x, d, nb, nn, ns, yp, xp, yn, xn, yf, xf;
@@ -1592,6 +1485,179 @@ void IMTFilterSeparate (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned 
             g_im[y][x] = gim;
         }
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterSeparateBGFGL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, double doverlay)
+{
+    unsigned widthbg = (width + bgs - 1) / bgs;
+    unsigned heightbg = (height + bgs - 1) / bgs;
+    unsigned widthfg = (widthbg + fgs - 1) / fgs;
+    unsigned heightfg = (heightbg + fgs - 1) / fgs;
+    unsigned whcp, y, x, d, l, i, j, y0, x0, y1, x1, y0b, x0b, y1b, x1b, yb, xb, yf, xf, blsz;
+    BYTE fgbase, bgbase, mim;
+    unsigned cnth, cntw;
+    IMTpixel pim, fgim, bgim;
+    double fgdist, bgdist, kover, fgpart, bgpart;
+    unsigned maskbl, maskover, bgsover, fgsum[3], bgsum[3], fgnum, bgnum;
+
+    IMTpixel** fgt_im;
+    fgt_im = (IMTpixel**)malloc(heightbg * sizeof(IMTpixel*));
+    for (y = 0; y < heightbg; y++) {fgt_im[y] = (IMTpixel*)malloc(widthbg * sizeof(IMTpixel));}
+
+    whcp = height;
+    whcp += width;
+    whcp /= 2;
+    blsz = 1;
+    if (level == 0)
+    {
+        while (bgs * blsz < whcp)
+        {
+            level++;
+            blsz *= 2;
+        }
+    } else {
+        for (l = 0; l < level; l++)
+        {
+            blsz *= 2;
+        }
+    }
+    fgbase = 127;
+    bgbase = 127;
+    for (y = 0; y < heightbg; y++)
+    {
+        for (x = 0; x < widthbg; x++)
+        {
+            fgt_im[y][x] = IMTset(fgbase, fgbase, fgbase);
+            bg_im[y][x] = IMTset(bgbase, bgbase, bgbase);
+        }
+    }
+    if (doverlay < 0) {doverlay = 0;}
+    kover = doverlay + 1.0;
+    for (l = 0; l < level; l++)
+    {
+        cnth = (heightbg + blsz - 1) / blsz;
+        cntw = (widthbg + blsz - 1) / blsz;
+        maskbl = bgs * blsz;
+        maskover = (kover * maskbl);
+        bgsover = (kover * blsz);
+        for (i = 0; i < cnth; i++)
+        {
+            y0 = i * maskbl;
+            y1 = y0 + maskover;
+            if (y1 > height) {y1 = height;}
+            y0b = i * blsz;
+            y1b = y0b + bgsover;
+            if (y1b > heightbg) {y1b = heightbg;}
+            for (j = 0; j < cntw; j++)
+            {
+                x0 = j * maskbl;
+                x1 = x0 + maskover;
+                if (x1 > width) {x1 = width;}
+                x0b = j * blsz;
+                x1b = x0b + bgsover;
+                if (x1b > widthbg) {x1b = widthbg;}
+
+                for (d = 0; d < 3; d++)
+                {
+                    fgsum[d] = 0;
+                    bgsum[d] = 0;
+                }
+                fgnum = 0;
+                bgnum = 0;
+                for (y = y0; y < y1; y++)
+                {
+                    for (x = x0; x < x1; x++)
+                    {
+                        pim = p_im[y][x];
+                        mim = m_im[y][x];
+                        if (mim == 0)
+                        {
+                            for (d = 0; d < 3; d++)
+                            {
+                                fgsum[d] += (int)pim.c[d];
+                            }
+                            fgnum++;
+                        } else {
+                            for (d = 0; d < 3; d++)
+                            {
+                                bgsum[d] += (int)pim.c[d];
+                            }
+                            bgnum++;
+                        }
+                    }
+                }
+                if (fgnum > 0)
+                {
+                    for (d = 0; d < 3; d++)
+                    {
+                        fgsum[d] /= fgnum;
+                        fgim.c[d] = fgsum[d];
+                    }
+                }
+                if (bgnum > 0)
+                {
+                    for (d = 0; d < 3; d++)
+                    {
+                        bgsum[d] /= bgnum;
+                        bgim.c[d] = bgsum[d];
+                    }
+                }
+                pim = IMTmeanIc(p_im, y0, x0, y1, x1);
+                fgdist = IMTdist(pim, fgim);
+                bgdist = IMTdist(pim, bgim);
+                fgpart = 1.0;
+                bgpart = 1.0;
+                if ((fgdist + bgdist)> 0)
+                {
+                    fgpart += (2.0 * fgdist / (fgdist + bgdist));
+                    bgpart += (2.0 * bgdist / (fgdist + bgdist));
+                }
+                fgim = IMTaverageIc(fgt_im, fgim, y0b, x0b, y1b, x1b, fgpart);
+                bgim = IMTaverageIc(bg_im, bgim, y0b, x0b, y1b, x1b, bgpart);
+            }
+        }
+        blsz /= 2;
+    }
+    for (y = 0; y < heightfg; y++)
+    {
+        y0 = y * fgs;
+        y1 = y0 + fgs;
+        if (y1 > heightbg) {y1 = heightbg;}
+        for (x = 0; x < widthfg; x++)
+        {
+            x0 = x * fgs;
+            x1 = x0 + fgs;
+            if (x1 > widthbg) {x1 = widthbg;}
+            fg_im[y][x] = IMTmeanIc(fgt_im, y0, x0, y1, x1);
+
+        }
+    }
+    for (y = 0; y < height; y++)
+    {
+        yb = y / bgs;
+        yf = yb / fgs;
+        for (x = 0; x < width; x++)
+        {
+            xb = x /bgs;
+            xf = xb / fgs;
+            pim = p_im[y][x];
+            fgim = fg_im[yf][xf];
+            bgim = bg_im[yb][xb];
+            fgdist = IMTdist(pim, fgim);
+            bgdist = IMTdist(pim, bgim);
+            if (fgdist < bgdist)
+            {
+                m_im[y][x] = 0;
+            } else {
+                m_im[y][x] = 255;
+            }
+        }
+    }       
+
+    for (y = 0; y < heightbg; y++){free(fgt_im[y]);}
+    free(fgt_im);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -5295,7 +5361,7 @@ int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
         }
         if (iw == 0 && ib == 0)
         {
-             T = Tn;
+            T = Tn;
         } else if (iw == 0) {
             T = Tb/ib;
         } else if (ib == 0) {
@@ -5303,8 +5369,8 @@ int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
         } else {
             T = ((Tw/iw) + (Tb/ib)) / 2.0;
         }
-        T += delta;
     }
+    T += delta;
     threshold = (int)(T+0.5);
     for (y = 0; y < h; y++ )
     {

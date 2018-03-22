@@ -26,7 +26,9 @@ void ImthresholdFilterTSauvolaUsage()
     printf("          -f str  name filter:\n");
     printf("                    'abutaleb'\n");
     printf("                    'bernsen'\n");
+    printf("                    'blur'\n");
     printf("                    'chistian'\n");
+    printf("                    'edge'\n");
     printf("                    'niblack'\n");
     printf("                    'sauvola' (default)\n");
     printf("          -c N    contrast limit (int, optional, default = 128)\n");
@@ -166,6 +168,17 @@ int main(int argc, char *argv[])
                 printf("Filter= %s\n", namefilter);
                 printf("Contrast= %d\n", contrast_limit);
                 threshold = IMTFilterTBernsen(p_im, d_im, height, width, radius, contrast_limit);
+            } else if (strcmp(namefilter, "blur") == 0) {
+                printf("Filter= %s\n", namefilter);
+                IMTpixel** b_im;
+                b_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {b_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTFilterGaussBlur (p_im, b_im, height, width, radius);
+                IMTFilterSCompare (p_im, b_im, height, width);
+                for (y = 0; y < height; y++){free(b_im[y]);}
+                free(b_im);
+                printf("Delta= %f\n", delta);
+                threshold = IMTFilterTBiMod (p_im, d_im, height, width, delta);
             } else if (strcmp(namefilter, "chistian") == 0) {
                 printf("Filter= %s\n", namefilter);
                 printf("Sensitivity= %f\n", sensitivity);
@@ -173,6 +186,17 @@ int main(int argc, char *argv[])
                 printf("Upper= %d\n", upper_bound);
                 printf("Delta= %f\n", delta);
                 threshold = IMTFilterTChistian(p_im, d_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
+            } else if (strcmp(namefilter, "edge") == 0) {
+                printf("Filter= %s\n", namefilter);
+                IMTpixel** b_im;
+                b_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {b_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTFilterGaussBlur (p_im, b_im, height, width, radius);
+                IMTFilterSEdge (p_im, b_im, height, width);
+                for (y = 0; y < height; y++){free(b_im[y]);}
+                free(b_im);
+                printf("Delta= %f\n", delta);
+                threshold = IMTFilterTBiMod (p_im, d_im, height, width, delta);
             } else if (strcmp(namefilter, "niblack") == 0) {
                 printf("Filter= %s\n", namefilter);
                 printf("Sensitivity= %f\n", sensitivity);
