@@ -425,7 +425,8 @@ double IMTdist3c2p(IMTpixel IMTim, double* IMTimc)
 IMTpixel IMTmeanIc (IMTpixel** IMTim, unsigned y0, unsigned x0, unsigned y1, unsigned x1)
 {
     unsigned y, x, d;
-    unsigned imm, ims, n = 0;
+    unsigned imm, n = 0;
+    double ims;
     IMTpixel immean;
 
     ims = 0;
@@ -438,7 +439,11 @@ IMTpixel IMTmeanIc (IMTpixel** IMTim, unsigned y0, unsigned x0, unsigned y1, uns
             n++;
         }
     }
-    if (n > 0) {ims /= n;}
+    if (n > 0)
+    {
+        ims /= n;
+        if (ims > 765) {ims = 765;}
+    }
     immean.s = (WORD)ims;
     for (d = 0; d < 3; d++)
     {
@@ -451,7 +456,11 @@ IMTpixel IMTmeanIc (IMTpixel** IMTim, unsigned y0, unsigned x0, unsigned y1, uns
                 ims += imm;
             }
         }
-        if (n > 0) {ims /= n;}
+        if (n > 0)
+        {
+            ims /= n;
+            if (ims > 255) {ims = 255;}
+        }
         immean.c[d] = (BYTE)ims;
     }
     immean = IMTcalcS (immean);
@@ -2204,6 +2213,30 @@ double IMTFilterMirrorHalf (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void IMTFilterMirrorMean (IMTpixel** p_im, unsigned height, unsigned width)
+{
+    unsigned y, x, d;
+    int im, imm;
+
+    for ( y = 0; y < height; y++ )
+    {
+        for ( x = 0; x < width; x++ )
+        {
+            for (d = 0; d < 3; d++)
+            {
+                im = p_im[y][x].c[d];
+                imm = im - 128;
+                if (imm < 0) {imm += 255;}
+                imm = MIN(MAX((int)0, imm), (int)255);
+                p_im[y][x].c[d] = (BYTE)imm;
+            }
+            p_im[y][x] = IMTcalcS (p_im[y][x]);
+        }
+    }
+ }
+
+///////////////////////////////////////////////////////////////////////////////
+
 IMTpixel IMTmeanIcM (IMTpixel** IMTim, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx)
 {
     unsigned y, x, d, i, j;
@@ -3841,6 +3874,281 @@ double IMTFilterBgDiv (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsign
 
 ////////////////////////////////////////////////////////////////////////////////
 
+int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned ncolor)
+{
+    unsigned y, x, d, k, l, m, n, im, imt, ims, imds, imdm;
+    int imd;
+    double T, Tw, Tb, Tn, iw, ib, cn[3];
+    unsigned thres[3];
+    unsigned cd[256];
+
+	imdm = 0;
+    for (y = 0; y < height; y++ )
+    {
+        for (x = 0; x < width; x++)
+        {
+            d_im[y][x].s = 0;
+        }
+    }
+    m = 0;
+    for (l = 1; l < ncolor; l++)
+    {
+        for (d = 0; d < 3; d++)
+        {
+            cn[d] = 0;
+        }
+        n = 0;
+        for (y = 0; y < height; y++ )
+        {
+            for (x = 0; x < width; x++)
+            {
+                imt = d_im[y][x].s;
+                if (imt == m)
+                {
+                    n++;
+                    for (d = 0; d < 3; d++)
+                    {
+                        im = p_im[y][x].c[d];
+                        cn[d] += im;
+                    }
+                }
+            }
+        }
+        for (d = 0; d < 3; d++)
+        {
+            if (n > 0)
+            {
+                cn[d] /= n;
+            } else {
+                cn[d] = 127.5;
+            }
+        }
+        for (d = 0; d < 3; d++)
+        {
+            thres[d] = 0;
+            T = cn[d];
+            Tn = 0;
+            while ( T != Tn )
+            {
+                Tn = T;
+                Tb = 0;
+                Tw = 0;
+                ib = 0;
+                iw = 0;
+                for (y = 0; y < height; y++ )
+                {
+                    for (x = 0; x < width; x++)
+                    {
+                        im = p_im[y][x].c[d];
+                        imt = d_im[y][x].s;
+                        if (imt == m)
+                        {
+                            if ( im > T)
+                            {
+                                Tw += im;
+                                iw++;
+                            } else {
+                                Tb += im;
+                                ib++;
+                            }
+                        }
+                    }
+                }
+                if (iw == 0 && ib == 0)
+                {
+                    T = Tn;
+                } else if (iw == 0) {
+                    T = Tb/ib;
+                } else if (ib == 0) {
+                    T = Tw/iw;
+                } else {
+                    T = ((Tw/iw) + (Tb/ib)) / 2.0;
+                }
+            }
+            if (T < 0) {T = 0;}
+            if (T > 255) {T = 255;}
+            thres[d] = (int)T;
+        }
+        for (y = 0; y < height; y++ )
+        {
+            for (x = 0; x < width; x++)
+            {
+                imt = d_im[y][x].s;
+                if (imt == m)
+                {
+					ims = 0;
+                    for (d = 0; d < 3; d++)
+                    {
+                        im = p_im[y][x].c[d];
+                        ims += ((im >= thres[d]) ? 255 : 0);
+                    }
+                    if (ims >= 384) {d_im[y][x].s = l;}
+                }
+            }
+        }
+        for (d = 0; d < 3; d++)
+        {
+            cn[d] = 0;
+        }
+        n = 0;
+        for (y = 0; y < height; y++ )
+        {
+            for (x = 0; x < width; x++)
+            {
+                imt = d_im[y][x].s;
+                if (imt == m)
+                {
+                    n++;
+                    for (d = 0; d < 3; d++)
+                    {
+                        im = p_im[y][x].c[d];
+                        cn[d] += im;
+                    }
+                }
+            }
+        }
+        cd[m] = 0;
+        if (n > 0)
+        {
+            for (d = 0; d < 3; d++)
+            {
+                cn[d] /= n;
+            }
+            for (y = 0; y < height; y++ )
+            {
+                for (x = 0; x < width; x++)
+                {
+                    imt = d_im[y][x].s;
+                    if (imt == m)
+                    {
+                        imds = 0;
+                        for (d = 0; d < 3; d++)
+                        {
+                            imd = p_im[y][x].c[d];
+                            imd -= cn[d];
+                            if (imd < 0) {imd = -imd;}
+                            imds += imd;
+                        }
+                        if (imds > cd[m]) {cd[m] = imds;}
+                    }
+                }
+            }
+        }
+        for (d = 0; d < 3; d++)
+        {
+            cn[d] = 0;
+        }
+        n = 0;
+        for (y = 0; y < height; y++ )
+        {
+            for (x = 0; x < width; x++)
+            {
+                imt = d_im[y][x].s;
+                if (imt == l)
+                {
+                    n++;
+                    for (d = 0; d < 3; d++)
+                    {
+                        im = p_im[y][x].c[d];
+                        cn[d] += im;
+                    }
+                }
+            }
+        }
+        cd[l] = 0;
+        if (n > 0)
+        {
+            for (d = 0; d < 3; d++)
+            {
+                cn[d] /= n;
+            }
+            for (y = 0; y < height; y++ )
+            {
+                for (x = 0; x < width; x++)
+                {
+                    imt = d_im[y][x].s;
+                    if (imt == l)
+                    {
+                        imds = 0;
+                        for (d = 0; d < 3; d++)
+                        {
+                            imd = p_im[y][x].c[d];
+                            imd -= cn[d];
+                            if (imd < 0) {imd = -imd;}
+                            imds += imd;
+                        }
+                        if (imds > cd[l]) {cd[l] = imds;}
+                    }
+                }
+            }
+        }
+        imdm = 0;
+        for (k = 0; k <= l; k++)
+        {
+            if (cd[k] > imdm)
+            {
+                imdm = cd[k];
+                m = k;
+            }
+        }
+    }
+    for (l = 0; l < ncolor; l++)
+    {
+        for (d = 0; d < 3; d++)
+        {
+            cn[d] = 0;
+        }
+        n = 0;
+        for (y = 0; y < height; y++ )
+        {
+            for (x = 0; x < width; x++)
+            {
+                imt = d_im[y][x].s;
+                if (imt == l)
+                {
+                    n++;
+                    for (d = 0; d < 3; d++)
+                    {
+                        im = p_im[y][x].c[d];
+                        cn[d] += im;
+                    }
+                }
+            }
+        }
+        if (n > 0)
+        {
+            for (d = 0; d < 3; d++)
+            {
+                cn[d] /= n;
+            }
+        }
+        for (y = 0; y < height; y++ )
+        {
+            for (x = 0; x < width; x++)
+            {
+                imt = d_im[y][x].s;
+                if (imt == l)
+                {
+                    for (d = 0; d < 3; d++)
+                    {
+                        d_im[y][x].c[d] = BYTE(cn[d]);
+                    }
+                }
+            }
+        }
+    }
+    for (y = 0; y < height; y++ )
+    {
+        for (x = 0; x < width; x++)
+        {
+            d_im[y][x] = IMTcalcS (d_im[y][x]);
+        }
+    }
+    return imdm;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 double IMTFilterClusterBWC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned radius)
 {
     unsigned y, x, d, y1, x1, y2, x2, i, j, distw, distb, gpart, bc, bs;
@@ -5327,13 +5635,10 @@ int IMTFilterTBHT (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width
 
 int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta)
 {
-    int y, x;
-    unsigned im;
+    unsigned y, x, im;
     double T, Tw, Tb, Tn, iw, ib;
     BYTE val;
     int threshold = 0;
-    int h = height;
-    int w = width;
 
     T = 384.0;
     Tn = 0;
@@ -5344,9 +5649,9 @@ int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
         Tw = 0;
         ib = 0;
         iw = 0;
-        for (y = 0; y < h; y++ )
+        for (y = 0; y < height; y++ )
         {
-            for (x = 0; x < w; x++)
+            for (x = 0; x < width; x++)
             {
                 im = p_im[y][x].s;
                 if ( im > T)
@@ -5371,13 +5676,89 @@ int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
         }
     }
     T += delta;
-    threshold = (int)(T+0.5);
-    for (y = 0; y < h; y++ )
+    threshold = (int)(T + 0.5);
+    for (y = 0; y < height; y++ )
     {
-        for (x = 0; x < w; x++)
+        for (x = 0; x < width; x++)
         {
             im = p_im[y][x].s;
             val = (BYTE) ((im >= T) ? 255 : 0 );
+            d_im[y][x] = val;
+        }
+    }
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTBiModC (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta)
+{
+    unsigned y, x, d, im, ims;
+    double T, Tw, Tb, Tn, iw, ib;
+    unsigned thres[3];
+    BYTE val;
+    int threshold = 0;
+
+    for (d = 0; d < 3; d++)
+    {
+        thres[d] = 0;
+        T = 127.5;
+        Tn = 0;
+        while ( T != Tn )
+        {
+            Tn = T;
+            Tb = 0;
+            Tw = 0;
+            ib = 0;
+            iw = 0;
+            for (y = 0; y < height; y++ )
+            {
+                for (x = 0; x < width; x++)
+                {
+                    im = p_im[y][x].c[d];
+                    if ( im > T)
+                    {
+                        Tw += im;
+                        iw++;
+                    } else {
+                        Tb += im;
+                        ib++;
+                    }
+                }
+            }
+            if (iw == 0 && ib == 0)
+            {
+                T = Tn;
+            } else if (iw == 0) {
+                T = Tb/ib;
+            } else if (ib == 0) {
+                T = Tw/iw;
+            } else {
+                T = ((Tw/iw) + (Tb/ib)) / 2.0;
+            }
+        }
+        T += delta;
+        if (T < 0) {T = 0;}
+        if (T > 255) {T = 255;}
+        thres[d] = (int)T;
+    }
+    threshold = 0;
+    for (d = 0; d < 3; d++)
+    {
+        threshold += thres[d];
+    }
+    for (y = 0; y < height; y++ )
+    {
+        for (x = 0; x < width; x++)
+        {
+            ims = 0;
+            for (d = 0; d < 3; d++)
+            {
+                im = p_im[y][x].c[d];
+                ims += ((im >= thres[d]) ? 255 : 0);
+            }
+            val = (BYTE) ((ims >= 384) ? 255 : 0 );
             d_im[y][x] = val;
         }
     }

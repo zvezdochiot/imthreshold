@@ -30,6 +30,7 @@ void ImthresholdFilterUsage()
     printf("                    'bgdiv'\n");
     printf("                    'blur'\n");
     printf("                    'bwc'\n");
+    printf("                    'cluster'\n");
     printf("                    'greynorm'\n");
     printf("                    'greyworld'\n");
     printf("                    'illumc'\n");
@@ -37,6 +38,7 @@ void ImthresholdFilterUsage()
     printf("                    'kmeans'\n");
     printf("                    'levelmean'\n");
     printf("                    'levelsigma'\n");
+    printf("                    'mirror'\n");
     printf("                    'monocolor'\n");
     printf("                    'none' (default)\n");
     printf("                    'peron'\n");
@@ -271,6 +273,29 @@ int main(int argc, char *argv[])
                 free(b_im);
                 for (y = 0; y < height; y++){free(p_im[y]);}
                 free(p_im);
+           } else if (strcmp(namefilter, "cluster") == 0) {
+                printf("Filter= %s\n", namefilter);
+                int imdm;
+                IMTpixel** p_im;
+                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** d_im;
+                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+
+                if (knum < 2) {knum = 2;}
+                printf("K= %d\n", knum);
+
+                ImthresholdGetData(dib, p_im);
+                FreeImage_Unload(dib);
+                imdm = IMTFilterClusterBiModC (p_im, d_im, height, width, knum);
+                printf("Dmax= %d\n", imdm);
+                for (y = 0; y < height; y++){free(p_im[y]);}
+                free(p_im);
+                dst_dib = FreeImage_Allocate(width, height, 24);
+                ImthresholdSetData(dst_dib, d_im);
+                for (y = 0; y < height; y++){free(d_im[y]);}
+                free(d_im);
             } else if (strcmp(namefilter, "greyworld") == 0) {
                 printf("Filter= %s\n", namefilter);
                 IMTpixel dim;
@@ -413,6 +438,19 @@ int main(int argc, char *argv[])
                 ImthresholdSetData(dst_dib, d_im);
                 for (y = 0; y < height; y++){free(d_im[y]);}
                 free(d_im);
+            } else if (strcmp(namefilter, "mirror") == 0) {
+                printf("Filter= %s\n", namefilter);
+                IMTpixel** p_im;
+                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+
+                ImthresholdGetData(dib, p_im);
+                FreeImage_Unload(dib);
+                IMTFilterMirrorMean(p_im, height, width);
+                dst_dib = FreeImage_Allocate(width, height, 24);
+                ImthresholdSetData(dst_dib, p_im);
+                for (y = 0; y < height; y++){free(p_im[y]);}
+                free(p_im);
             } else if (strcmp(namefilter, "monocolor") == 0) {
                 printf("Filter= %s\n", namefilter);
                 IMTpixel** p_im;

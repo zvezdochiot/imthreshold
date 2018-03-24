@@ -26,6 +26,7 @@ void ImthresholdFilterTGlobalUsage()
     printf("          -f str  name filter:\n");
     printf("                    'bht'\n");
     printf("                    'bimod' (default)\n");
+    printf("                    'bimodc'\n");
     printf("                    'color'\n");
     printf("                    'dither'\n");
     printf("                    'entropy'\n");
@@ -159,9 +160,13 @@ int main(int argc, char *argv[])
             {
                 printf("Filter= %s\n", namefilter);
                 threshold = IMTFilterTBHT(p_im, d_im, height, width);
-            } else if (strcmp(namefilter, "color") == 0) {
-                printf("Delta= %d\n", delta);
+            } else if (strcmp(namefilter, "bimodc") == 0) {
                 printf("Filter= %s\n", namefilter);
+                printf("Delta= %d\n", delta);
+                threshold = IMTFilterTBiModC(p_im, d_im, height, width, delta);
+            } else if (strcmp(namefilter, "color") == 0) {
+                printf("Filter= %s\n", namefilter);
+                printf("Delta= %d\n", delta);
                 threshold = IMTFilterTColor(p_im, d_im, height, width, delta);
             } else if (strcmp(namefilter, "dither") == 0) {
                 printf("Filter= %s\n", namefilter);

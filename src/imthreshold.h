@@ -139,6 +139,7 @@ double IMTFilterLevelMean (IMTpixel** p_im, IMTpixel** d_im, unsigned height, un
 double IMTFilterLevelSigma (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double thres, double fpart);
 double IMTFilterMirror (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width);
 double IMTFilterMirrorHalf (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width);
+void IMTFilterMirrorMean (IMTpixel** p_im, unsigned height, unsigned width);
 void IMTFilterMonoColor (IMTpixel** p_im, unsigned height, unsigned width);
 IMTpixel IMTmeanIcM (IMTpixel** IMTim, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx);
 IMTpixel IMTmeanPtIcM (IMTpixel** IMTim, IMTpixel IMTimm, double* linfilt, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx);
@@ -162,6 +163,7 @@ void IMTFilterUnRipple (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
 void IMTGaussLineMatrix (double *cmatrix, double radius);
 void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius);
 double IMTFilterBgDiv (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned ndiv);
+int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned ncolor);
 double IMTFilterClusterBWC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned radius);
 void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, double amount, int threshold);
 double IMTFilterNoiseVariance (IMTpixel** p_im, unsigned height, unsigned width, int radius);
@@ -180,6 +182,7 @@ int IMTFilterTAbutaleb (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
 int IMTFilterTBernsen (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, unsigned contrast_limit);
 int IMTFilterTBHT (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta);
+int IMTFilterTBiModC (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta);
 int IMTFilterTColor (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta);
 int IMTFilterTChistian (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta);
 int IMTFilterTDalg (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int region_size, int delta);
