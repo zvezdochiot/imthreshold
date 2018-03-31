@@ -64,7 +64,7 @@ void ImthresholdFilterWienerUsage()
 	printf("Usage : imthreshold-fwiener [options] <input_file> <output_file>\n\n");
 	printf("options:\n");
 	printf("          -r N    radius (int, optional, default = 5)\n");
-	printf("          -n N.N  noise variance (double, optional, default = -1.0)\n");
+	printf("          -n N.N  noise size (double, optional, default = -1.0[auto])\n");
 	printf("          -h      this help\n");
 }
 
@@ -79,8 +79,8 @@ int main(int argc, char *argv[])
 	
 	int opt;
 	int radius = 5;
-	double noise_variance = -1.0;
-	int fhelp = 0;
+	double noise = -1.0;
+	bool fhelp = false;
 	while ((opt = getopt(argc, argv, ":r:n:h")) != -1)
 	{
 		switch(opt)
@@ -89,10 +89,10 @@ int main(int argc, char *argv[])
 				radius = atof(optarg);
 				break;
 			case 'n':
-				noise_variance = atof(optarg);
+				noise = atof(optarg);
 				break;
 			case 'h':
-				fhelp = 1;
+				fhelp = true;
 				break;
 			case ':':
 				printf("option needs a value\n");
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	
 	ImthresholdFilterWienerTitle();
 	
-	if(optind + 2 > argc || fhelp > 0 || radius <= 0)
+	if(optind + 2 > argc || fhelp || radius <= 0)
 	{
 		ImthresholdFilterWienerUsage();
 		return 0;
@@ -134,11 +134,14 @@ int main(int argc, char *argv[])
 			for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 
 			printf("Radius= %d\n", radius);
-			printf("Noise= %f\n", noise_variance);
-
 			ImthresholdGetData(dib, p_im);
 			FreeImage_Unload(dib);
-			IMTFilterWiener(p_im, d_im, height, width, radius, noise_variance);
+			if (noise < 0)
+			{
+				noise = IMTFilterNoiseVariance (p_im, height, width, radius);
+			}
+			printf("Noise= %f\n", noise);
+			IMTFilterWiener(p_im, d_im, height, width, radius, noise);
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);
 			dst_dib = FreeImage_Allocate(width, height, 24);

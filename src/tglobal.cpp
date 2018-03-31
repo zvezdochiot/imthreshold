@@ -35,6 +35,7 @@ void ImthresholdFilterTGlobalUsage()
     printf("                    'janni'\n");
     printf("                    'kmeans'\n");
     printf("                    'otsu'\n");
+    printf("                    'quadmod'\n");
     printf("                    'rot'\n");
     printf("                    'tsai'\n");
     printf("                    'use'\n");
@@ -189,6 +190,10 @@ int main(int argc, char *argv[])
             } else if (strcmp(namefilter, "otsu") == 0) {
                 printf("Filter= %s\n", namefilter);
                 threshold = IMTFilterTOtsu(p_im, d_im, height, width);
+            } else if (strcmp(namefilter, "quadmod") == 0) {
+                printf("Filter= %s\n", namefilter);
+                printf("Delta= %d\n", delta);
+                threshold = IMTFilterTQuadMod(p_im, d_im, height, width, delta);
             } else if (strcmp(namefilter, "rot") == 0) {
                 printf("Filter= %s\n", namefilter);
                 threshold = IMTFilterTRot(p_im, d_im, height, width, weight);

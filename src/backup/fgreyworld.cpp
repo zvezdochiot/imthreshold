@@ -98,20 +98,15 @@ int main(int argc, char *argv[])
 			IMTpixel** p_im;
 			p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
 			for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-			IMTpixel** d_im;
-			d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-			for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 
 			ImthresholdGetData(dib, p_im);
 			FreeImage_Unload(dib);
-			dim = IMTFilterGreyWorld(p_im, d_im, height, width);
+			dim = IMTFilterGreyWorld(p_im, height, width);
 			printf("Normalize= %d,%d,%d\n", dim.c[0], dim.c[1], dim.c[2]);
+			dst_dib = FreeImage_Allocate(width, height, 24);
+			ImthresholdSetData(dst_dib, p_im);
 			for (y = 0; y < height; y++){free(p_im[y]);}
 			free(p_im);
-			dst_dib = FreeImage_Allocate(width, height, 24);
-			ImthresholdSetData(dst_dib, d_im);
-			for (y = 0; y < height; y++){free(d_im[y]);}
-			free(d_im);
 			
 			if (dst_dib)
 			{

@@ -39,7 +39,7 @@ void ImthresholdFilterPeronUsage()
 	printf("Usage : imthreshold-fperon [options] <input_file> <output_file>\n\n");
 	printf("options:\n");
 	printf("          -r N.N  radius (double, optional, default = 3.0)\n");
-	printf("          -n N.N  noise size (double, optional, default = 3.0)\n");
+	printf("          -n N.N  noise size (double, optional, default = -1.0[auto])\n");
 	printf("          -h      this help\n");
 }
 
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
 	int opt;
 	double radius = 3.0;
-	double noise = 3.0;
+	double noise = -1.0;
 	bool fhelp = false;
 	while ((opt = getopt(argc, argv, ":r:n:h")) != -1)
 	{
@@ -90,11 +90,6 @@ int main(int argc, char *argv[])
 	
 	printf("Input= %s\n", src_filename);
 	FIBITMAP *dib = ImthresholdGenericLoader(src_filename, 0);
-	if (radius < 0) {radius = -radius;}
-	if (noise < 0) {noise = -noise;}
-	if (noise == 0) {noise = 1;}
-	printf("Radius= %f\n", radius);
-	printf("Noise= %f\n", noise);
 	if (dib)
 	{
 		if (FreeImage_GetImageType(dib) == FIT_BITMAP)
@@ -115,8 +110,16 @@ int main(int argc, char *argv[])
 				d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
 				for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
 
+				if (radius < 0) {radius = -radius;}
+				printf("Radius= %f\n", radius);
 				ImthresholdGetData(dib, p_im);
 				FreeImage_Unload(dib);
+				if (noise <= 0)
+				{
+					noise = IMTFilterNoiseVariance (p_im, height, width, radius);
+					noise /= 2;
+				}
+				printf("Noise= %f\n", noise);
 				IMTFilterPeron(p_im, d_im, height, width, radius, noise);
 				for (y = 0; y < height; y++){free(p_im[y]);}
 				free(p_im);

@@ -28,7 +28,7 @@
 // 
 // The code implements Otsu thresholding, which is described in
 // N. Otsu, "A threshold selection method from gray-level pdfs", IEEE Trans. Systems,
-// Man and Cybernetics 9(1), pp. 62â€“66, 1979.
+// Man and Cybernetics 9(1), pp. 62–66, 1979.
 // This implementation instead of minimizing the weighted within-class variance
 // does maximization of between-class variance, what gives the same result.
 // The approach is described in this presentation:
