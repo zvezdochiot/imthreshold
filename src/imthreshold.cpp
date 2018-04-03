@@ -7205,8 +7205,8 @@ int IMTFilterTOtsu (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
 
 int IMTFilterTQuadMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta)
 {
-    unsigned y, x, im, nw, nb, n;
-    double T, TG, Trw, Trb, Tw, Tb, Tn, iw, ib, sw, sb, s;
+    unsigned y, x, im;
+    double T, TG, Trw, Trb, Tw, Tb, Tn, iw, ib;
     BYTE val;
     int threshold = 0;
 
@@ -7248,30 +7248,7 @@ int IMTFilterTQuadMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
     T += delta;
     TG = T;
     threshold = (int)(T + 0.5);
-    sw = 0;
-    nw = 0;
-    sb = 0;
-    nb = 0;
-    for (y = 0; y < height; y++ )
-    {
-        for (x = 0; x < width; x++)
-        {
-            im = p_im[y][x].s;
-            val = (BYTE) ((im >= T) ? 255 : 0 );
-            if (val == 0)
-            {
-                sb += im;
-                nb++;
-            } else {
-                sw += im;
-                nw++;
-            }
-            d_im[y][x] = val;
-        }
-    }
-    if (nb > 0) {sb /= nb;}
-    if (nw > 0) {sw /= nw;}
-    T = sw;
+    T = (TG + 765) / 2;
     Tn = 0;
     while ( T != Tn )
     {
@@ -7310,7 +7287,7 @@ int IMTFilterTQuadMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
         }
     }
     Trw = T;
-    T = sb;
+    T = TG / 2;
     Tn = 0;
     while ( T != Tn )
     {
@@ -7349,22 +7326,7 @@ int IMTFilterTQuadMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
         }
     }
     Trb = T;
-    s = 0;
-    n = 0;
-    for (y = 0; y < height; y++ )
-    {
-        for (x = 0; x < width; x++)
-        {
-            im = p_im[y][x].s;
-            if (im >= Trb && im <= Trw)
-            {
-                s += im;
-                n++;
-            }
-        }
-    }
-    if (n > 0) {s /= n;} else {s = 384.0;}
-    T = s;
+    T = (Trw + Trb) / 2;
     Tn = 0;
     while ( T != Tn )
     {
@@ -7377,10 +7339,10 @@ int IMTFilterTQuadMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
         {
             for (x = 0; x < width; x++)
             {
-                if (d_im[y][x] > 0)
+                im = p_im[y][x].s;
+                if ((im > Trb) && (im < Trw))
                 {
-                    im = p_im[y][x].s;
-                    if ( im > T)
+                    if (im > T)
                     {
                         Tw += im;
                         iw++;
