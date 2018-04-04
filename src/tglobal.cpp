@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
             } else if (strcmp(namefilter, "use") == 0) {
                 printf("Filter= %s\n", namefilter);
                 printf("Delta= %d\n", delta);
-                threshold = IMTFilterThreshold(p_im, d_im, height, width, delta);
+                threshold = IMTFilterThreshold(p_im, d_im, height, width, 382 + delta);
             } else {
                 printf("Filter= bimod\n");
                 printf("Delta= %d\n", delta);

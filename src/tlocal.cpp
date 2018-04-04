@@ -26,6 +26,7 @@ void ImthresholdFilterTSauvolaUsage()
     printf("          -f str  name filter:\n");
     printf("                    'abutaleb'\n");
     printf("                    'bernsen'\n");
+    printf("                    'bimod'\n");
     printf("                    'blur'\n");
     printf("                    'chistian'\n");
     printf("                    'edge'\n");
@@ -168,6 +169,10 @@ int main(int argc, char *argv[])
                 printf("Filter= %s\n", namefilter);
                 printf("Contrast= %d\n", contrast_limit);
                 threshold = IMTFilterTBernsen(p_im, d_im, height, width, radius, contrast_limit);
+            } else if (strcmp(namefilter, "bimod") == 0) {
+                printf("Filter= %s\n", namefilter);
+                printf("Delta= %f\n", delta);
+                threshold = IMTFilterTBiModRegion ( p_im, d_im, height, width, delta, radius);
             } else if (strcmp(namefilter, "blur") == 0) {
                 printf("Filter= %s\n", namefilter);
                 IMTpixel** b_im;

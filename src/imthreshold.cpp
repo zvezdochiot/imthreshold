@@ -4149,6 +4149,93 @@ int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
 
 ////////////////////////////////////////////////////////////////////////////////
 
+int IMTFilterBiModNorm (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int delta, int radius)
+{
+    unsigned y, x, d, y0, x0, y1, x1, yf, xf, im, r;
+    double T, Tw, Tb, Tn, iw, ib, Ts, kT, imx;
+    int threshold = 0;
+
+    r = 0;
+    if (radius < 0) {r = -radius;} else {r = radius;}
+    if (r > 0)
+    {
+        Ts = 0;
+        for (y = 0; y < height; y++ )
+        {
+            y0 = 0;
+            if (y > r) {y0 = y - r;}
+            y1 = y + r;
+            if (y1 > height) {y1 = height;}
+            for (x = 0; x < width; x++ )
+            {
+                x0 = 0;
+                if (x > r) {x0 = x - r;}
+                x1 = x + r;
+                if (x1 > width) {x1 = width;}
+            
+                T = 384.0;
+                Tn = 0;
+                while ( T != Tn )
+                {
+                    Tn = T;
+                    Tb = 0;
+                    Tw = 0;
+                    ib = 0;
+                    iw = 0;
+                    for (yf = y0; yf < y1; yf++ )
+                    {
+                        for (xf = x0; xf < x1; xf++)
+                        {
+                            im = p_im[yf][xf].s;
+                            if ( im > T)
+                            {
+                                Tw += im;
+                                iw++;
+                            } else {
+                                Tb += im;
+                                ib++;
+                            }
+                        }
+                    }
+                    if (iw == 0 && ib == 0)
+                    {
+                        T = Tn;
+                    } else if (iw == 0) {
+                        T = Tb/ib;
+                    } else if (ib == 0) {
+                        T = Tw/iw;
+                    } else {
+                        T = ((Tw/iw) + (Tb/ib)) / 2.0;
+                    }
+                }
+                T += delta;
+                Ts += T;
+                im = p_im[y][x].s;
+                if (radius < 0)
+                {
+                    kT = (T + 1.0) / 385.0;
+                } else {
+                    kT = 385.0 / (T + 1.0);
+                }
+                for (d = 0; d < 3; d++)
+                {
+                    imx = p_im[y][x].c[d];
+                    imx *= kT;
+                    d_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)(imx + 0.5)), (int)255);;
+                }
+                d_im[y][x] = IMTcalcS (d_im[y][x]);
+            }
+        }
+        Ts /= height;
+        Ts /= width;
+        threshold = (int)(Ts + 0.5);
+    }
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 double IMTFilterClusterBWC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned radius)
 {
     unsigned y, x, d, y1, x1, y2, x2, i, j, distw, distb, gpart, bc, bs;
@@ -5311,63 +5398,21 @@ void IMTFilterSNearest (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTBernsen(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, unsigned contrast_limit)
+int IMTFilterThreshold (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int threshold)
 {
-    int x, y, i, j, xt, yt;
-    unsigned im, t;
-    unsigned confused, c, minimum, maximum;
+    unsigned y, x;
     BYTE val;
-    int h = height;
-    int w = width;
-    int threshold = 0, st = 0, sn = 0;
+    int im;
 
-    if (radius < 0) {radius = -radius;}
-
-    confused = 255; // white
-
-    for (y = 0; y < h; y++)
+    for (y = 0; y < height; y++ )
     {
-        for (x = 0; x < w; x++)
+        for (x = 0; x < width; x++)
         {
-            minimum = 768;
-            maximum = 0;
-            for (i = -radius; i <= radius; i++)
-            {
-                yt = y + i;
-                if (yt >= 0 && yt < h)
-                {
-                    for (j = -radius; j <= radius; j++)
-                    {
-                        xt = x + j;
-                        if (xt >= 0 && xt < w)
-                        {
-                            im = p_im[yt][xt].s;
-                            minimum = MIN(minimum, im);
-                            maximum = MAX(maximum, im);
-                        }
-                    }
-                }
-            }
-            c = maximum - minimum;
-            if (c < contrast_limit * 3)
-            {
-                val = (BYTE)confused;
-            } else {
-                t = (maximum + minimum) / 2;
-                st += t;
-                sn++;
-                im = p_im[y][x].s;
-                if (im >= t)
-                {
-                    val = 255; // white
-                } else {
-                    val = 0; // black
-                }
-            }
+            im = p_im[y][x].s;
+            val = (BYTE) ((im > threshold) ? 255 : 0 );
             d_im[y][x] = val;
         }
     }
-    if (sn > 0) {threshold =  st / sn;}
 
     return threshold;
 }
@@ -5567,16 +5612,78 @@ int IMTFilterTAbutaleb (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTBHT (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
+int IMTFilterTBernsen(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, unsigned contrast_limit)
+{
+    int x, y, i, j, xt, yt;
+    unsigned im, t;
+    unsigned confused, c, minimum, maximum;
+    BYTE val;
+    int h = height;
+    int w = width;
+    int threshold = 0, st = 0, sn = 0;
+
+    if (radius < 0) {radius = -radius;}
+
+    confused = 255; // white
+
+    for (y = 0; y < h; y++)
+    {
+        for (x = 0; x < w; x++)
+        {
+            minimum = 768;
+            maximum = 0;
+            for (i = -radius; i <= radius; i++)
+            {
+                yt = y + i;
+                if (yt >= 0 && yt < h)
+                {
+                    for (j = -radius; j <= radius; j++)
+                    {
+                        xt = x + j;
+                        if (xt >= 0 && xt < w)
+                        {
+                            im = p_im[yt][xt].s;
+                            minimum = MIN(minimum, im);
+                            maximum = MAX(maximum, im);
+                        }
+                    }
+                }
+            }
+            c = maximum - minimum;
+            if (c < contrast_limit * 3)
+            {
+                val = (BYTE)confused;
+            } else {
+                t = (maximum + minimum) / 2;
+                st += t;
+                sn++;
+                im = p_im[y][x].s;
+                if (im >= t)
+                {
+                    val = 255; // white
+                } else {
+                    val = 0; // black
+                }
+            }
+            d_im[y][x] = val;
+        }
+    }
+    if (sn > 0) {threshold =  st / sn;}
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTBHTValue (IMTpixel** p_im, unsigned height, unsigned width)
 {
     unsigned y, x;
     int i, im, il, ir;
     il = 0;
     ir = 767;
     double wl = 0, wr = 0;
-    BYTE val;
-    int threshold = 384;
     double histogram[768] = {0};
+    int threshold = 384;
 
     for (y = 0; y < height; y++)
     {
@@ -5618,26 +5725,27 @@ int IMTFilterTBHT (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width
         }
     }
 
-    for ( y = 0; y < height; y++ )
-    {
-        for ( x = 0; x < width; x++)
-        {
-            im = p_im[y][x].s;
-            val = (BYTE) ( ( im >= threshold ) ? 255 : 0 );
-            d_im[y][x] = val;
-        }
-    }
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTBHT (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
+{
+    int threshold = 384;
+
+    threshold = IMTFilterTBHTValue (p_im, height, width);
+    threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);
 
     return threshold;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta)
+int IMTFilterTBiModValue (IMTpixel** p_im, unsigned height, unsigned width, int delta)
 {
     unsigned y, x, im;
     double T, Tw, Tb, Tn, iw, ib;
-    BYTE val;
     int threshold = 0;
 
     T = 384.0;
@@ -5677,14 +5785,96 @@ int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
     }
     T += delta;
     threshold = (int)(T + 0.5);
-    for (y = 0; y < height; y++ )
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta)
+{
+    int threshold = 0;
+    
+    threshold = IMTFilterTBiModValue (p_im, height, width, delta);
+    threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTBiModRegion (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta, int radius)
+{
+    unsigned y, x, y0, x0, y1, x1, yf, xf, im, r;
+    double T, Tw, Tb, Tn, iw, ib, Ts;
+    BYTE val;
+    int threshold = 0;
+
+    if (radius < 0) {radius = -radius;}
+    r = radius;
+    if (r > 0)
     {
-        for (x = 0; x < width; x++)
+        Ts = 0;
+        for (y = 0; y < height; y++ )
         {
-            im = p_im[y][x].s;
-            val = (BYTE) ((im >= T) ? 255 : 0 );
-            d_im[y][x] = val;
+            y0 = 0;
+            if (y > r) {y0 = y - r;}
+            y1 = y + r;
+            if (y1 > height) {y1 = height;}
+            for (x = 0; x < width; x++ )
+            {
+                x0 = 0;
+                if (x > r) {x0 = x - r;}
+                x1 = x + r;
+                if (x1 > width) {x1 = width;}
+            
+                T = 384.0;
+                Tn = 0;
+                while ( T != Tn )
+                {
+                    Tn = T;
+                    Tb = 0;
+                    Tw = 0;
+                    ib = 0;
+                    iw = 0;
+                    for (yf = y0; yf < y1; yf++ )
+                    {
+                        for (xf = x0; xf < x1; xf++)
+                        {
+                            im = p_im[yf][xf].s;
+                            if ( im > T)
+                            {
+                                Tw += im;
+                                iw++;
+                            } else {
+                                Tb += im;
+                                ib++;
+                            }
+                        }
+                    }
+                    if (iw == 0 && ib == 0)
+                    {
+                        T = Tn;
+                    } else if (iw == 0) {
+                        T = Tb/ib;
+                    } else if (ib == 0) {
+                        T = Tw/iw;
+                    } else {
+                        T = ((Tw/iw) + (Tb/ib)) / 2.0;
+                    }
+                }
+                T += delta;
+                Ts += T;
+                im = p_im[y][x].s;
+                val = (BYTE) ((im >= T) ? 255 : 0 );
+                d_im[y][x] = val;
+            }
         }
+        Ts /= height;
+        Ts /= width;
+        threshold = (int)(Ts + 0.5);
+    } else {
+        threshold = IMTFilterTBiMod (p_im, d_im, height, width, delta);
     }
 
     return threshold;
@@ -5780,7 +5970,8 @@ int IMTFilterTColor (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
             p_im[y][x] = IMTdiffS (p_im[y][x]);
         }
     }
-    threshold = IMTFilterTBiMod(p_im, d_im, height, width, delta);
+    threshold = IMTFilterTBiModValue (p_im, height, width, delta);
+    threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);
 
     return threshold;
 }
@@ -6341,7 +6532,7 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTEnt (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
+int IMTFilterTEntValue (IMTpixel** p_im, unsigned height, unsigned width)
 {
     unsigned y, x, i, t, im, cn = 768;
     double sum = 0, pTB, hhB, pTW, hhW, jMax, j;
@@ -6351,7 +6542,6 @@ int IMTFilterTEnt (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width
     double hB[768] = {0};
     double hW[768] = {0};
     int threshold = 0;
-    BYTE val;
 
     for (y = 0; y < height; y++)
     {
@@ -6443,28 +6633,27 @@ int IMTFilterTEnt (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width
         }
     }
 
-    for (y = 0; y < height; y++)
-    {
-        for (x = 0; x < width; x++)
-        {
-            im = p_im[y][x].s;
-            val = (BYTE) (((int)im >= threshold) ? 255 : 0);
-            d_im[y][x] = val;
-        }
-    }
+    return threshold;
+}
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTEnt (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
+{
+    int threshold = 0;
+
+    threshold = IMTFilterTEntValue (p_im, height, width);
+    threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);
 
     return threshold;
 }
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTEqBright (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
+int IMTFilterTEqBrightValue (IMTpixel** p_im, unsigned height, unsigned width)
 {
-    unsigned x, y, i;
-
-    unsigned tx, tt, threshold = 0;
+    unsigned x, y, i, tx, tt;
     double imx, sw, swt, dsr = 0, dst = 0;
     int histogram[768] = {0};
-    BYTE val;
+    int threshold = 0;
 
     for ( i = 0; i < 768; i++ )
     {
@@ -6495,16 +6684,19 @@ int IMTFilterTEqBright (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
         tt++;
         swt -= (imx*767);
     }
-    for (y = 0; y < height; y++)
-    {
-        for (x = 0; x < width; x++)
-        {
-            tx = p_im[y][x].s;
-            val = (BYTE) ( ( tx > tt ) ? 255 : 0 );
-            d_im[y][x] = val;
-        }
-    }
     threshold = tt;
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTEqBright (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
+{
+    int threshold = 0;
+
+    threshold = IMTFilterTEqBrightValue (p_im, height, width);
+    threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);
 
     return threshold;
 }
@@ -6666,13 +6858,12 @@ int IMTFilterTGatos (IMTpixel** p_im, BYTE** d_im, IMTpixel** bg_im, BYTE** g_im
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTGrad (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
+int IMTFilterTGradValue (IMTpixel** p_im, unsigned height, unsigned width)
 {
     int x, y, xp, xn, yp, yn;
     int im, imp, imn;
     double GX, GY, G, SG = 0, SGI = 0, SI = 0, SN = 0, S = 0;
     int threshold = 0;
-    BYTE val;
     int h = height;
     int w = width;
 
@@ -6714,15 +6905,17 @@ int IMTFilterTGrad (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
 
     threshold = (int)(S);
 
-    for (y = 0; y < h; y++)
-    {
-        for (x = 0; x < w; x++)
-        {
-            im = p_im[y][x].s;
-            val = (BYTE) ( ( im >= S ) ? 255 : 0 );
-            d_im[y][x] = val;
-        }
-    }
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTGrad (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
+{
+    int threshold = 0;
+
+    threshold = IMTFilterTGradValue (p_im, height, width);
+    threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);
 
     return threshold;
 }
@@ -6787,35 +6980,12 @@ int IMTFilterTHalftone2 (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterThreshold (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta)
-{
-    unsigned y, x;
-    BYTE val;
-    int im, threshold = 0;
-
-    threshold = 382 + delta;
-    for (y = 0; y < height; y++ )
-    {
-        for (x = 0; x < width; x++)
-        {
-            im = p_im[y][x].s;
-            val = (BYTE) ((im > threshold) ? 255 : 0 );
-            d_im[y][x] = val;
-        }
-    }
-
-    return threshold;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-int IMTFilterTJanni (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
+int IMTFilterTJanniValue (IMTpixel** p_im, unsigned height, unsigned width)
 {
     unsigned y, x, i, cn = 768, im;
     double histogram[768] = {0};
     int gmin=0, gmax=256, gmid;
     double spg = 0;
-    BYTE val;
     unsigned threshold = 0;
 
     for (y = 0; y < height; y++)
@@ -6853,15 +7023,17 @@ int IMTFilterTJanni (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
     threshold = gmin + (int)((gmax - gmin) * spg);
     threshold = (threshold + gmid)/2;
 
-    for (y = 0; y < height; y++)
-    {
-        for (x = 0; x < width; x++)
-        {
-            im = p_im[y][x].s;
-            val = (BYTE) ((im >= threshold ) ? 255 : 0);
-            d_im[y][x] = val;
-        }
-    }
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTJanni (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
+{
+    int threshold = 0;
+
+    threshold = IMTFilterTJanniValue (p_im, height, width);
+    threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);
 
     return threshold;
 }
@@ -7137,14 +7309,13 @@ int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTOtsu (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
+int IMTFilterTOtsuValue (IMTpixel** p_im, unsigned height, unsigned width)
 {
     unsigned im, y, x, i;
     double w = 0, u = 0, uT = 0;
     double  histmean = 0.0;
     double  work1, work2, work3 = 0.0;
     unsigned threshold = 0;
-    BYTE val;
     double histogram[768] = {0};
 
     for (i = 0; i < 768; i++)
@@ -7188,15 +7359,17 @@ int IMTFilterTOtsu (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
         threshold = (int)(histmean/2.0);
     }
 
-    for ( y = 0; y < height; y++ )
-    {
-        for ( x = 0; x < width; x++)
-        {
-            im = p_im[y][x].s;
-            val = (BYTE) ( ( im >= threshold ) ? 255 : 0 );
-            d_im[y][x] = val;
-        }
-    }
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTOtsu (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
+{
+    int threshold = 0;
+
+    threshold = IMTFilterTOtsuValue (p_im, height, width);
+    threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);
 
     return threshold;
 }
@@ -7207,7 +7380,6 @@ int IMTFilterTQuadMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
 {
     unsigned y, x, im;
     double T, TG, Trw, Trb, Tw, Tb, Tn, iw, ib;
-    BYTE val;
     int threshold = 0;
 
     T = 384.0;
@@ -7369,28 +7541,20 @@ int IMTFilterTQuadMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
     T /= 2;
     threshold = (int)(T + 0.5);
 
-    for (y = 0; y < height; y++ )
-    {
-        for (x = 0; x < width; x++)
-        {
-            im = p_im[y][x].s;
-            val = (BYTE) ((im >= T) ? 255 : 0 );
-            d_im[y][x] = val;
-        }
-    }
+    threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);
+    
     return threshold;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTRot (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, bool weight)
+int IMTFilterTRotValue (IMTpixel** p_im, unsigned height, unsigned width, bool weight)
 {
     unsigned y, x, i, im;
     unsigned isz = 768, il = 0, ir = isz - 1;
     double  wl = 0, wr = 0;
     double kw, wi;
     unsigned threshold = 0;
-    BYTE val;
     double histogram[768] = {};
     double hists = 0;
 
@@ -7441,15 +7605,17 @@ int IMTFilterTRot (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width
 
     threshold = il;
 
-    for ( y = 0; y < height; y++ )
-    {
-        for ( x = 0; x < width; x++)
-        {
-            im = p_im[y][x].s;
-            val = (BYTE) ((im >= threshold ) ? 255 : 0);
-            d_im[y][x] = val;
-        }
-    }
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTRot (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, bool weight)
+{
+    int threshold = 0;
+
+    threshold = IMTFilterTRotValue (p_im, height, width, weight);
+    threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);
 
     return threshold;
 }
@@ -7627,11 +7793,10 @@ int IMTFilterTText (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTTsai (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int shift)
+int IMTFilterTTsaiValue (IMTpixel** p_im, unsigned height, unsigned width, int shift)
 {
 
     unsigned y, x, cn = 768, i, im;
-    BYTE val;
     int threshold;
     int histogram[768] = {0};
     double criterion = 0.0;
@@ -7677,15 +7842,17 @@ int IMTFilterTTsai (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
 
     threshold += shift * 3;
 
-    for (y = 0; y < height; y++)
-    {
-        for (x = 0; x < width; x++)
-        {
-            im = p_im[y][x].s;
-            val = (BYTE) (((int)im >= threshold) ? 255 : 0);
-            d_im[y][x] = val;
-        }
-    }
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTTsai (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int shift)
+{
+    int threshold = 0;
+
+    threshold = IMTFilterTTsaiValue (p_im, height, width, shift);
+    threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);
 
     return threshold;
 }

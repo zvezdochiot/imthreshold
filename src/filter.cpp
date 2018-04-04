@@ -28,6 +28,7 @@ void ImthresholdFilterUsage()
     printf("          -f str  name filter:\n");
     printf("                    'adsmooth'\n");
     printf("                    'bgdiv'\n");
+    printf("                    'binorm'\n");
     printf("                    'blur'\n");
     printf("                    'bwc'\n");
     printf("                    'cluster'\n");
@@ -226,6 +227,28 @@ int main(int argc, char *argv[])
                 free(b_im);
                 for (y = 0; y < height; y++){free(p_im[y]);}
                 free(p_im);
+            } else if (strcmp(namefilter, "binorm") == 0) {
+                printf("Filter= %s\n", namefilter);
+                IMTpixel** p_im;
+                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** d_im;
+                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+
+                printf("Radius= %f\n", radius);
+                printf("Delta= %f\n", threshold);
+
+                ImthresholdGetData(dib, p_im);
+                FreeImage_Unload(dib);
+                threshold = IMTFilterBiModNorm (p_im, d_im, height, width, (int)threshold, radius);
+                for (y = 0; y < height; y++){free(p_im[y]);}
+                free(p_im);
+                printf("Norm= %f\n", threshold / 3);
+                dst_dib = FreeImage_Allocate(width, height, 24);
+                ImthresholdSetData(dst_dib, d_im);
+                for (y = 0; y < height; y++){free(d_im[y]);}
+                free(d_im);
             } else if (strcmp(namefilter, "bwc") == 0) {
                 printf("Filter= %s\n", namefilter);
                 unsigned radiusint;
