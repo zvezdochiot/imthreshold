@@ -1,9 +1,9 @@
-PROGNAME      = imthreshold-deskew imthreshold-rotate imthreshold-filter imthreshold-fautoinv imthreshold-fdespeckle imthreshold-finfo imthreshold-flevell imthreshold-fpmean imthreshold-separate imthreshold-size imthreshold-sbwmag2 imthreshold-scris imthreshold-shris imthreshold-tglobal imthreshold-tlocal imthreshold-tdalg imthreshold-tdjvul imthreshold-tgatos imthreshold-thalftone2 imthreshold-ttext imthreshold-twhiterohrer
+PROGNAME      = imthreshold-deskew imthreshold-rotate imthreshold-filter imthreshold-fautoinv imthreshold-fdespeckle imthreshold-finfo imthreshold-flevell imthreshold-fpmean imthreshold-math imthreshold-separate imthreshold-size imthreshold-sbwmag2 imthreshold-scris imthreshold-shris imthreshold-tglobal imthreshold-tlocal imthreshold-tlayer imthreshold-tdalg imthreshold-tdjvul imthreshold-tgatos imthreshold-thalftone2 imthreshold-ttext imthreshold-twhiterohrer
 CPP           = g++
 CFLAGS        = -DUNIX -O2 -Wall -s
 LIBS          = -lfreeimage
 VER           = 0
-VERB          = 20180404
+VERB          = 20180405
 COMMON        = libimthreshold.so.$(VER) libimthresholdfreeimage.so.$(VER)
 PREFIX        = /usr/local
 INCPREFIX     = $(PREFIX)/include
@@ -57,6 +57,9 @@ imthreshold-flevell: flevell.cpp $(COMMON)
 imthreshold-fpmean: fpmean.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
+imthreshold-math: math.cpp $(COMMON)
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
+
 imthreshold-separate: separate.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
@@ -76,6 +79,9 @@ imthreshold-tglobal: tglobal.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-tlocal: tlocal.cpp $(COMMON)
+	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
+
+imthreshold-tlayer: tlayer.cpp $(COMMON)
 	$(CPP) $(CFLAGS) $(LIBS) $^ -o $@
 
 imthreshold-tdalg: tdalg.cpp $(COMMON)

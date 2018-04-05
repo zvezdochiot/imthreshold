@@ -40,6 +40,8 @@ It's a set of command line tools to create color images of djvu.
   imthreshold-deskew
   imthreshold-rotate
   imthreshold-separate
+  imthreshold-tlayer
+  imthreshold-math
   imthreshold-bash-scripts
 
 2017-12-19
