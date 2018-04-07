@@ -1,3 +1,7 @@
+0.20180408
+
+    Math: average, distance, divide, geometric, minus, multiply, norm, plus, threshold
+
 0.20180405
 
     Threshold: restruct threshold method (value and layer)

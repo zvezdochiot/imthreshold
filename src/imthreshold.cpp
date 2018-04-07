@@ -1938,68 +1938,6 @@ IMTpixel IMTFilterGreyWorld (IMTpixel** p_im, unsigned height, unsigned width)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterLevelL (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned level, unsigned num)
-{
-    unsigned y, x, d, l, i, j, y0, x0, y1, x1;
-    unsigned blsz = 1, cnth, cntw;
-    double immean, val;
-    IMTpixel pim, dim;
-
-    for (l = 0; l < level; l++)
-    {
-        blsz *= 2;
-    }
-    pim = IMTmeanIc(p_im, 0, 0, height, width);
-    for (y = 0; y < height; y++)
-    {
-        for (x = 0; x < width; x++)
-        {
-            d_im[y][x] = pim;
-        }
-    }
-    if (num > level) {num = 0;}
-    level -= num;
-    for (l = 0; l <= level; l++)
-    {
-        cnth = (height + blsz - 1) / blsz;
-        cntw = (width + blsz - 1) / blsz;
-        for (i = 0; i < cnth; i++)
-        {
-            y0 = i * blsz;
-            y1 = y0 + blsz;
-            if (y1 > height) {y1 = height;}
-            for (j = 0; j < cntw; j++)
-            {
-                x0 = j * blsz;
-                x1 = x0 + blsz;
-                if (x1 > width) {x1 = width;}
-
-                pim = IMTmeanIc(p_im, y0, x0, y1, x1);
-                dim = IMTaverageIc(d_im, pim, y0, x0, y1, x1, level);
-            }
-        }
-        blsz /= 2;
-    }
-    immean = IMTmean(d_im, height, width);
-    for (y = 0; y < height; y++)
-    {
-        for (x = 0; x < width; x++)
-        {
-            for (d = 0; d < 3; d++)
-            {
-                val = p_im[y][x].c[d];
-                val += immean;
-                val -= d_im[y][x].c[d];
-                d_im[y][x].c[d] = MIN(MAX((int)0, (int)val), (int)255);;
-            }
-        }
-    }
-
-    return immean;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 double IMTFilterLevelMean (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double contour, double thres, int lower_bound, int upper_bound)
 {
     if (upper_bound < lower_bound)
@@ -2224,6 +2162,33 @@ void IMTFilterMathDivide (IMTpixel** p_im, IMTpixel** m_im, unsigned height, uns
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void IMTFilterMathGeometric (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width)
+{
+    unsigned y, x, d;
+    double im, imm;
+
+    for ( y = 0; y < height; y++ )
+    {
+        for ( x = 0; x < width; x++ )
+        {
+            for (d = 0; d < 3; d++)
+            {
+                im = p_im[y][x].c[d];
+                im++;
+                imm = m_im[y][x].c[d];
+                imm++;
+                im *= imm;
+                im = sqrt(im);
+                im -= 0.5;
+                p_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)im), (int)255);
+            }
+            p_im[y][x] = IMTcalcS (p_im[y][x]);
+        }
+    }
+ }
+
+///////////////////////////////////////////////////////////////////////////////
+
 void IMTFilterMathMinus (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width)
 {
     unsigned y, x, d;
@@ -2263,7 +2228,7 @@ void IMTFilterMathMultiply (IMTpixel** p_im, IMTpixel** m_im, unsigned height, u
                 imm = m_im[y][x].c[d];
                 imm++;
                 im *= imm;
-                im = sqrt(im);
+                im /= 256.0;
                 im -= 0.5;
                 p_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)im), (int)255);
             }
@@ -4026,60 +3991,6 @@ void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsi
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterBgDiv (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned ndiv)
-{
-    unsigned y, x, d, k, im, n;
-    int t, dd;
-    double xdiv, xx, value, ims;
-
-    ims = 0;
-    n = 0;
-    for (y = 0; y < height; y++)
-    {
-        for (x = 0; x < width; x++)
-        {
-            im = p_im[y][x].s;
-            ims += im;
-            n++;
-        }
-    }
-    ims /= n;
-    ims /= 3.0;
-    ims /= 255.0;
-    for (y = 0; y < height; y++)
-    {
-        for (x = 0; x < width; x++)
-        {
-            t = p_im[y][x].s;
-            t++;
-            dd = b_im[y][x].s;
-            dd++;
-            xdiv = t;
-            xx = dd;
-            xdiv /= xx;
-            xx = xdiv;
-            for (k = 0; k < ndiv; k++)
-            {
-                xdiv *= xx;
-            }
-            xx = 1.0 / (ims + 0.5);
-            for (d = 0; d < 3; d++)
-            {
-                value = p_im[y][x].c[d];
-                value -= 127.5;
-                value *= xx;
-                value += 127.5;
-                value *= xdiv;
-                d_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)(value + 0.5)), (int)255);
-            }
-            d_im[y][x] = IMTcalcS (d_im[y][x]);
-        }
-    }
-    return ims;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned ncolor)
 {
     unsigned y, x, d, k, l, m, n, im, imt, ims, imds, imdm;
@@ -4351,96 +4262,6 @@ int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
         }
     }
     return imdm;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-int IMTFilterBiModNorm (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int delta, int radius)
-{
-    unsigned y, x, d, y0, x0, y1, x1, yf, xf, im, r;
-    double T, Tw, Tb, Tn, iw, ib, Ts, kT, imx;
-    int threshold;
-
-    threshold = IMTFilterTBiModValue (p_im, height, width);
-    threshold += delta;
-    if (threshold == 0) {threshold = 385;}
-    r = 0;
-    if (radius < 0) {r = -radius;} else {r = radius;}
-    if (r > 0)
-    {
-        Ts = 0;
-        for (y = 0; y < height; y++ )
-        {
-            y0 = 0;
-            if (y > r) {y0 = y - r;}
-            y1 = y + r;
-            if (y1 > height) {y1 = height;}
-            for (x = 0; x < width; x++ )
-            {
-                x0 = 0;
-                if (x > r) {x0 = x - r;}
-                x1 = x + r;
-                if (x1 > width) {x1 = width;}
-            
-                T = 384.0;
-                Tn = 0;
-                while ( T != Tn )
-                {
-                    Tn = T;
-                    Tb = 0;
-                    Tw = 0;
-                    ib = 0;
-                    iw = 0;
-                    for (yf = y0; yf < y1; yf++ )
-                    {
-                        for (xf = x0; xf < x1; xf++)
-                        {
-                            im = p_im[yf][xf].s;
-                            if ( im > T)
-                            {
-                                Tw += im;
-                                iw++;
-                            } else {
-                                Tb += im;
-                                ib++;
-                            }
-                        }
-                    }
-                    if (iw == 0 && ib == 0)
-                    {
-                        T = Tn;
-                    } else if (iw == 0) {
-                        T = Tb/ib;
-                    } else if (ib == 0) {
-                        T = Tw/iw;
-                    } else {
-                        T = ((Tw/iw) + (Tb/ib)) / 2.0;
-                    }
-                }
-                T += delta;
-                Ts += T;
-                im = p_im[y][x].s;
-                if (radius < 0)
-                {
-                    kT = (T + 1.0) / threshold;
-                } else {
-                    kT = threshold / (T + 1.0);
-                }
-                for (d = 0; d < 3; d++)
-                {
-                    imx = p_im[y][x].c[d];
-                    imx *= kT;
-                    d_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)(imx + 0.5)), (int)255);;
-                }
-                d_im[y][x] = IMTcalcS (d_im[y][x]);
-            }
-        }
-        Ts /= height;
-        Ts /= width;
-        threshold = (int)(Ts + 0.5);
-    }
-
-    return threshold;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

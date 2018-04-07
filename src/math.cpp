@@ -27,6 +27,7 @@ void ImthresholdFilterMathUsage()
     printf("                    'average'\n");
     printf("                    'distance'\n");
     printf("                    'divide'\n");
+    printf("                    'geometric'\n");
     printf("                    'minus'\n");
     printf("                    'multiply'\n");
     printf("                    'norm'\n");
@@ -137,6 +138,14 @@ int main(int argc, char *argv[])
                             printf("Filter= %s\n", namefilter);
 
                             IMTFilterMathDivide (p_im, m_im, height, width);
+                            dst_dib = FreeImage_Allocate (width, height, 24);
+                            ImthresholdSetData (dst_dib, p_im);
+                        }
+                        else if (strcmp(namefilter, "geometric") == 0)
+                        {
+                            printf("Filter= %s\n", namefilter);
+
+                            IMTFilterMathGeometric (p_im, m_im, height, width);
                             dst_dib = FreeImage_Allocate (width, height, 24);
                             ImthresholdSetData (dst_dib, p_im);
                         }
