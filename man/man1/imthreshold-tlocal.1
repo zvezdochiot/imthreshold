@@ -1,4 +1,4 @@
-.TH "ImThreshold User Manual" 1 "17 Jan 2018" "ImThreshold documentation"
+.TH "ImThreshold User Manual" 1 "14 Apr 2018" "ImThreshold documentation"
 
 .SH NAME
 imthreshold-tlocal
@@ -13,11 +13,14 @@ imthreshold-tlocal [options] <input_image> <output_image>(BW)
 .TP
 -f str
 name filter:
-                    'abutaleb'
-                    'bernsen'
-                    'chistian'
-                    'niblack'
-                    'sauvola' (default)
+    'abutaleb'
+    'bernsen'
+    'bimod'
+    'blur'
+    'chistian'
+    'edge'
+    'niblack'
+    'sauvola' (default)
 .TP
 -c N
 contrast limit (int, optional, default = 128)
@@ -25,11 +28,17 @@ contrast limit (int, optional, default = 128)
 -d N.N
 delta (double, optional, default = -5.0)
 .TP
+-i
+invert (bool, optional, default = false)
+.TP
 -l N
 lower bound (int, optional, default = 0)
 .TP
 -g N
 dynamic range (int, optional, default = 128)
+.TP
+-n
+norm (bool, optional, default = false)
 .TP
 -r N
 radius (int, optional, default = 7)
@@ -39,6 +48,9 @@ sensitivity (double, optional, default = 0.5)
 .TP
 -u N
 upper bound (int, optional, default = 255)
+.TP
+-z
+mirror of mean (bool, optional, default = false)
 .TP
 -h
 help
@@ -52,6 +64,7 @@ Copyright 2017 zvezdochiot.
 
 .SH SEE ALSO
  imthreshold,
+ imthreshold-a4,
  imthreshold-anytodjvu,
  imthreshold-anytominidjvu,
  imthreshold-deskew,
@@ -59,11 +72,12 @@ Copyright 2017 zvezdochiot.
  imthreshold-fdespeckle,
  imthreshold-filter,
  imthreshold-finfo,
- imthreshold-flevell,
  imthreshold-fpmean,
+ imthreshold-math,
  imthreshold-rotate,
  imthreshold-sbwmag2,
  imthreshold-scris,
+ imthreshold-separate,
  imthreshold-shris,
  imthreshold-size,
  imthreshold-tdalg,
@@ -71,10 +85,10 @@ Copyright 2017 zvezdochiot.
  imthreshold-tgatos,
  imthreshold-tglobal,
  imthreshold-thalftone2,
+ imthreshold-tlayer,
  imthreshold-tlocal,
  imthreshold-ttext,
  imthreshold-twhiterohrer,
- imthreshold-separate,
  imthreshold-bash-scripts.
 
 .SH CONTACTS

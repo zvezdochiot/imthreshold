@@ -28,6 +28,9 @@ void ImthresholdFilterMathUsage()
     printf("                    'distance'\n");
     printf("                    'divide'\n");
     printf("                    'geometric'\n");
+    printf("                    'harmonic'\n");
+    printf("                    'max'\n");
+    printf("                    'min'\n");
     printf("                    'minus'\n");
     printf("                    'multiply'\n");
     printf("                    'norm'\n");
@@ -146,6 +149,30 @@ int main(int argc, char *argv[])
                             printf("Filter= %s\n", namefilter);
 
                             IMTFilterMathGeometric (p_im, m_im, height, width);
+                            dst_dib = FreeImage_Allocate (width, height, 24);
+                            ImthresholdSetData (dst_dib, p_im);
+                        }
+                        else if (strcmp(namefilter, "harmonic") == 0)
+                        {
+                            printf("Filter= %s\n", namefilter);
+
+                            IMTFilterMathHarmonic (p_im, m_im, height, width);
+                            dst_dib = FreeImage_Allocate (width, height, 24);
+                            ImthresholdSetData (dst_dib, p_im);
+                        }
+                        else if (strcmp(namefilter, "max") == 0)
+                        {
+                            printf("Filter= %s\n", namefilter);
+
+                            IMTFilterMathMax (p_im, m_im, height, width);
+                            dst_dib = FreeImage_Allocate (width, height, 24);
+                            ImthresholdSetData (dst_dib, p_im);
+                        }
+                        else if (strcmp(namefilter, "min") == 0)
+                        {
+                            printf("Filter= %s\n", namefilter);
+
+                            IMTFilterMathMin (p_im, m_im, height, width);
                             dst_dib = FreeImage_Allocate (width, height, 24);
                             ImthresholdSetData (dst_dib, p_im);
                         }

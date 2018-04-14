@@ -1,45 +1,56 @@
 .TH "ImThreshold User Manual" 1 "14 Apr 2018" "ImThreshold documentation"
 
 .SH NAME
-imthreshold-bash-scripts
+imthreshold-tlayer
 
 .SH DESCRIPTION
-A set of scripts for encoding images in a format djvu and manipulate djvu file.
+Local adaptive zero-layer image.
 
 .SH SYNOPSIS
-imthreshold-bash-scripts
+imthreshold-tlayer [options] <input_image> <output_image>
 
-or
+.SH OPTIONS
+.TP
+-f str
+name filter:
+    'bernsen'
+    'bimod'
+    'chistian'
+    'niblack'
+    'sauvola' (default)
+.TP
+-c N
+contrast limit (int, optional, default = 128)
+.TP
+-d N.N
+delta (double, optional, default = -5.0)
+.TP
+-l N
+lower bound (int, optional, default = 0)
+.TP
+-g N
+dynamic range (int, optional, default = 128)
+.TP
+-n
+norm (bool, optional, default = false)
+.TP
+-r N
+radius (int, optional, default = 7)
+.TP
+-s N.N
+sensitivity (double, optional, default = 0.5)
+.TP
+-u N
+upper bound (int, optional, default = 255)
+.TP
+-z
+mirror of mean (bool, optional, default = false)
+.TP
+-h
+help
 
-ls -R1 /usr/share/scripts/bash/djvu
-
-.SH CONTENTS
- MFB-make
- [Make (Mask-Foreground-Background)-djvu file of colors image]:
-  djvu-pnm-tdjvul.sh
-  djvu-pnm-ush-tbimod.sh
-  djvu-pnm-ush-tgrad.sh
-  djvu-pnm-ush-totsu.sh
-  djvu-pnm-ush-trot.sh
- meta
- [Metadata manipulation djvu file]:
-    djvu-meta-get.sh
-    djvu-meta-make.sh
-    djvu-meta-set.sh
- ocr
- [Recognize text in multipage djvu file]:
-    djvu-cuneiform-pbm.sh
-    djvu-tesseract-be.sh
-    djvu-tesseract-pbm.sh
-    djvu-tesseract-rs.sh
-    djvu-tesseract.sh
- outline
- [Outline manipulation djvu file]:
-    djvu-outline-offset.sh
-    djvu-outline.sh
-
-.SH DEPENDS
- bash, djvulibre-bin, netpbm, imthreshold, [gawk, uni2ascii], [sed, tesseract-ocr, cuneiform, ocrodjvu].
+.SH EXAMPLE
+imthreshold-tlayer -f chistian sample.tif sample.tlocal.tif
 
 .SH COPYRIGHT
 Copyright 2017 zvezdochiot.

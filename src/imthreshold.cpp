@@ -2189,6 +2189,78 @@ void IMTFilterMathGeometric (IMTpixel** p_im, IMTpixel** m_im, unsigned height, 
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void IMTFilterMathHarmonic (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width)
+{
+    unsigned y, x, d;
+    double im, imm;
+
+    for ( y = 0; y < height; y++ )
+    {
+        for ( x = 0; x < width; x++ )
+        {
+            for (d = 0; d < 3; d++)
+            {
+                im = p_im[y][x].c[d];
+                im++;
+                imm = m_im[y][x].c[d];
+                imm++;
+                im = 2.0 / (1.0 / im + 1.0 /imm);
+                im -= 0.5;
+                p_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)im), (int)255);
+            }
+            p_im[y][x] = IMTcalcS (p_im[y][x]);
+        }
+    }
+ }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterMathMax (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width)
+{
+    unsigned y, x, d;
+    int im, imm;
+
+    for ( y = 0; y < height; y++ )
+    {
+        for ( x = 0; x < width; x++ )
+        {
+            for (d = 0; d < 3; d++)
+            {
+                im = p_im[y][x].c[d];
+                imm = m_im[y][x].c[d];
+                if (imm > im) {im = imm;}
+                p_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)im), (int)255);
+            }
+            p_im[y][x] = IMTcalcS (p_im[y][x]);
+        }
+    }
+ }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterMathMin (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width)
+{
+    unsigned y, x, d;
+    int im, imm;
+
+    for ( y = 0; y < height; y++ )
+    {
+        for ( x = 0; x < width; x++ )
+        {
+            for (d = 0; d < 3; d++)
+            {
+                im = p_im[y][x].c[d];
+                imm = m_im[y][x].c[d];
+                if (imm < im) {im = imm;}
+                p_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)im), (int)255);
+            }
+            p_im[y][x] = IMTcalcS (p_im[y][x]);
+        }
+    }
+ }
+
+///////////////////////////////////////////////////////////////////////////////
+
 void IMTFilterMathMinus (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width)
 {
     unsigned y, x, d;

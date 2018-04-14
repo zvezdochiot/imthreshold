@@ -1,45 +1,37 @@
 .TH "ImThreshold User Manual" 1 "14 Apr 2018" "ImThreshold documentation"
 
 .SH NAME
-imthreshold-bash-scripts
+ imthreshold-math
 
 .SH DESCRIPTION
-A set of scripts for encoding images in a format djvu and manipulate djvu file.
+Math opertion of two image.
 
 .SH SYNOPSIS
-imthreshold-bash-scripts
+imthreshold-math [options] <input_file> <input_file> <output_file>
 
-or
+.SH OPTIONS
+.TP
+-m str
+name method
+(string, optional, default = similar):
+    'average'
+    'distance'
+    'divide'
+    'geometric'
+    'harmonic'
+    'max'
+    'min'
+    'minus'
+    'multiply'
+    'norm'
+    'plus'
+    'threshold (default)'
+.TP
+-h
+help
 
-ls -R1 /usr/share/scripts/bash/djvu
-
-.SH CONTENTS
- MFB-make
- [Make (Mask-Foreground-Background)-djvu file of colors image]:
-  djvu-pnm-tdjvul.sh
-  djvu-pnm-ush-tbimod.sh
-  djvu-pnm-ush-tgrad.sh
-  djvu-pnm-ush-totsu.sh
-  djvu-pnm-ush-trot.sh
- meta
- [Metadata manipulation djvu file]:
-    djvu-meta-get.sh
-    djvu-meta-make.sh
-    djvu-meta-set.sh
- ocr
- [Recognize text in multipage djvu file]:
-    djvu-cuneiform-pbm.sh
-    djvu-tesseract-be.sh
-    djvu-tesseract-pbm.sh
-    djvu-tesseract-rs.sh
-    djvu-tesseract.sh
- outline
- [Outline manipulation djvu file]:
-    djvu-outline-offset.sh
-    djvu-outline.sh
-
-.SH DEPENDS
- bash, djvulibre-bin, netpbm, imthreshold, [gawk, uni2ascii], [sed, tesseract-ocr, cuneiform, ocrodjvu].
+.SH EXAMPLE
+imthreshold-math -m multiply sample1.tif sample2.tif sample.multiply.tif
 
 .SH COPYRIGHT
 Copyright 2017 zvezdochiot.

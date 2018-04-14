@@ -1,4 +1,4 @@
-.TH "ImThreshold User Manual" 1 "17 Jan 2018" "ImThreshold documentation"
+.TH "ImThreshold User Manual" 1 "14 Apr 2018" "ImThreshold documentation"
 
 .SH NAME
 imthreshold-tglobal
@@ -13,18 +13,21 @@ imthreshold-tglobal [options] <input_image> <output_image>(BW)
 .TP
 -f str
 name filter:
-                    'bht'
-                    'bimod' (default)
-                    'color'
-                    'dither'
-                    'entropy'
-                    'eqbright'
-                    'grad'
-                    'janni'
-                    'kmeans'
-                    'otsu'
-                    'rot'
-                    'tsai'
+    'bht'
+    'bimod' (default)
+    'bimodc'
+    'color'
+    'dither'
+    'entropy'
+    'eqbright'
+    'grad'
+    'janni'
+    'kmeans'
+    'otsu'
+    'quadmod'
+    'rot'
+    'tsai'
+    'use'
 .TP
 -d N
 delta (int, optional, default = 0)
@@ -38,11 +41,17 @@ K par (k/2) (int, optional, default = 1)
 -m N
 max iteration (int, optional, default = 10)
 .TP
+-n
+norm (bool, optional, default = false)
+.TP
 -s N
 shift (int, optional, default = -32)
 .TP
 -w
 weight colors (bool, optional)
+.TP
+-z
+mirror of mean (bool, optional, default = false)
 .TP
 -h
 help
@@ -56,6 +65,7 @@ Copyright 2017 zvezdochiot.
 
 .SH SEE ALSO
  imthreshold,
+ imthreshold-a4,
  imthreshold-anytodjvu,
  imthreshold-anytominidjvu,
  imthreshold-deskew,
@@ -63,11 +73,12 @@ Copyright 2017 zvezdochiot.
  imthreshold-fdespeckle,
  imthreshold-filter,
  imthreshold-finfo,
- imthreshold-flevell,
  imthreshold-fpmean,
+ imthreshold-math,
  imthreshold-rotate,
  imthreshold-sbwmag2,
  imthreshold-scris,
+ imthreshold-separate,
  imthreshold-shris,
  imthreshold-size,
  imthreshold-tdalg,
@@ -75,10 +86,10 @@ Copyright 2017 zvezdochiot.
  imthreshold-tgatos,
  imthreshold-tglobal,
  imthreshold-thalftone2,
+ imthreshold-tlayer,
  imthreshold-tlocal,
  imthreshold-ttext,
  imthreshold-twhiterohrer,
- imthreshold-separate,
  imthreshold-bash-scripts.
 
 .SH CONTACTS
