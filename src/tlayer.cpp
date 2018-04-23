@@ -27,13 +27,15 @@ void ImthresholdFilterTSauvolaUsage()
     printf("                    'bernsen'\n");
     printf("                    'bimod'\n");
     printf("                    'chistian'\n");
+    printf("                    'mscale'\n");
     printf("                    'niblack'\n");
     printf("                    'sauvola' (default)\n");
     printf("          -c N    contrast limit (int, optional, default = 128)\n");
     printf("          -d N.N  delta (double, optional, default = -5.0)\n");
-    printf("          -l N    lower bound (int, optional, default = 0)\n");
     printf("          -g N    dynamic range (int, optional, default = 128)\n");
+    printf("          -l N    lower bound (int, optional, default = 0)\n");
     printf("          -n      norm (bool, optional, default = false)\n");
+    printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
     printf("          -r N    radius (int, optional, default = 7)\n");
     printf("          -s N.N  sensitivity (double, optional, default = 0.5)\n");
     printf("          -u N    upper bound (int, optional, default = 255)\n");
@@ -52,6 +54,7 @@ int main(int argc, char *argv[])
 
     int opt;
     int radius = 7;
+    double doverlay = 0.5;
     double sensitivity = 0.5;
     unsigned contrast_limit = 128;
     int dynamic_range = 128;
@@ -64,7 +67,7 @@ int main(int argc, char *argv[])
     int threshold = 0;
     char *namefilter;
     namefilter="sauvola";
-    while ((opt = getopt(argc, argv, ":f:c:d:g:l:nr:s:u:zh")) != -1)
+    while ((opt = getopt(argc, argv, ":f:c:d:g:l:no:r:s:u:zh")) != -1)
     {
         switch(opt)
         {
@@ -85,6 +88,9 @@ int main(int argc, char *argv[])
                 break;
             case 'n':
                 fnorm = true;
+                break;
+            case 'o':
+                doverlay = atof(optarg);
                 break;
             case 'r':
                 radius = atof(optarg);
@@ -173,6 +179,12 @@ int main(int argc, char *argv[])
                 printf("Upper= %d\n", upper_bound);
                 printf("Delta= %f\n", delta);
                 threshold = IMTFilterTChistianLayer(p_im, t_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
+            } else if (strcmp(namefilter, "mscale") == 0) {
+                printf("Filter= %s\n", namefilter);
+                printf("Sensitivity= %f\n", sensitivity);
+                printf("Overlay= %f\n", doverlay);
+                printf("Delta= %f\n", delta);
+                threshold = IMTFilterTMscaleLayer (p_im, t_im, height, width, radius, sensitivity, doverlay, delta);
             } else if (strcmp(namefilter, "niblack") == 0) {
                 printf("Filter= %s\n", namefilter);
                 printf("Sensitivity= %f\n", sensitivity);

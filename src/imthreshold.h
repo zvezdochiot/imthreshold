@@ -221,6 +221,8 @@ int IMTFilterTHalftone2 (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned
 int IMTFilterTJanniValue (IMTpixel** p_im, unsigned height, unsigned width);
 int IMTFilterTJanni (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width);
 int IMTFilterTKMeans (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, unsigned knum, unsigned iters);
+int IMTFilterTMscaleLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsigned width, unsigned radius, double sensitivity, double doverlay, double delta);
+int IMTFilterTMscale (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, unsigned radius, double sensitivity, double doverlay, double delta);
 int IMTFilterTNiblackLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta);
 int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta);
 int IMTFilterTOtsuValue (IMTpixel** p_im, unsigned height, unsigned width);

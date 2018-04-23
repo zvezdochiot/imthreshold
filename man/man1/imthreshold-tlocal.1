@@ -18,6 +18,7 @@ name filter:
     'bimod'
     'blur'
     'chistian'
+    'mscale'
     'edge'
     'niblack'
     'sauvola' (default)
@@ -31,11 +32,14 @@ delta (double, optional, default = -5.0)
 -i
 invert (bool, optional, default = false)
 .TP
+-g N
+dynamic range (int, optional, default = 128)
+.TP
 -l N
 lower bound (int, optional, default = 0)
 .TP
--g N
-dynamic range (int, optional, default = 128)
+-o N.N
+overlay (double, optional, default = 0.5)
 .TP
 -n
 norm (bool, optional, default = false)

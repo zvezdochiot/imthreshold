@@ -7509,6 +7509,149 @@ int IMTFilterTKMeans (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wi
 
 ////////////////////////////////////////////////////////////////////////////////
 
+int IMTFilterTMscaleLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsigned width, unsigned radius, double sensitivity, double doverlay, double delta)
+{
+    unsigned whcp, y, x, l, i, j, y0, x0, y1, x1, blsz, rsz;
+    double immean, st, kover, sensdiv, senspos, sensinv;
+    unsigned immin, immax, imt, cnth, cntw, level = 0;
+    unsigned maskbl, maskover;
+    int threshold = 0;
+
+    whcp = height;
+    whcp += width;
+    whcp /= 2;
+    blsz = 1;
+    while (blsz < whcp)
+    {
+        level++;
+        blsz *= 2;
+    }
+    rsz = 1;
+    while (rsz < radius)
+    {
+        if (level > 1) {level--;}
+        rsz *= 2;
+    }
+    immin = p_im[0][0].s;
+    immax = p_im[0][0].s;
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            if (p_im[y][x].s < immin) {immin = p_im[y][x].s;}
+            if (p_im[y][x].s > immax) {immax = p_im[y][x].s;}
+        }
+    }
+    immean = immax + immin;
+    immean /= 2.0;
+    immean += 0.5;
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            t_im[y][x] = WORD(immean);
+        }
+    }
+    if (doverlay < 0) {doverlay = 0;}
+    kover = doverlay + 1.0;
+    if (sensitivity < 0)
+    {
+		sensitivity = -sensitivity;
+		sensdiv = sensitivity;
+		sensdiv += 1.0;
+		sensinv = 1.0 / sensdiv;
+		senspos = sensitivity / sensdiv;
+	} else {
+		sensdiv = sensitivity;
+		sensdiv += 1.0;
+		senspos = 1.0 / sensdiv;
+		sensinv = sensitivity / sensdiv;
+	}
+    for (l = 0; l < level; l++)
+    {
+        cnth = (height + blsz - 1) / blsz;
+        cntw = (width + blsz - 1) / blsz;
+        maskbl = blsz;
+        maskover = (kover * maskbl);
+        for (i = 0; i < cnth; i++)
+        {
+            y0 = i * maskbl;
+            y1 = y0 + maskover;
+            if (y1 > height) {y1 = height;}
+            for (j = 0; j < cntw; j++)
+            {
+                x0 = j * maskbl;
+                x1 = x0 + maskover;
+                if (x1 > width) {x1 = width;}
+
+                immin = p_im[y0][x0].s;
+                immax = p_im[y0][x0].s;
+                for (y = y0; y < y1; y++)
+                {
+                    for (x = x0; x < x1; x++)
+                    {
+                        if (p_im[y][x].s < immin) {immin = p_im[y][x].s;}
+                        if (p_im[y][x].s > immax) {immax = p_im[y][x].s;}                       
+                    }
+                }
+                immean = immax + immin;
+                immean /= 2.0;
+                immean *= sensinv;
+                for (y = y0; y < y1; y++)
+                {
+                    for (x = x0; x < x1; x++)
+                    {
+                        imt = t_im[y][x];
+                        imt *= senspos;
+                        imt += immean;
+                        imt += 0.5;
+                        t_im[y][x] = WORD(imt);
+                    }
+                }
+            }
+        }
+        blsz /= 2;
+    }
+    st = 0;
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            imt = t_im[y][x];
+            imt += delta;
+            t_im[y][x] = imt;
+            st += imt;
+        }
+    }
+    st /= height;
+    st /= width;
+    st += 0.5;
+    threshold = int(st);
+
+    return threshold;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTMscale (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, unsigned radius, double sensitivity, double doverlay, double delta)
+{
+    unsigned y;
+    int threshold = 0;
+    WORD** t_im;
+    t_im = (WORD**)malloc(height * sizeof(WORD*));
+    for (y = 0; y < height; y++) {t_im[y] = (WORD*)malloc(width * sizeof(WORD));}
+
+    threshold = IMTFilterTMscaleLayer (p_im, t_im, height, width, radius, sensitivity, doverlay, delta);
+    threshold = IMTFilterThresholdLayer (p_im, t_im, d_im, height, width);
+
+    for (y = 0; y < height; y++){free(t_im[y]);}
+    free(t_im);
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 int IMTFilterTNiblackLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta)
 {
     unsigned y, x, n;
