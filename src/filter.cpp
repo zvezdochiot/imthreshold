@@ -39,6 +39,10 @@ void ImthresholdFilterUsage()
     printf("                    'levelsigma'\n");
     printf("                    'mirror'\n");
     printf("                    'monocolor'\n");
+    printf("                    'mclose'\n");
+    printf("                    'mdilate'\n");
+    printf("                    'merose'\n");
+    printf("                    'mopen'\n");
     printf("                    'none' (default)\n");
     printf("                    'peron'\n");
     printf("                    'posterize'\n");
@@ -427,6 +431,92 @@ int main(int argc, char *argv[])
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
                 IMTFilterMonoColor(p_im, height, width);
+                dst_dib = FreeImage_Allocate(width, height, 24);
+                ImthresholdSetData(dst_dib, p_im);
+                for (y = 0; y < height; y++){free(p_im[y]);}
+                free(p_im);
+            } else if (strcmp(namefilter, "mclose") == 0) {
+                printf("Filter= %s\n", namefilter);
+                IMTpixel** p_im;
+                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** d_im;
+                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+
+                if (radius < 0) {radius = -radius;}
+                printf("Radius= %f\n", radius);
+
+                ImthresholdGetData(dib, p_im);
+                FreeImage_Unload(dib);
+                IMTFilterMorph(p_im, d_im, height, width, radius, true);
+                IMTFilterMorph(d_im, p_im, height, width, radius, false);
+                for (y = 0; y < height; y++){free(d_im[y]);}
+                free(d_im);
+                dst_dib = FreeImage_Allocate(width, height, 24);
+                ImthresholdSetData(dst_dib, p_im);
+                for (y = 0; y < height; y++){free(p_im[y]);}
+                free(p_im);
+            } else if (strcmp(namefilter, "mdilate") == 0) {
+                printf("Filter= %s\n", namefilter);
+                IMTpixel** p_im;
+                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** d_im;
+                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+
+                if (radius < 0) {radius = -radius;}
+                printf("Radius= %f\n", radius);
+
+                ImthresholdGetData(dib, p_im);
+                FreeImage_Unload(dib);
+                IMTFilterMorph(p_im, d_im, height, width, radius, true);
+                dst_dib = FreeImage_Allocate(width, height, 24);
+                ImthresholdSetData(dst_dib, d_im);
+                for (y = 0; y < height; y++){free(d_im[y]);}
+                free(d_im);
+                for (y = 0; y < height; y++){free(p_im[y]);}
+                free(p_im);
+            } else if (strcmp(namefilter, "merose") == 0) {
+                printf("Filter= %s\n", namefilter);
+                IMTpixel** p_im;
+                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** d_im;
+                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+
+                if (radius < 0) {radius = -radius;}
+                printf("Radius= %f\n", radius);
+
+                ImthresholdGetData(dib, p_im);
+                FreeImage_Unload(dib);
+                IMTFilterMorph(p_im, d_im, height, width, radius, false);
+                dst_dib = FreeImage_Allocate(width, height, 24);
+                ImthresholdSetData(dst_dib, d_im);
+                for (y = 0; y < height; y++){free(d_im[y]);}
+                free(d_im);
+                for (y = 0; y < height; y++){free(p_im[y]);}
+                free(p_im);
+            } else if (strcmp(namefilter, "mopen") == 0) {
+                printf("Filter= %s\n", namefilter);
+                IMTpixel** p_im;
+                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** d_im;
+                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+
+                if (radius < 0) {radius = -radius;}
+                printf("Radius= %f\n", radius);
+
+                ImthresholdGetData(dib, p_im);
+                FreeImage_Unload(dib);
+                IMTFilterMorph(p_im, d_im, height, width, radius, false);
+                IMTFilterMorph(d_im, p_im, height, width, radius, true);
+                for (y = 0; y < height; y++){free(d_im[y]);}
+                free(d_im);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
                 for (y = 0; y < height; y++){free(p_im[y]);}

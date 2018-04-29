@@ -240,17 +240,20 @@ double IMTwb (IMTpixel** IMTim, double immean, unsigned height, unsigned width)
 
 void IMTFilterSMirror (IMTpixel** p_im, unsigned height, unsigned width)
 {
-    unsigned y, x, ims;
-    IMTpixel pim, mim;
+    unsigned y, x, tim, pim;
 
-    mim = IMTmeanIc(p_im, 0, 0, height, width);
+    tim = IMTFilterTBiModValueIc (p_im, 0, 0, height, width);
     for (y = 0; y < height; y++ )
     {
         for (x = 0; x < width; x++)
         {
-            pim = p_im[y][x];
-            ims = IMTdist(pim, mim);
-            p_im[y][x].s = (WORD)ims;
+            pim = p_im[y][x].s;
+            if (pim > tim)
+            {
+				pim = 765 - pim;
+			}
+			pim *= 2;
+            p_im[y][x].s = (WORD)pim;
         }
     }
 }
@@ -2275,6 +2278,30 @@ void IMTFilterMathMinus (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsi
                 im = p_im[y][x].c[d];
                 imm = m_im[y][x].c[d];
                 im = im - imm;
+                p_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)im), (int)255);
+            }
+            p_im[y][x] = IMTcalcS (p_im[y][x]);
+        }
+    }
+ }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterMathMirror (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width)
+{
+    unsigned y, x, d;
+    int im, imm;
+
+    for ( y = 0; y < height; y++ )
+    {
+        for ( x = 0; x < width; x++ )
+        {
+            for (d = 0; d < 3; d++)
+            {
+                im = p_im[y][x].c[d];
+                imm = m_im[y][x].c[d];
+                imm -= im;
+                im -= imm;
                 p_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)im), (int)255);
             }
             p_im[y][x] = IMTcalcS (p_im[y][x]);
@@ -4489,7 +4516,7 @@ void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, un
 
                 value = p_im[y][x].c[d];
                 value += (amount * diff);
-                d_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)(value + 0.5)), (int)255);;
+                d_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)(value + 0.5)), (int)255);
             }
             d_im[y][x] = IMTcalcS (d_im[y][x]);
         }
@@ -4521,6 +4548,56 @@ void IMTFilterMonoColor (IMTpixel** p_im, unsigned height, unsigned width)
             }
             p_im[y][x].c[maxc] = (BYTE)maxcv;
             p_im[y][x].s = (WORD)maxcv;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterMorph (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, bool fdilate)
+{
+    unsigned y, x, d, y0, x0, y1, x1, yf, xf, r;
+    BYTE val;
+
+
+    if (radius < 0) {radius = -radius;}
+    r = radius;
+    if (r > 0)
+    {
+        for (y = 0; y < height; y++ )
+        {
+            y0 = 0;
+            if (y > 1) {y0 = y - 1;}
+            y1 = y + 1;
+            if (y1 > height) {y1 = height;}
+            for (x = 0; x < width; x++ )
+            {
+                x0 = 0;
+                if (x > 1) {x0 = x - 1;}
+                x1 = x + 1;
+                if (x1 > width) {x1 = width;}
+                for (d = 0; d < 3; d++)
+                {
+                    val = p_im[y0][x0].c[d];
+                    for (yf = y0; yf < y1; yf++)
+                    {
+                        for (xf = x0; xf < x1; xf++)
+                        {
+                            if ((p_im[yf][xf].c[d] < val) == fdilate) {val = p_im[yf][xf].c[d];}
+                        }
+                    }
+                    d_im[y][x].c[d] = val;
+                }
+                d_im[y][x] = IMTcalcS (d_im[y][x]);
+            }
+        }
+    } else {
+        for (y = 0; y < height; y++ )
+        {
+            for (x = 0; x < width; x++ )
+            {
+                d_im[y][x] = p_im[y][x];
+            }
         }
     }
 }
@@ -5904,54 +5981,6 @@ int IMTFilterTBHT (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTBiModValue (IMTpixel** p_im, unsigned height, unsigned width)
-{
-    unsigned y, x, im;
-    double T, Tw, Tb, Tn, iw, ib;
-    int threshold = 0;
-
-    T = 384.0;
-    Tn = 0;
-    while ( T != Tn )
-    {
-        Tn = T;
-        Tb = 0;
-        Tw = 0;
-        ib = 0;
-        iw = 0;
-        for (y = 0; y < height; y++ )
-        {
-            for (x = 0; x < width; x++)
-            {
-                im = p_im[y][x].s;
-                if ( im > T)
-                {
-                    Tw += im;
-                    iw++;
-                } else {
-                    Tb += im;
-                    ib++;
-                }
-            }
-        }
-        if (iw == 0 && ib == 0)
-        {
-            T = Tn;
-        } else if (iw == 0) {
-            T = Tb/ib;
-        } else if (ib == 0) {
-            T = Tw/iw;
-        } else {
-            T = ((Tw/iw) + (Tb/ib)) / 2.0;
-        }
-    }
-    threshold = (int)(T + 0.5);
-
-    return threshold;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 int IMTFilterTBiModValueBound (IMTpixel** p_im, unsigned height, unsigned width, int lower_bound, int upper_bound)
 {
     unsigned y, x;
@@ -6060,6 +6089,17 @@ int IMTFilterTBiModValueIc (IMTpixel** p_im, unsigned y0, unsigned x0, unsigned 
 
 ////////////////////////////////////////////////////////////////////////////////
 
+int IMTFilterTBiModValue (IMTpixel** p_im, unsigned height, unsigned width)
+{
+    int threshold = 0;
+
+    threshold = IMTFilterTBiModValueIc (p_im, 0, 0, height, width);
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta)
 {
     int threshold = 0;
@@ -6082,7 +6122,7 @@ int IMTFilterTBiModLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsigne
 
     if (radius < 0) {radius = -radius;}
     r = radius;
-    TG = IMTFilterTBiModValue (p_im, height, width);
+    TG = IMTFilterTBiModValueIc (p_im, 0, 0, height, width);
     if (r > 0)
     {
         Ts = 0;
@@ -7556,17 +7596,17 @@ int IMTFilterTMscaleLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsign
     kover = doverlay + 1.0;
     if (sensitivity < 0)
     {
-		sensitivity = -sensitivity;
-		sensdiv = sensitivity;
-		sensdiv += 1.0;
-		sensinv = 1.0 / sensdiv;
-		senspos = sensitivity / sensdiv;
-	} else {
-		sensdiv = sensitivity;
-		sensdiv += 1.0;
-		senspos = 1.0 / sensdiv;
-		sensinv = sensitivity / sensdiv;
-	}
+        sensitivity = -sensitivity;
+        sensdiv = sensitivity;
+        sensdiv += 1.0;
+        sensinv = 1.0 / sensdiv;
+        senspos = sensitivity / sensdiv;
+    } else {
+        sensdiv = sensitivity;
+        sensdiv += 1.0;
+        senspos = 1.0 / sensdiv;
+        sensinv = sensitivity / sensdiv;
+    }
     for (l = 0; l < level; l++)
     {
         cnth = (height + blsz - 1) / blsz;

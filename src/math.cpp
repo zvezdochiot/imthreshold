@@ -32,6 +32,7 @@ void ImthresholdFilterMathUsage()
     printf("                    'max'\n");
     printf("                    'min'\n");
     printf("                    'minus'\n");
+    printf("                    'mirror'\n");
     printf("                    'multiply'\n");
     printf("                    'norm'\n");
     printf("                    'plus'\n");
@@ -184,6 +185,14 @@ int main(int argc, char *argv[])
                             dst_dib = FreeImage_Allocate (width, height, 24);
                             ImthresholdSetData (dst_dib, p_im);
                         }
+                        else if (strcmp(namefilter, "mirror") == 0)
+                        {
+                            printf("Filter= %s\n", namefilter);
+
+                            IMTFilterMathMirror (p_im, m_im, height, width);
+                            dst_dib = FreeImage_Allocate (width, height, 24);
+                            ImthresholdSetData (dst_dib, p_im);
+                        }
                         else if (strcmp(namefilter, "multiply") == 0)
                         {
                             printf("Filter= %s\n", namefilter);
@@ -207,7 +216,9 @@ int main(int argc, char *argv[])
                             IMTFilterMathPlus (p_im, m_im, height, width);
                             dst_dib = FreeImage_Allocate (width, height, 24);
                             ImthresholdSetData (dst_dib, p_im);
-                        } else {
+                        }
+                        else
+                        {
                             printf("Filter= threshold\n");
 
                             BYTE** d_im;
