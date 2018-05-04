@@ -26,6 +26,7 @@ void ImthresholdFilterDespeckleUsage()
     printf("          -m str  name method:\n");
     printf("                    'hist'\n");
     printf("                    'invert'\n");
+    printf("                    'mag2'\n");
     printf("                    'neuro'\n");
     printf("                    'simple' (default)\n");
     printf("          -a N    aperture size (int, optional, default = 3)\n");
@@ -124,6 +125,11 @@ int main(int argc, char *argv[])
                 } else if (strcmp(namefilter, "invert") == 0) {
                     printf("Method= %s\n", namefilter);
                     IMTFilterInvertBW(p_im, height, width);
+                } else if (strcmp(namefilter, "mag2") == 0) {
+                    printf("Method= %s\n", namefilter);
+                    unsigned threshold = 0;
+                    threshold = IMTFilterDMag2(p_im, height, width, Ksize);
+                    printf("Despeckle= %d\n", threshold);
                 } else if (strcmp(namefilter, "neuro") == 0) {
                     printf("Method= %s\n", namefilter);
                     printf("Lambda= %f\n", lambda);

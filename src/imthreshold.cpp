@@ -250,9 +250,9 @@ void IMTFilterSMirror (IMTpixel** p_im, unsigned height, unsigned width)
             pim = p_im[y][x].s;
             if (pim > tim)
             {
-				pim = 765 - pim;
-			}
-			pim *= 2;
+                pim = 765 - pim;
+            }
+            pim *= 2;
             p_im[y][x].s = (WORD)pim;
         }
     }
@@ -634,6 +634,33 @@ void IMTFilterDespeck2 (BYTE** p_im, unsigned height, unsigned width, unsigned K
 
     for (y = 0; y < h; y++){free(d_im[y]);}
     free(d_im);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+unsigned IMTFilterDMag2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize)
+{
+    unsigned height2, width2, y, threshold;
+    height2 = height * 2;
+    width2 = width * 2;
+    
+    BYTE** d_im;
+    d_im = (BYTE**)malloc(height2 * sizeof(BYTE*));
+    for (y = 0; y < height2; y++) {d_im[y] = (BYTE*)malloc(width2 * sizeof(BYTE));}
+
+    threshold = 0;
+    for (y = 0; y < Ksize; y++)
+    {
+        threshold += IMTFilterSBWMag2(p_im, d_im, height, width, height2, width2);
+        threshold += IMTFilterSBWReduce2(d_im, p_im, height2, width2, height, width);
+    }
+    threshold /= Ksize;
+    threshold /= 2;
+    
+    for (y = 0; y < height2; y++){free(d_im[y]);}
+    free(d_im);
+    
+    return threshold;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

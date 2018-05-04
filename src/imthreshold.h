@@ -117,6 +117,7 @@ IMTpixel IMTmaxIc (IMTpixel** IMTim, unsigned y0, unsigned x0, unsigned y1, unsi
 IMTpixel IMTminIc (IMTpixel** IMTim, unsigned y0, unsigned x0, unsigned y1, unsigned x1);
 IMTpixel IMTaverageIc (IMTpixel** IMTim, IMTpixel IMTima, unsigned y0, unsigned x0, unsigned y1, unsigned x1, double part);
 void IMTFilterDespeck2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize);
+unsigned IMTFilterDMag2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize);
 void IMTFilterDNeuro2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize, double lambda, unsigned lnum);
 double IMTFilterDphist (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize);
 void IMTBlurMask (IMTpixel** p_im, BYTE** m_im, unsigned height, unsigned width, int radius);
