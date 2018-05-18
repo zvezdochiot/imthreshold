@@ -30,6 +30,7 @@ void ImthresholdFilterUsage()
     printf("                    'blur'\n");
     printf("                    'bwc'\n");
     printf("                    'cluster'\n");
+    printf("                    'denoise'\n");
     printf("                    'greynorm'\n");
     printf("                    'greyworld'\n");
     printf("                    'illumc'\n");
@@ -267,6 +268,27 @@ int main(int argc, char *argv[])
                 ImthresholdSetData(dst_dib, d_im);
                 for (y = 0; y < height; y++){free(d_im[y]);}
                 free(d_im);
+            } else if (strcmp(namefilter, "denoise") == 0) {
+                printf("Filter= %s\n", namefilter);
+                double kdenoises;
+                unsigned radiusint;
+                IMTpixel** p_im;
+                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+
+                if (radius < 0) {radius = -radius;}
+                radiusint = int(radius + 0.5);
+                printf("Radius= %d\n", radiusint);
+                printf("KUse= %f\n", threshold);
+
+                ImthresholdGetData(dib, p_im);
+                FreeImage_Unload(dib);
+                kdenoises = IMTFilterDeNoiseDiff (p_im, height, width, radiusint, threshold);
+                printf("KDeNoise= %f\n", kdenoises);
+                dst_dib = FreeImage_Allocate(width, height, 24);
+                ImthresholdSetData(dst_dib, p_im);
+                for (y = 0; y < height; y++){free(p_im[y]);}
+                free(p_im);
             } else if (strcmp(namefilter, "greyworld") == 0) {
                 printf("Filter= %s\n", namefilter);
                 IMTpixel dim;

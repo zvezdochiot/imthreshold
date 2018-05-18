@@ -949,6 +949,235 @@ double IMTFilterDphist (BYTE** p_im, unsigned height, unsigned width, unsigned K
 
 ////////////////////////////////////////////////////////////////////////////////
 
+double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width, double kdenoise)
+{
+    unsigned y, x, d, n;
+    double korigin = 1.0;
+    int val, valp, vald, valdp, vali, histn[512];
+    double ka, kn, valdn, valda, valds, valdso, valdsd, valdsn, histdelta[512];
+    IMTpixel** t_im;
+    t_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
+    for (y = 0; y < height; y++) {t_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+
+
+    for (d = 0; d < 512; d++)
+    {
+        histdelta[d] = 0.0;
+        histn[d] = 0;
+    }
+    n = 0;
+    valdso = 0;
+    for (d = 0; d < 3; d++)
+    {
+        for (y = 0; y < height; y++)
+        {
+            valp = p_im[y][0].c[d];
+            valdp = 0;
+            for (x = 0; x < width; x++)
+            {
+                val = p_im[y][x].c[d];
+                vald = val - valp;
+                valp = val;
+                valds = vald;
+                valds /= 256.0;
+                valds *= valds;
+                valdso += valds;
+                vali = valdp + 256;
+                valdp = vald;
+                histn[vali]++;
+                ka = 1.0;
+                ka /= double(histn[vali]);
+                kn = 1.0 - ka;
+                valda = vald;
+                valda *= ka;
+                valdn = histdelta[vali];
+                valdn *= kn;
+                valdn += valda;
+                histdelta[vali] = valdn;
+                n++;
+            }
+        }
+    }
+    for (d = 0; d < 3; d++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            valp = p_im[0][x].c[d];
+            valdp = 0;
+            for (y = 0; y < height; y++)
+            {
+                val = p_im[y][x].c[d];
+                vald = val - valp;
+                valp = val;
+                valds = vald;
+                valds /= 256.0;
+                valds *= valds;
+                valdso += valds;
+                vali = valdp + 256;
+                valdp = vald;
+                histn[vali]++;
+                ka = 1.0;
+                ka /= double(histn[vali]);
+                kn = 1.0 - ka;
+                valda = vald;
+                valda *= ka;
+                valdn = histdelta[vali];
+                valdn *= kn;
+                valdn += valda;
+                histdelta[vali] = valdn;
+                n++;
+            }
+        }
+    }
+    valdso /= (double)n;
+    valdso *= 2.0;
+    valdso = sqrt(valdso);
+
+    if (kdenoise == 0.0)
+    {
+        valdsd = 0;
+        for (d = 0; d < 3; d++)
+        {
+            for (y = 0; y < height; y++)
+            {
+                valp = p_im[y][0].c[d];
+                valdp = 0;
+                for (x = 0; x < width; x++)
+                {
+                    val = p_im[y][x].c[d];
+                    vald = val - valp;
+                    vali = valdp + 256;
+                    valdp = vald;
+                    valdn = histdelta[vali];
+                    val -= vald;
+                    val += valdn;
+                    valp = val;
+                    valds = valdn;
+                    valds /= 256.0;
+                    valds *= valds;
+                    valdsd += valds;
+                }
+            }
+        }
+        for (d = 0; d < 3; d++)
+        {
+            for (x = 0; x < width; x++)
+            {
+                valp = p_im[0][x].c[d];
+                valdp = 0;
+                for (y = 0; y < height; y++)
+                {
+                    val = p_im[y][x].c[d];
+                    vald = val - valp;
+                    vali = valdp + 256;
+                    valdp = vald;
+                    valdn = histdelta[vali];
+                    val -= vald;
+                    val += valdn;
+                    valp = val;
+                    valds = valdn;
+                    valds /= 256.0;
+                    valds *= valds;
+                    valdsd += valds;
+                }
+            }
+        }
+        valdsd /= (double)n;
+        valdsd *= 2.0;
+        valdsd = sqrt(valdsd);
+
+        valdsn = valdso + valdsd;
+        if (valdsn > 0)
+        {
+            kdenoise = valdso / valdsn;
+        }
+        kdenoise /= 2;
+    }
+    korigin = 1.0 - kdenoise;
+
+    for (d = 0; d < 3; d++)
+    {
+        for (y = 0; y < height; y++)
+        {
+            valp = p_im[y][0].c[d];
+            valdp = 0;
+            for (x = 0; x < width; x++)
+            {
+                val = p_im[y][x].c[d];
+                vald = val - valp;
+                vali = valdp + 256;
+                valdp = vald;
+                valdn = histdelta[vali];
+                valdn *= kdenoise;
+                valda = vald;
+                valda *= korigin;
+                valda += valdn;
+                valdp = valda;
+                valda += 0.5;
+                valp = val;
+                val -= vald;
+                val += (int)valda;
+                if (val < 0) {val = 0;}
+                if (val > 255) {val = 255;}
+                t_im[y][x].c[d] = val;
+            }
+        }
+    }
+    for (d = 0; d < 3; d++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            valp = t_im[0][x].c[d];
+            valdp = 0;
+            for (y = 0; y < height; y++)
+            {
+                val = t_im[y][x].c[d];
+                vald = val - valp;
+                vali = valdp + 256;
+                valdp = vald;
+                valdn = histdelta[vali];
+                valdn *= kdenoise;
+                valda = vald;
+                valda *= korigin;
+                valda += valdn;
+                valdp = valda;
+                valda += 0.5;
+                valp = val;
+                val -= vald;
+                val += (int)valda;
+                if (val < 0) {val = 0;}
+                if (val > 255) {val = 255;}
+                p_im[y][x].c[d] = val;
+            }
+        }
+    }
+
+    for (y = 0; y < height; y++){free(t_im[y]);}
+    free(t_im);
+
+    return kdenoise;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+double IMTFilterDeNoiseDiff (IMTpixel** p_im, unsigned height, unsigned width, unsigned radius, double kdenoise)
+{
+    unsigned i;
+    double kdenoises = 0.0;
+    if (radius > 0)
+    {
+        for (i = 0; i < radius; i++)
+        {
+            kdenoises += IMTFilterDeNoiseDiff1p (p_im, height, width, kdenoise);
+        }
+        kdenoises /= (double)radius;
+    }
+
+    return kdenoises;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void IMTBlurMask (IMTpixel** p_im, BYTE** m_im, unsigned height, unsigned width, int radius)
 {
     int y, x, y0, x0;
