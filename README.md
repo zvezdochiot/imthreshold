@@ -19,6 +19,8 @@ Main directions:
  
  Website: https://sourceforge.net/projects/imthreshold/
  
+ GIT: https://github.com/ImageProcessing-ElectronicPublications/imthreshold
+ 
  BookScanLib.ru Website: http://djvu-soft.narod.ru/
  
  Email: zvezdochiot@users.sourceforge.net

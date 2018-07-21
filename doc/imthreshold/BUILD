@@ -20,7 +20,6 @@ Build
 To build this library type the following:
 
   cd [imthreshold/source/path]
-  cd src
   make
 
 Test
@@ -29,7 +28,6 @@ Test
 To test this library type the following:
 
   cd [imthreshold/source/path]
-  cd src
   LD_LIBRARY_PATH=. ./imthreshold-[utils] <image_in> <image_out>
 
 Installation
@@ -38,7 +36,6 @@ Installation
 To install this library type the following:
 
   cd [imthreshold/source/path]
-  cd src
   sudo make install
 
 Copyright and licence
