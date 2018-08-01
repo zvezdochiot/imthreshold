@@ -70,7 +70,7 @@ IMTpixel IMTrefilter1p (IMTpixel IMTim, IMTpixel IMTimf)
     {
         im = IMTim.c[d];
         imf = IMTimf.c[d];
-        imd = 2 * im - imf;
+        imd = im + im - imf;
         immt.c[d] = (BYTE)MIN(MAX((int)0, (int)(imd)), (int)255);
     }
     immt = IMTcalcS (immt);
@@ -7023,7 +7023,7 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
     double immean, imwb;
     BYTE fgbase, bgbase;
     unsigned cnth, cntw;
-    IMTpixel pim, fgim, bgim;
+    IMTpixel pim, gim, tim, fgim, bgim;
     double fgdist, bgdist, kover, fgpart, bgpart, fgk = 1.0;
     unsigned maskbl, maskover, bgsover, fgsum[3], bgsum[3], fgnum, bgnum;
 
@@ -7100,13 +7100,13 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
                 x1b = x0b + bgsover;
                 if (x1b > widthbg) {x1b = widthbg;}
 
-                pim = IMTmeanIc(p_im, y0, x0, y1, x1);
+                gim = IMTmeanIc(p_im, y0, x0, y1, x1);
 
                 fgim = IMTmeanIc(fgt_im, y0b, x0b, y1b, x1b);
                 bgim = IMTmeanIc(bg_im, y0b, x0b, y1b, x1b);
 
-                fgdist = IMTdist(pim, fgim);
-                bgdist = IMTdist(pim, bgim);
+                fgdist = IMTdist(gim, fgim);
+                bgdist = IMTdist(gim, bgim);
 
                 fgk = (fgdist + bgdist);
                 if (fgk > 0)
@@ -7129,8 +7129,9 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
                     for (x = x0; x < x1; x++)
                     {
                         pim = p_im[y][x];
-                        fgdist = IMTdist(pim, fgim);
-                        bgdist = IMTdist(pim, bgim);
+                        tim = IMTrefilter1p (pim, gim);
+                        fgdist = IMTdist(tim, fgim);
+                        bgdist = IMTdist(tim, bgim);
                         if (fgdist * fgk < bgdist)
                         {
                             for (d = 0; d < 3; d++)
