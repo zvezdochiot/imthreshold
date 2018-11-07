@@ -23,7 +23,12 @@ void ImthresholdFilterSCRISUsage()
 {
     printf("Usage : imthreshold-scris [options] <input_file> <output_file>\n\n");
     printf("options:\n");
+    printf("          -f str  name filter:\n");
+    printf("                    'bicubic'\n");
+    printf("                    'bicont' (default)\n");
+    printf("          -p N.N  part prefilter (double, optional, default = 0.5)\n");
     printf("          -r N.N  ratio (double, optional, default = 1.0)\n");
+    printf("          -w N    new width (int, optional, default = [auto])\n");
     printf("          -w N    new width (int, optional, default = [auto])\n");
     printf("          -z N    new height (int, optional, default = [auto])\n");
     printf("          -h      this help\n");
@@ -43,11 +48,19 @@ int main(int argc, char *argv[])
     int newh = 0;
     int neww = 0;
     double ims = 0.0;
+    double ppart = 0.5;
     bool fhelp = false;
-    while ((opt = getopt(argc, argv, ":r:w:z:h")) != -1)
+    char *namefilter = "bicont";
+    while ((opt = getopt(argc, argv, ":f:p:r:w:z:h")) != -1)
     {
         switch(opt)
         {
+            case 'f':
+                namefilter = optarg;
+                break;
+            case 'p':
+                ppart = atof(optarg);
+                break;
             case 'r':
                 ratio = atof(optarg);
                 break;
@@ -122,13 +135,26 @@ int main(int argc, char *argv[])
 
             ImthresholdGetData(dib, p_im);
             FreeImage_Unload(dib);
-            IMTFilterSBicub(p_im, d_im, height, width, new_height, new_width);
-            IMTFilterSBicub(d_im, c_im, new_height, new_width, height, width);
-            ims = IMTFilterMirrorHalf(p_im, c_im, height, width);
-            printf("RIS= %f\n", ims);
+            if (strcmp(namefilter, "bicubic") == 0)
+            {
+                printf("Filter= %s\n", namefilter);
+                IMTFilterSBicub(p_im, d_im, height, width, new_height, new_width);
+                IMTFilterSBicub(d_im, c_im, new_height, new_width, height, width);
+                printf("Prefilter= %f\n", ppart);
+                ims = IMTFilterMirrorPart(p_im, c_im, height, width, ppart);
+                printf("RIS= %f\n", ims);
+                IMTFilterSBicub(c_im, d_im, height, width, new_height, new_width);
+            } else {
+                printf("Filter= bicont\n");
+                IMTFilterSBicont(p_im, d_im, height, width, new_height, new_width);
+                IMTFilterSBicont(d_im, c_im, new_height, new_width, height, width);
+                printf("Prefilter= %f\n", ppart);
+                ims = IMTFilterMirrorPart(p_im, c_im, height, width, ppart);
+                printf("RIS= %f\n", ims);
+                IMTFilterSBicont(c_im, d_im, height, width, new_height, new_width);
+            }
             for (y = 0; y < height; y++){free(p_im[y]);}
             free(p_im);
-            IMTFilterSBicub(c_im, d_im, height, width, new_height, new_width);
             for (y = 0; y < height; y++){free(c_im[y]);}
             free(c_im);
             dst_dib = FreeImage_Allocate(new_width, new_height, 24);

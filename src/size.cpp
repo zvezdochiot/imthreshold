@@ -26,6 +26,7 @@ void ImthresholdFilterSizeUsage()
     printf("          -f str  name filter:\n");
     printf("                    'bicubic'\n");
     printf("                    'biline'\n");
+    printf("                    'bicont'\n");
     printf("                    'gsample' (default)\n");
     printf("                    'nearest'\n");
     printf("          -r N.N  ratio (double, optional, default = 1.0)\n");
@@ -134,6 +135,9 @@ int main(int argc, char *argv[])
             } else if (strcmp(namefilter, "biline") == 0) {
                 printf("Filter= %s\n", namefilter);
                 IMTFilterSBilin(p_im, d_im, height, width, new_height, new_width);
+            } else if (strcmp(namefilter, "bicont") == 0) {
+                printf("Filter= %s\n", namefilter);
+                IMTFilterSBicont(p_im, d_im, height, width, new_height, new_width);
             } else if (strcmp(namefilter, "nearest") == 0) {
                 printf("Filter= %s\n", namefilter);
                 IMTFilterSNearest(p_im, d_im, height, width, new_height, new_width);

@@ -154,7 +154,7 @@ void IMTFilterMathPlus (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsig
 double IMTFilterMathSharpenBadMetric (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width);
 void IMTFilterMathThreshold (IMTpixel** p_im, IMTpixel** m_im, BYTE** d_im, unsigned height, unsigned width, int delta);
 double IMTFilterMirror (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width);
-double IMTFilterMirrorHalf (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width);
+double IMTFilterMirrorPart (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double part);
 void IMTFilterMirrorMean (IMTpixel** p_im, unsigned height, unsigned width);
 void IMTFilterMonoColor (IMTpixel** p_im, unsigned height, unsigned width);
 void IMTFilterMorph (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, bool fdilate);
@@ -187,6 +187,7 @@ void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
 int IMTFilterWhiteFill (IMTpixel** p_im, unsigned height, unsigned width);
 double BiCubicKernel (double x);
 void IMTFilterSBicub (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width);
+void IMTFilterSBicont (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width);
 void IMTFilterSBilin (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width);
 int IMTFilterSBWMag2 (BYTE** d_im, BYTE** r_im, unsigned height, unsigned width, unsigned height2, unsigned width2);
 int IMTFilterSBWReduce2 (BYTE** d_im, BYTE** r_im, unsigned height, unsigned width, unsigned height2, unsigned width2);

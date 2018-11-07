@@ -1,4 +1,4 @@
-.TH "ImThreshold User Manual" 1 "18 Jun 2018" "ImThreshold documentation"
+.TH "ImThreshold User Manual" 1 "07 Nov 2018" "ImThreshold documentation"
 
 .SH NAME
 imthreshold-scris
@@ -10,6 +10,14 @@ Resize image using bicubic Reverse Interpolate Scale (CRIS).
 imthreshold-scris [options] <input_file> <output_file>
 
 .SH OPTIONS
+.TP
+-f str
+name filter:
+                    'bicubic'
+                    'bicont' (default)
+.TP
+-p N.N
+part prefilter (double, optional, default = 0.5)
 .TP
 -r N.N
 ratio, scale factor (double, optional, default = 1.0)
@@ -24,7 +32,7 @@ new height (int, optional, default = [auto])
 help
 
 .SH EXAMPLE
-imthreshold-scris -r 0.5 sample.tif sample.cris.0_5.tif
+imthreshold-scris -r 2.0 sample.tif sample.cris.2_0.tif
 
 .SH COPYRIGHT
 Copyright 2017 zvezdochiot.

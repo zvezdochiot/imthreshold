@@ -2824,11 +2824,11 @@ double IMTFilterMirror (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
 
 ///////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterMirrorHalf (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width)
+double IMTFilterMirrorPart (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double part)
 {
     unsigned y, x, d;
-    int im, imm, imd, ime = 0, imf;
-    double ims = 0.0;
+    int im, imm, imd;
+    double imx, ims = 0.0;
 
     for ( y = 0; y < height; y++ )
     {
@@ -2839,10 +2839,11 @@ double IMTFilterMirrorHalf (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
                 im = p_im[y][x].c[d];
                 imm = d_im[y][x].c[d];
                 imd = im - imm;
-                imf = (imd + ime) / 2;
-                ime += (imd - imf * 2);
-                im += imf;
-                ims += imf;
+                imx = imd;
+                imx *= part;
+                imd = (int)(imx + 0.5);
+                im += imd;
+                ims += imd;
                 d_im[y][x].c[d] = (BYTE)MIN(MAX((int)0, (int)im), (int)255);
             }
             d_im[y][x] = IMTcalcS (d_im[y][x]);
@@ -5271,6 +5272,146 @@ void IMTFilterSBicub (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
                     {
                         p_g[d] += (k2 * (double)p_im[oy2][ox2].c[d]);
                     }
+                }
+            }
+            for (d = 0; d < 3; d++)
+            {
+                d_im[y][x].c[d] = (BYTE)p_g[d];
+            }
+            d_im[y][x] = IMTcalcS (d_im[y][x]);
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterSBicont (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width)
+{
+
+    unsigned d;
+    double xFactor = (double)width / new_width;
+    double yFactor = (double)height / new_height;
+    double  ox, oy, dx, dy, k1, k2;
+    int y, x, k, ox1, oy1, ox2, oy2, m, n;
+    double p_g[3] = {0};
+    int h = new_height;
+    int w = new_width;
+    int ymax = height - 1;
+    int xmax = width - 1;
+    IMTpixel mim, pim[16];
+    double sdist, zdist, pdist[16];
+
+    for (y = 0; y < h; y++ )
+    {
+        oy  = (double)y * yFactor - 0.5;
+        oy1 = (int)oy;
+        dy  = oy - (double)oy1;
+        for (x = 0; x < w; x++ )
+        {
+            ox  = (double)x * xFactor - 0.5f;
+            ox1 = (int)ox;
+            dx  = ox - (double)ox1;
+            for (d = 0; d < 3; d++)
+            {
+                p_g[d] = 0;
+            }
+            k = 0;
+            for (n = -1; n < 3; n++)
+            {
+                oy2 = oy1 + n;
+                if ( oy2 < 0 ) {oy2 = 0;}
+                if ( oy2 > ymax ) {oy2 = ymax;}
+                for (m = -1; m < 3; m++)
+                {
+                    ox2 = ox1 + m;
+                    if ( ox2 < 0 ) {ox2 = 0;}
+                    if ( ox2 > xmax ) {ox2 = xmax;}
+                    pim[k] = p_im[oy2][ox2];
+                    k++;
+                }
+            }
+            k = 0;
+            for (n = -1; n < 3; n++)
+            {
+                k1 = BiCubicKernel(dy - (double)n);
+                oy2 = oy1 + n;
+                if ( oy2 < 0 ) {oy2 = 0;}
+                if ( oy2 > ymax ) {oy2 = ymax;}
+                for (m = -1; m < 3; m++)
+                {
+                    k2 = k1 * BiCubicKernel((double)m - dx);
+                    ox2 = ox1 + m;
+                    if ( ox2 < 0 ) {ox2 = 0;}
+                    if ( ox2 > xmax ) {ox2 = xmax;}
+                    for (d = 0; d < 3; d++)
+                    {
+                        p_g[d] += (k2 * (double)pim[k].c[d]);
+                    }
+                    k++;
+                }
+            }
+            for (d = 0; d < 3; d++)
+            {
+                mim.c[d] = (BYTE)p_g[d];
+            }
+            sdist = 0;
+            for (k = 0; k < 16; k++)
+            {
+                pdist[k] = IMTdist(mim, pim[k]);
+                sdist += pdist[k];
+            }
+            sdist /= 16.0;
+            if (sdist == 0)
+            {
+                for (k = 0; k < 16; k++)
+                {
+                    pdist[k] = 1.0;
+                }
+            } else {
+                for (k = 0; k < 16; k++)
+                {
+                    pdist[k] += sdist;
+                    pdist[k] = sdist / pdist[k];
+                     
+                    pdist[k] -= 0.5;
+                    zdist = (pdist[k] < 0.0) ? -1.0: 1.0;
+                    pdist[k] *= zdist;
+                    pdist[k] *= 2.0;
+                    pdist[k] = sqrt(pdist[k]);
+                    pdist[k] *= 0.5;
+                    pdist[k] *= zdist;
+                    pdist[k] += 0.5;
+                }
+            }
+            for (k = 0; k < 16; k++)
+            {
+                for (d = 0; d < 3; d++)
+                {
+                    pim[k].c[d] = (BYTE) ((double)pim[k].c[d] * pdist[k] + (double)mim.c[d] * (1 - pdist[k]));
+                }
+            }
+            k = 0;
+            for (d = 0; d < 3; d++)
+            {
+                p_g[d] = 0;
+            }
+            for (n = -1; n < 3; n++)
+            {
+                k1 = BiCubicKernel(dy - (double)n);
+                oy2 = oy1 + n;
+                if ( oy2 < 0 ) {oy2 = 0;}
+                if ( oy2 > ymax ) {oy2 = ymax;}
+                for (m = -1; m < 3; m++)
+                {
+                    k2 = k1 * BiCubicKernel((double)m - dx);
+                    ox2 = ox1 + m;
+                    if ( ox2 < 0 ) {ox2 = 0;}
+                    if ( ox2 > xmax ) {ox2 = xmax;}
+                    for (d = 0; d < 3; d++)
+                    {
+                        p_g[d] += (k2 * (double)pim[k].c[d]);
+                    }
+                    k++;
                 }
             }
             for (d = 0; d < 3; d++)
