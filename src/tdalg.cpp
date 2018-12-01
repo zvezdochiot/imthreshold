@@ -92,14 +92,9 @@ int main(int argc, char *argv[])
             FIBITMAP* dst_dib;
             unsigned width = FreeImage_GetWidth(dib);
             unsigned height = FreeImage_GetHeight(dib);
-            unsigned y;
 
-            IMTpixel** p_im;
-            p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-            for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-            BYTE** d_im;
-            d_im = (BYTE**)malloc(height * sizeof(BYTE*));
-            for (y = 0; y < height; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+            IMTpixel** p_im = IMTalloc(height, width);
+            BYTE** d_im = BWalloc(height, width);
 
             ImthresholdGetData(dib, p_im);
             FreeImage_Unload(dib);
@@ -112,12 +107,10 @@ int main(int argc, char *argv[])
             printf("Delta= %d\n", delta);
             threshold = IMTFilterTDalg(p_im, d_im, height, width, region_size, delta);
             printf("Threshold= %d\n", threshold / 3);
-            for (y = 0; y < height; y++){free(p_im[y]);}
-            free(p_im);
+            IMTfree(p_im, height);
             dst_dib = FreeImage_Allocate(width, height, 1);
             ImthresholdSetDataBW(dst_dib, d_im);
-            for (y = 0; y < height; y++){free(d_im[y]);}
-            free(d_im);
+            BWfree(d_im, height);
 
             if (dst_dib)
             {

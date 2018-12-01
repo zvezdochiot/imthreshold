@@ -137,16 +137,9 @@ int main(int argc, char *argv[])
             FIBITMAP* dst_dib;
             unsigned width = FreeImage_GetWidth(dib);
             unsigned height = FreeImage_GetHeight(dib);
-            unsigned y;
-            IMTpixel** p_im;
-            p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-            for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-            WORD** t_im;
-            t_im = (WORD**)malloc(height * sizeof(WORD*));
-            for (y = 0; y < height; y++) {t_im[y] = (WORD*)malloc(width * sizeof(WORD));}
-            IMTpixel** d_im;
-            d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-            for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+            IMTpixel** p_im = IMTalloc(height, width);
+            WORD** t_im = TLalloc(height, width);
+            IMTpixel** d_im = IMTalloc(height, width);
 
             printf("Radius= %d\n", radius);
 
@@ -202,15 +195,12 @@ int main(int argc, char *argv[])
                 threshold = IMTFilterTSauvolaLayer(p_im, t_im, height, width, radius, sensitivity, dynamic_range, lower_bound, upper_bound, delta);
             }
             printf("Threshold= %d\n", threshold / 3);
-            for (y = 0; y < height; y++){free(p_im[y]);}
-            free(p_im);
+            IMTfree(p_im, height);
             IMTFilterTLayerToImg (t_im, d_im, height, width);
-            for (y = 0; y < height; y++){free(t_im[y]);}
-            free(t_im);
+            TLfree(t_im, height);
             dst_dib = FreeImage_Allocate(width, height, 24);
             ImthresholdSetData(dst_dib, d_im);
-            for (y = 0; y < height; y++){free(d_im[y]);}
-            free(d_im);
+            IMTfree(d_im, height);
 
             if (dst_dib)
             {

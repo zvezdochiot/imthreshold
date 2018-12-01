@@ -87,17 +87,10 @@ int main(int argc, char *argv[])
             unsigned height = FreeImage_GetHeight(dib);
             unsigned width2 = width * 2;
             unsigned height2 = height * 2;
-            unsigned y;
 
-            IMTpixel** p_im;
-            p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-            for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-            BYTE** d_im;
-            d_im = (BYTE**)malloc(height2 * sizeof(BYTE*));
-            for (y = 0; y < height2; y++) {d_im[y] = (BYTE*)malloc(width2 * sizeof(BYTE));}
-            BYTE** r_im;
-            r_im = (BYTE**)malloc(height * sizeof(BYTE*));
-            for (y = 0; y < height; y++) {r_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+            IMTpixel** p_im = IMTalloc(height, width);
+            BYTE** d_im = BWalloc(height2, width2);
+            BYTE** r_im = BWalloc(height, width);
 
             ImthresholdGetData(dib, p_im);
             FreeImage_Unload(dib);
@@ -108,8 +101,7 @@ int main(int argc, char *argv[])
             }
             threshold = IMTFilterTHalftone2(p_im, d_im, height, width);
             printf("Threshold= %d\n", threshold);
-            for (y = 0; y < height; y++){free(p_im[y]);}
-            free(p_im);
+            IMTfree(p_im, height);
             if (freduce)
             {
                 threshold = IMTFilterSBWReduce2(d_im, r_im, height2, width2, height, width);
@@ -120,10 +112,8 @@ int main(int argc, char *argv[])
                 dst_dib = FreeImage_Allocate(width2, height2, 1);
                 ImthresholdSetDataBW(dst_dib, d_im);
             }
-            for (y = 0; y < height; y++){free(r_im[y]);}
-            free(r_im);
-            for (y = 0; y < height2; y++){free(d_im[y]);}
-            free(d_im);
+            BWfree(r_im, height);
+            BWfree(d_im, height2);
 
             if (dst_dib)
             {

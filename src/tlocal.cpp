@@ -145,13 +145,8 @@ int main(int argc, char *argv[])
             FIBITMAP* dst_dib;
             unsigned width = FreeImage_GetWidth(dib);
             unsigned height = FreeImage_GetHeight(dib);
-            unsigned y;
-            IMTpixel** p_im;
-            p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-            for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-            BYTE** d_im;
-            d_im = (BYTE**)malloc(height * sizeof(BYTE*));
-            for (y = 0; y < height; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+            IMTpixel** p_im = IMTalloc(height, width);
+            BYTE** d_im = BWalloc(height, width);
 
             printf("Radius= %d\n", radius);
 
@@ -182,13 +177,10 @@ int main(int argc, char *argv[])
                 threshold = IMTFilterTBiModRegion ( p_im, d_im, height, width, radius, sensitivity, delta);
             } else if (strcmp(namefilter, "blur") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** b_im;
-                b_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {b_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** b_im = IMTalloc(height, width);
                 IMTFilterGaussBlur (p_im, b_im, height, width, radius);
                 IMTFilterSCompare (p_im, b_im, height, width);
-                for (y = 0; y < height; y++){free(b_im[y]);}
-                free(b_im);
+                IMTfree(b_im, height);
                 printf("Delta= %f\n", delta);
                 threshold = IMTFilterTBiMod (p_im, d_im, height, width, delta);
             } else if (strcmp(namefilter, "chistian") == 0) {
@@ -200,13 +192,10 @@ int main(int argc, char *argv[])
                 threshold = IMTFilterTChistian(p_im, d_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
             } else if (strcmp(namefilter, "edge") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** b_im;
-                b_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {b_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** b_im = IMTalloc(height, width);
                 IMTFilterGaussBlur (p_im, b_im, height, width, radius);
                 IMTFilterSEdge (p_im, b_im, height, width);
-                for (y = 0; y < height; y++){free(b_im[y]);}
-                free(b_im);
+                IMTfree(b_im, height);
                 printf("Delta= %f\n", delta);
                 threshold = IMTFilterTBiMod (p_im, d_im, height, width, delta);
             } else if (strcmp(namefilter, "mscale") == 0) {
@@ -232,8 +221,7 @@ int main(int argc, char *argv[])
                 threshold = IMTFilterTSauvola(p_im, d_im, height, width, radius, sensitivity, dynamic_range, lower_bound, upper_bound, delta);
             }
             printf("Threshold= %d\n", threshold / 3);
-            for (y = 0; y < height; y++){free(p_im[y]);}
-            free(p_im);
+            IMTfree(p_im, height);
             if (finv)
             {
                 printf("Invert= true\n");
@@ -241,8 +229,7 @@ int main(int argc, char *argv[])
             }
             dst_dib = FreeImage_Allocate(width, height, 1);
             ImthresholdSetDataBW(dst_dib, d_im);
-            for (y = 0; y < height; y++){free(d_im[y]);}
-            free(d_im);
+            BWfree(d_im, height);
 
             if (dst_dib)
             {

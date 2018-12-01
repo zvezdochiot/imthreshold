@@ -109,24 +109,17 @@ int main(int argc, char *argv[])
             } else {
                 unsigned width = FreeImage_GetWidth(dib);
                 unsigned height = FreeImage_GetHeight(dib);
-                unsigned y;
 
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
                 IMTFilterPMean(p_im, d_im, height, width, radius, fmode, fneared);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
             }
 
             if (dst_dib)

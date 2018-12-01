@@ -84,11 +84,8 @@ int main(int argc, char *argv[]) {
                 unsigned height = FreeImage_GetHeight(dib);
                 unsigned bpp = FreeImage_GetBPP(dib);
                 IMTinfo p_info;
-                unsigned y;
 
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
@@ -104,8 +101,7 @@ int main(int argc, char *argv[]) {
                 printf("Std= %f\n", p_info.std);
                 printf("W/B= %f\n", p_info.wb);
 
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             }
             if (output_filename)
             {

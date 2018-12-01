@@ -171,18 +171,13 @@ int main(int argc, char *argv[])
             FIBITMAP* dst_dib;
             unsigned width = FreeImage_GetWidth(dib);
             unsigned height = FreeImage_GetHeight(dib);
-            unsigned y;
 
             if (strcmp(namefilter, "adsmooth") == 0)
             {
                 printf("Filter= %s\n", namefilter);
                 int radiusint;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 radiusint = int(radius + 0.5);
@@ -192,22 +187,16 @@ int main(int argc, char *argv[])
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
                 IMTFilterAdSmooth(p_im, d_im, height, width, radiusint);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
             } else if (strcmp(namefilter, "bwc") == 0) {
                 printf("Filter= %s\n", namefilter);
                 unsigned radiusint;
                 double kwb = 0.5;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 radiusint = unsigned(radius + 0.5);
@@ -217,20 +206,14 @@ int main(int argc, char *argv[])
                 FreeImage_Unload(dib);
                 kwb = IMTFilterClusterBWC(p_im, d_im, height, width, radiusint);
                 printf("W/b= %f\n", kwb);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
             } else if (strcmp(namefilter, "blur") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** b_im;
-                b_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {b_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** b_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 if (radius == 0) {radius = 1.0;}
@@ -241,19 +224,13 @@ int main(int argc, char *argv[])
                 IMTFilterGaussBlur(p_im, b_im, height, width, radius);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, b_im);
-                for (y = 0; y < height; y++){free(b_im[y]);}
-                free(b_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(b_im, height);
+                IMTfree(p_im, height);
            } else if (strcmp(namefilter, "cluster") == 0) {
                 printf("Filter= %s\n", namefilter);
                 int imdm;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (knum < 2) {knum = 2;}
                 printf("K= %d\n", knum);
@@ -262,19 +239,15 @@ int main(int argc, char *argv[])
                 FreeImage_Unload(dib);
                 imdm = IMTFilterClusterBiModC (p_im, d_im, height, width, knum);
                 printf("Dmax= %d\n", imdm);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
             } else if (strcmp(namefilter, "denoise") == 0) {
                 printf("Filter= %s\n", namefilter);
                 double kdenoises;
                 unsigned radiusint;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 radiusint = int(radius + 0.5);
@@ -287,14 +260,11 @@ int main(int argc, char *argv[])
                 printf("KDeNoise= %f\n", kdenoises);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "greyworld") == 0) {
                 printf("Filter= %s\n", namefilter);
                 IMTpixel dim;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
@@ -302,14 +272,11 @@ int main(int argc, char *argv[])
                 printf("Normalize= %d,%d,%d\n", dim.c[0], dim.c[1], dim.c[2]);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "greynorm") == 0) {
                 printf("Filter= %s\n", namefilter);
                 IMTpixel dim;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
@@ -317,20 +284,13 @@ int main(int argc, char *argv[])
                 printf("Normalize= %d,%d,%d: %d\n", dim.c[0], dim.c[1], dim.c[2], dim.s);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "illumc") == 0) {
                 printf("Filter= %s\n", namefilter);
                 IMTpixel domin;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** b_im;
-                b_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {b_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** b_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 if (radius == 0) {radius = 1.0;}
@@ -342,32 +302,24 @@ int main(int argc, char *argv[])
                 IMTFilterGaussBlur(p_im, b_im, height, width, radius);
                 domin = IMTFilterIllumCorr(p_im, b_im, d_im, height, width);
                 printf("Dominante= %d,%d,%d\n", domin.c[0], domin.c[1], domin.c[2]);
-                for (y = 0; y < height; y++){free(b_im[y]);}
-                free(b_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(b_im, height);
+                IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
             } else if (strcmp(namefilter, "invert") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
                 IMTFilterInvert(p_im, height, width);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "kmeans") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 if (knum < 2) {knum = 2;}
                 printf("K= %d\n", knum);
@@ -378,17 +330,12 @@ int main(int argc, char *argv[])
                 printf("Iters= %d\n", (int)threshold);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "levelmean") == 0) {
                 printf("Filter= %s\n", namefilter);
                 int radiusint;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 radiusint = int(radius + 0.5);
@@ -402,21 +349,15 @@ int main(int argc, char *argv[])
                 FreeImage_Unload(dib);
                 contour = IMTFilterLevelMean(p_im, d_im, height, width, radiusint, contour, threshold, lower_bound, upper_bound);
                 printf("Contour= %f\n", contour);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
             } else if (strcmp(namefilter, "levelsigma") == 0) {
                 printf("Filter= %s\n", namefilter);
                 double ks = 0;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 printf("Average= %f\n", amount);
                 printf("Part= %f\n", threshold);
@@ -425,46 +366,34 @@ int main(int argc, char *argv[])
                 FreeImage_Unload(dib);
                 ks = IMTFilterLevelSigma(p_im, d_im, height, width, amount, threshold);
                 printf("Multy= %f\n", ks);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
             } else if (strcmp(namefilter, "mirror") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
                 IMTFilterMirrorMean(p_im, height, width);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "monocolor") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
                 IMTFilterMonoColor(p_im, height, width);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "mclose") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 printf("Radius= %f\n", radius);
@@ -473,20 +402,14 @@ int main(int argc, char *argv[])
                 FreeImage_Unload(dib);
                 IMTFilterMorph(p_im, d_im, height, width, radius, true);
                 IMTFilterMorph(d_im, p_im, height, width, radius, false);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "mdilate") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 printf("Radius= %f\n", radius);
@@ -496,18 +419,12 @@ int main(int argc, char *argv[])
                 IMTFilterMorph(p_im, d_im, height, width, radius, true);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(d_im, height);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "merose") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 printf("Radius= %f\n", radius);
@@ -517,18 +434,12 @@ int main(int argc, char *argv[])
                 IMTFilterMorph(p_im, d_im, height, width, radius, false);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(d_im, height);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "mopen") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 printf("Radius= %f\n", radius);
@@ -537,21 +448,15 @@ int main(int argc, char *argv[])
                 FreeImage_Unload(dib);
                 IMTFilterMorph(p_im, d_im, height, width, radius, false);
                 IMTFilterMorph(d_im, p_im, height, width, radius, true);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "peron") == 0) {
                 printf("Filter= %s\n", namefilter);
                 int radiusint;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 radiusint = int(radius + 0.5);
@@ -566,18 +471,14 @@ int main(int argc, char *argv[])
                 }
                 printf("Noise= %f\n", noise);
                 IMTFilterPeron(p_im, d_im, height, width, radius, noise);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
             } else if (strcmp(namefilter, "posterize") == 0) {
                 printf("Filter= %s\n", namefilter);
                 double imsh = 0;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 if (posterdiv < 1) {posterdiv = 1;}
                 printf("Posterize= %d\n", posterdiv);
@@ -587,18 +488,13 @@ int main(int argc, char *argv[])
                 printf("Delta= %f\n", imsh);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "retinex") == 0) {
                 printf("Filter= %s\n", namefilter);
                 int radiusint;
                 int kimi = 0;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 radiusint = int(radius + 0.5);
@@ -609,18 +505,14 @@ int main(int argc, char *argv[])
                 FreeImage_Unload(dib);
                 kimi = IMTFilterRetinex(p_im, d_im, height, width, radiusint, sigma);
                 printf("K= %d\n", kimi);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
             } else if (strcmp(namefilter, "rs") == 0) {
                 printf("Filter= %s\n", namefilter);
                 double imd = 0;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
@@ -628,16 +520,11 @@ int main(int argc, char *argv[])
                 printf("Stdev= %f\n", imd);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "selgauss") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 if (radius == 0) {radius = 1.0;}
@@ -647,18 +534,14 @@ int main(int argc, char *argv[])
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
                 IMTFilterSelGauss(p_im, d_im, height, width, radius, maxdelta);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
             } else if (strcmp(namefilter, "shrink") == 0) {
                 printf("Filter= %s\n", namefilter);
                 double imsh = 0;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 if (threshold <= 0) {threshold = 4;}
                 printf("Threshold= %f\n", threshold);
@@ -669,17 +552,12 @@ int main(int argc, char *argv[])
                 printf("Shrink= %f\n", imsh);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "unripple") == 0) {
                 printf("Filter= %s\n", namefilter);
                 int radiusint;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 radiusint = int(radius + 0.5);
@@ -690,23 +568,15 @@ int main(int argc, char *argv[])
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
                 IMTFilterUnRipple(p_im, d_im, height, width, radiusint, maxdelta);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
             } else if (strcmp(namefilter, "unsharp") == 0) {
                 printf("Filter= %s\n", namefilter);
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** b_im;
-                b_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {b_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** b_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 if (radius == 0) {radius = 1.0;}
@@ -720,18 +590,13 @@ int main(int argc, char *argv[])
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 IMTFilterUnsharpMask(p_im, b_im, d_im, height, width, amount, threshold);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
-                for (y = 0; y < height; y++){free(b_im[y]);}
-                free(b_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(d_im, height);
+                IMTfree(b_im, height);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "whitefill") == 0) {
                 printf("Filter= %s\n", namefilter);
                 int niter;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
@@ -739,17 +604,12 @@ int main(int argc, char *argv[])
                 printf("Iteration= %d\n", niter);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             } else if (strcmp(namefilter, "wiener") == 0) {
                 printf("Filter= %s\n", namefilter);
                 int radiusint;
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                IMTpixel** d_im;
-                d_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {d_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
 
                 if (radius < 0) {radius = -radius;}
                 radiusint = int(radius + 0.5);
@@ -764,24 +624,19 @@ int main(int argc, char *argv[])
                 }
                 printf("Noise= %f\n", noise);
                 IMTFilterWiener(p_im, d_im, height, width, radiusint, noise);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                IMTfree(d_im, height);
             } else {
                 printf("Filter= none\n");
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+                IMTpixel** p_im = IMTalloc(height, width);
 
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
             }
 
             if (dst_dib)

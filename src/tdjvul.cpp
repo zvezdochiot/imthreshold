@@ -162,26 +162,13 @@ int main(int argc, char *argv[])
                 unsigned heightbg = (height + bgs - 1) / bgs;
                 unsigned widthfg = (widthbg + fgs - 1) / fgs;
                 unsigned heightfg = (heightbg + fgs - 1) / fgs;
-                unsigned y;
 
-                IMTpixel** p_im;
-                p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-                for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-                BYTE** m_im;
-                m_im = (BYTE**)malloc(height * sizeof(BYTE*));
-                for (y = 0; y < height; y++) {m_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
-                IMTpixel** fg_im;
-                fg_im = (IMTpixel**)malloc(heightfg * sizeof(IMTpixel*));
-                for (y = 0; y < heightfg; y++) {fg_im[y] = (IMTpixel*)malloc(widthfg * sizeof(IMTpixel));}
-                IMTpixel** bg_im;
-                bg_im = (IMTpixel**)malloc(heightbg * sizeof(IMTpixel*));
-                for (y = 0; y < heightbg; y++) {bg_im[y] = (IMTpixel*)malloc(widthbg * sizeof(IMTpixel));}
-                BYTE** fgm_im;
-                fgm_im = (BYTE**)malloc(heightfg * sizeof(BYTE*));
-                for (y = 0; y < heightfg; y++) {fgm_im[y] = (BYTE*)malloc(widthfg * sizeof(BYTE));}
-                BYTE** bgm_im;
-                bgm_im = (BYTE**)malloc(heightbg * sizeof(BYTE*));
-                for (y = 0; y < heightbg; y++) {bgm_im[y] = (BYTE*)malloc(widthbg * sizeof(BYTE));}
+                IMTpixel** p_im = IMTalloc(height, width);
+                BYTE** m_im = BWalloc(height, width);
+                IMTpixel** fg_im = IMTalloc(heightfg, widthfg);
+                IMTpixel** bg_im = IMTalloc(heightbg, widthbg);
+                BYTE** fgm_im = BWalloc(heightfg, widthfg);
+                BYTE** bgm_im = BWalloc(heightbg, widthbg);
 
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
@@ -196,8 +183,7 @@ int main(int argc, char *argv[])
                 } else {
                     printf("Mode= black\n");
                 }
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+                IMTfree(p_im, height);
 
                 if (fdespeckle > 0)
                 {
@@ -213,8 +199,7 @@ int main(int argc, char *argv[])
                     IMTFilterInvertBW (m_im, height, width);
                 }
                 ImthresholdSetDataBW(dst_dib, m_im);
-                for (y = 0; y < height; y++){free(m_im[y]);}
-                free(m_im);
+                BWfree(m_im, height);
                 if (fclean > 0)
                 {
                     printf("Blur= %d\n", fclean);
@@ -236,10 +221,8 @@ int main(int argc, char *argv[])
                     bg_dib = FreeImage_Allocate(widthbg, heightbg, 24);
                     ImthresholdSetData(bg_dib, bg_im);
                 }
-                for (y = 0; y < heightfg; y++){free(fg_im[y]);}
-                free(fg_im);
-                for (y = 0; y < heightbg; y++){free(bg_im[y]);}
-                free(bg_im);
+                IMTfree(fg_im, heightfg);
+                IMTfree(bg_im, heightbg);
                 if (finvs)
                 {
                     fgm_dib = FreeImage_Allocate(widthbg, heightbg, 1);
@@ -252,10 +235,8 @@ int main(int argc, char *argv[])
                     bgm_dib = FreeImage_Allocate(widthbg, heightbg, 1);
                     ImthresholdSetDataBW(bgm_dib, bgm_im);
                 }
-                for (y = 0; y < heightfg; y++){free(fgm_im[y]);}
-                free(fgm_im);
-                for (y = 0; y < heightbg; y++){free(bgm_im[y]);}
-                free(bgm_im);
+                BWfree(fgm_im, heightfg);
+                BWfree(bgm_im, heightbg);
 
             }
             if (dst_dib)

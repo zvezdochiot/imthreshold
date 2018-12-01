@@ -89,7 +89,6 @@ int main(int argc, char *argv[])
             unsigned height = FreeImage_GetHeight(dib);
             unsigned width2;
             unsigned height2;
-            unsigned y;
             printf("Mode= %d\n", smode);
             width2 = width * smode;
             height2 = height * smode;
@@ -103,12 +102,8 @@ int main(int argc, char *argv[])
             }
             printf("Width= %d\n", width2);
             printf("Height= %d\n", height2);
-            IMTpixel** p_im;
-            p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-            for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-            IMTpixel** d_im;
-            d_im = (IMTpixel**)malloc(height2 * sizeof(IMTpixel*));
-            for (y = 0; y < height2; y++) {d_im[y] = (IMTpixel*)malloc(width2 * sizeof(IMTpixel));}
+            IMTpixel** p_im = IMTalloc(height, width);
+            IMTpixel** d_im = IMTalloc(height2, width2);
 
             ImthresholdGetData(dib, p_im);
             FreeImage_Unload(dib);
@@ -121,12 +116,10 @@ int main(int argc, char *argv[])
                 IMTFilterSHRIS(p_im, d_im, height, width, smode);
             }
 
-            for (y = 0; y < height; y++){free(p_im[y]);}
-            free(p_im);
+            IMTfree(p_im, height);
             dst_dib = FreeImage_Allocate(width2, height2, 24);
             ImthresholdSetData(dst_dib, d_im);
-            for (y = 0; y < height2; y++){free(d_im[y]);}
-            free(d_im);
+            IMTfree(d_im, height2);
 
             if (dst_dib)
             {

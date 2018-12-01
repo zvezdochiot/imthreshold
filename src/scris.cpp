@@ -120,15 +120,9 @@ int main(int argc, char *argv[])
                 new_height = (height * neww) / width;
             }
 
-            IMTpixel** p_im;
-            p_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-            for (y = 0; y < height; y++) {p_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-            IMTpixel** c_im;
-            c_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-            for (y = 0; y < height; y++) {c_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-            IMTpixel** d_im;
-            d_im = (IMTpixel**)malloc(new_height * sizeof(IMTpixel*));
-            for (y = 0; y < new_height; y++) {d_im[y] = (IMTpixel*)malloc(new_width * sizeof(IMTpixel));}
+            IMTpixel** p_im = IMTalloc(height, width);
+            IMTpixel** c_im = IMTalloc(height, width);
+            IMTpixel** d_im = IMTalloc(new_height, new_width);
 
             printf("Width= %d\n", new_width);
             printf("Height= %d\n", new_height);
@@ -153,14 +147,11 @@ int main(int argc, char *argv[])
                 printf("RIS= %f\n", ims);
                 IMTFilterSBicont(c_im, d_im, height, width, new_height, new_width);
             }
-            for (y = 0; y < height; y++){free(p_im[y]);}
-            free(p_im);
-            for (y = 0; y < height; y++){free(c_im[y]);}
-            free(c_im);
+            IMTfree(p_im, height);
+            IMTfree(c_im, height);
             dst_dib = FreeImage_Allocate(new_width, new_height, 24);
             ImthresholdSetData(dst_dib, d_im);
-            for (y = 0; y < new_height; y++){free(d_im[y]);}
-            free(d_im);
+            IMTfree(d_im, new_height);
 
             if (dst_dib)
             {

@@ -42,6 +42,75 @@ IMTpixel IMTcalcS (IMTpixel im)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+IMTpixel** IMTalloc (unsigned height, unsigned width)
+{
+    IMTpixel** im;
+    unsigned y;
+
+    im = (IMTpixel**)malloc (height * sizeof(IMTpixel*));
+    for (y = 0; y < height; y++) {im[y] = (IMTpixel*)malloc (width * sizeof(IMTpixel));}
+
+    return im;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void IMTfree (IMTpixel** im, unsigned height)
+{
+    unsigned y;
+
+    for (y = 0; y < height; y++){free(im[y]);}
+    free(im);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+BYTE** BWalloc (unsigned height, unsigned width)
+{
+    BYTE** im;
+    unsigned y;
+
+    im = (BYTE**)malloc(height * sizeof(BYTE*));
+    for (y = 0; y < height; y++) {im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+
+    return im;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void BWfree (BYTE** im, unsigned height)
+{
+    unsigned y;
+
+    for (y = 0; y < height; y++){free(im[y]);}
+    free(im);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+WORD** TLalloc (unsigned height, unsigned width)
+{
+    WORD** im;
+    unsigned y;
+
+    im = (WORD**)malloc(height * sizeof(WORD*));
+    for (y = 0; y < height; y++) {im[y] = (WORD*)malloc(width * sizeof(WORD));}
+
+    return im;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void TLfree (WORD** im, unsigned height)
+{
+    unsigned y;
+
+    for (y = 0; y < height; y++){free(im[y]);}
+    free(im);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 IMTpixel IMTdiffS (IMTpixel im)
 {
     unsigned immax, immin, d;
@@ -589,9 +658,7 @@ void IMTFilterDespeck2 (BYTE** p_im, unsigned height, unsigned width, unsigned K
     unsigned n, val;
     int h = height;
     int w = width;
-    BYTE** d_im;
-    d_im = (BYTE**)malloc(height * sizeof(BYTE*));
-    for (y = 0; y < h; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+    BYTE** d_im = BWalloc(height, width);
 
     for (y = 0; y < h; y++)
     {
@@ -632,8 +699,7 @@ void IMTFilterDespeck2 (BYTE** p_im, unsigned height, unsigned width, unsigned K
         }
     }
 
-    for (y = 0; y < h; y++){free(d_im[y]);}
-    free(d_im);
+    BWfree(d_im, height);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -644,9 +710,7 @@ unsigned IMTFilterDMag2 (BYTE** p_im, unsigned height, unsigned width, unsigned 
     height2 = height * 2;
     width2 = width * 2;
     
-    BYTE** d_im;
-    d_im = (BYTE**)malloc(height2 * sizeof(BYTE*));
-    for (y = 0; y < height2; y++) {d_im[y] = (BYTE*)malloc(width2 * sizeof(BYTE));}
+    BYTE** d_im = BWalloc(height2, width2);
 
     threshold = 0;
     for (y = 0; y < Ksize; y++)
@@ -657,8 +721,7 @@ unsigned IMTFilterDMag2 (BYTE** p_im, unsigned height, unsigned width, unsigned 
     threshold /= Ksize;
     threshold /= 2;
     
-    for (y = 0; y < height2; y++){free(d_im[y]);}
-    free(d_im);
+    BWfree(d_im, height2);
     
     return threshold;
 }
@@ -678,9 +741,7 @@ void IMTFilterDNeuro2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ks
     double** weight;
     weight = (double**)malloc(Ksize * sizeof(double*));
     for (y = 0; y < k; y++) {weight[y] = (double*)malloc(Ksize * sizeof(double));}
-    BYTE** d_im;
-    d_im = (BYTE**)malloc(height * sizeof(BYTE*));
-    for (y = 0; y < h; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+    BYTE** d_im = BWalloc(height, width);
 
     if (lnum < 1) {lnum = 1;}
     n = 0;
@@ -786,8 +847,7 @@ void IMTFilterDNeuro2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ks
 
     for (y = 0; y < k; y++){free(weight[y]);}
     free(weight);
-    for (y = 0; y < h; y++){free(d_im[y]);}
-    free(d_im);
+    BWfree(d_im, height);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -955,10 +1015,7 @@ double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width,
     double korigin = 1.0;
     int val, valp, vald, valdp, vali, histn[512];
     double ka, kn, valdn, valda, valds, valdso, valdsd, valdsn, histdelta[512];
-    IMTpixel** t_im;
-    t_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-    for (y = 0; y < height; y++) {t_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
-
+    IMTpixel** t_im = IMTalloc(height, width);
 
     for (d = 0; d < 512; d++)
     {
@@ -1152,8 +1209,7 @@ double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width,
         }
     }
 
-    for (y = 0; y < height; y++){free(t_im[y]);}
-    free(t_im);
+    IMTfree(t_im, height);
 
     return kdenoise;
 }
@@ -1601,12 +1657,8 @@ void IMTFilterInpaint (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned h
     double cs[3];
     BYTE csb[3];
 
-    BYTE** mg_im;
-    mg_im = (BYTE**)malloc(height * sizeof(BYTE*));
-    for (y = 0; y < height; y++) {mg_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
-    BYTE** md_im;
-    md_im = (BYTE**)malloc(height * sizeof(BYTE*));
-    for (y = 0; y < height; y++) {md_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+    BYTE** mg_im = BWalloc(height, width);
+    BYTE** md_im = BWalloc(height, width);
 
     nb = 0;
     nn = 0;
@@ -1728,10 +1780,8 @@ void IMTFilterInpaint (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned h
         }
     }
 
-    for (y = 0; y < height; y++){free(md_im[y]);}
-    free(md_im);
-    for (y = 0; y < height; y++){free(mg_im[y]);}
-    free(mg_im);
+    BWfree(md_im, height);
+    BWfree(mg_im, height);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1770,9 +1820,7 @@ void IMTFilterSeparateBGFGL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMT
     double fgdist, bgdist, kover, fgpart, bgpart;
     unsigned maskbl, maskover, bgsover, fgsum[3], bgsum[3], fgnum, bgnum;
 
-    IMTpixel** fgt_im;
-    fgt_im = (IMTpixel**)malloc(heightbg * sizeof(IMTpixel*));
-    for (y = 0; y < heightbg; y++) {fgt_im[y] = (IMTpixel*)malloc(widthbg * sizeof(IMTpixel));}
+    IMTpixel** fgt_im = IMTalloc(heightbg, widthbg);
 
     whcp = height;
     whcp += width;
@@ -1924,8 +1972,7 @@ void IMTFilterSeparateBGFGL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMT
         }
     }       
 
-    for (y = 0; y < heightbg; y++){free(fgt_im[y]);}
-    free(fgt_im);
+    IMTfree(fgt_im, heightbg);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3837,9 +3884,7 @@ double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width)
     double imx = 0, ims = 0, imd = 0;
     int h = height;
     int w = width;
-    IMTpixel** t_im;
-    t_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-    for (d = 0; d < height; d++) {t_im[d] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+    IMTpixel** t_im = IMTalloc(height, width);
 
     imd = 0;
     for ( y = 0; y < h; y++ )
@@ -3961,8 +4006,7 @@ double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width)
     imd = sqrt(imd);
     imd /= 255.0;
 
-    for (d = 0; d < height; d++){free(t_im[d]);}
-    free(t_im);
+    IMTfree(t_im, height);
 
     return imd;
  }
@@ -4375,8 +4419,7 @@ void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsi
     iradius = (int)(2.0 * radius + 0.5) + 1;
 
     gaussmat = (double*)malloc((iradius) * sizeof(double));
-    t_im = (IMTpixel**)malloc(height * sizeof(IMTpixel*));
-    for (y = 0; y < h; y++) {t_im[y] = (IMTpixel*)malloc(width * sizeof(IMTpixel));}
+    t_im = IMTalloc(height, width);
 
     IMTGaussLineMatrix (gaussmat, radius);
 
@@ -4458,8 +4501,7 @@ void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsi
         }
     }
 
-    for (y = 0; y < h; y++){free(t_im[y]);}
-    free(t_im);
+    IMTfree(t_im, height);
     free(gaussmat);
 }
 
@@ -6412,17 +6454,13 @@ int IMTFilterTBernsenLayer(IMTpixel** p_im, WORD** t_im, unsigned height, unsign
 
 int IMTFilterTBernsen(IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, unsigned contrast_limit)
 {
-    unsigned y;
     int threshold = 0;
-    WORD** t_im;
-    t_im = (WORD**)malloc(height * sizeof(WORD*));
-    for (y = 0; y < height; y++) {t_im[y] = (WORD*)malloc(width * sizeof(WORD));}
+    WORD** t_im = TLalloc(height, width);
 
     threshold = IMTFilterTBernsenLayer(p_im, t_im, height, width, radius, contrast_limit);
     threshold = IMTFilterThresholdLayer (p_im, t_im, d_im, height, width);
 
-    for (y = 0; y < height; y++){free(t_im[y]);}
-    free(t_im);
+    TLfree(t_im, height);
 
     return threshold;
 }
@@ -6686,17 +6724,13 @@ int IMTFilterTBiModLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsigne
 
 int IMTFilterTBiModRegion (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int delta)
 {
-    unsigned y;
     int threshold = 0;
-    WORD** t_im;
-    t_im = (WORD**)malloc(height * sizeof(WORD*));
-    for (y = 0; y < height; y++) {t_im[y] = (WORD*)malloc(width * sizeof(WORD));}
+    WORD** t_im = TLalloc(height, width);
 
     threshold = IMTFilterTBiModLayer (p_im, t_im, height, width, radius, sensitivity, delta);
     threshold = IMTFilterThresholdLayer (p_im, t_im, d_im, height, width);
 
-    for (y = 0; y < height; y++){free(t_im[y]);}
-    free(t_im);
+    TLfree(t_im, height);
 
     return threshold;
 }
@@ -6902,17 +6936,13 @@ int IMTFilterTChistianLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsi
 
 int IMTFilterTChistian (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta)
 {
-    unsigned y;
     int threshold = 0;
-    WORD** t_im;
-    t_im = (WORD**)malloc(height * sizeof(WORD*));
-    for (y = 0; y < height; y++) {t_im[y] = (WORD*)malloc(width * sizeof(WORD));}
+    WORD** t_im = TLalloc(height, width);
 
     threshold = IMTFilterTChistianLayer (p_im, t_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
     threshold = IMTFilterThresholdLayer (p_im, t_im, d_im, height, width);
 
-    for (y = 0; y < height; y++){free(t_im[y]);}
-    free(t_im);
+    TLfree(t_im, height);
 
     return threshold;
 }
@@ -7168,9 +7198,7 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
     double fgdist, bgdist, kover, fgpart, bgpart, fgk = 1.0;
     unsigned maskbl, maskover, bgsover, fgsum[3], bgsum[3], fgnum, bgnum;
 
-    IMTpixel** fgt_im;
-    fgt_im = (IMTpixel**)malloc(heightbg * sizeof(IMTpixel*));
-    for (y = 0; y < heightbg; y++) {fgt_im[y] = (IMTpixel*)malloc(widthbg * sizeof(IMTpixel));}
+    IMTpixel** fgt_im = IMTalloc(heightbg, widthbg);
 
     whcp = height;
     whcp += width;
@@ -7362,8 +7390,7 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
         }
     }
 
-    for (y = 0; y < heightbg; y++){free(fgt_im[y]);}
-    free(fgt_im);
+    IMTfree(fgt_im, heightbg);
 
     return wbmode;
 }
@@ -8191,17 +8218,13 @@ int IMTFilterTMscaleLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsign
 
 int IMTFilterTMscale (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, unsigned radius, double sensitivity, double doverlay, double delta)
 {
-    unsigned y;
     int threshold = 0;
-    WORD** t_im;
-    t_im = (WORD**)malloc(height * sizeof(WORD*));
-    for (y = 0; y < height; y++) {t_im[y] = (WORD*)malloc(width * sizeof(WORD));}
+    WORD** t_im = TLalloc(height, width);
 
     threshold = IMTFilterTMscaleLayer (p_im, t_im, height, width, radius, sensitivity, doverlay, delta);
     threshold = IMTFilterThresholdLayer (p_im, t_im, d_im, height, width);
 
-    for (y = 0; y < height; y++){free(t_im[y]);}
-    free(t_im);
+    TLfree(t_im, height);
 
     return threshold;
 }
@@ -8289,17 +8312,13 @@ int IMTFilterTNiblackLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsig
 
 int IMTFilterTNiblack (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta)
 {
-    unsigned y;
     int threshold = 0;
-    WORD** t_im;
-    t_im = (WORD**)malloc(height * sizeof(WORD*));
-    for (y = 0; y < height; y++) {t_im[y] = (WORD*)malloc(width * sizeof(WORD));}
+    WORD** t_im = TLalloc(height, width);
 
     threshold = IMTFilterTNiblackLayer (p_im, t_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
     threshold = IMTFilterThresholdLayer (p_im, t_im, d_im, height, width);
 
-    for (y = 0; y < height; y++){free(t_im[y]);}
-    free(t_im);
+    TLfree(t_im, height);
 
     return threshold;
 }
@@ -8561,17 +8580,13 @@ int IMTFilterTSauvolaLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsig
 
 int IMTFilterTSauvola (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int dynamic_range, int lower_bound, int upper_bound, double delta)
 {
-    unsigned y;
     int threshold = 0;
-    WORD** t_im;
-    t_im = (WORD**)malloc(height * sizeof(WORD*));
-    for (y = 0; y < height; y++) {t_im[y] = (WORD*)malloc(width * sizeof(WORD));}
+    WORD** t_im = TLalloc(height, width);
 
     threshold = IMTFilterTSauvolaLayer (p_im, t_im, height, width, radius, sensitivity, dynamic_range, lower_bound, upper_bound, delta);
     threshold = IMTFilterThresholdLayer (p_im, t_im, d_im, height, width);
 
-    for (y = 0; y < height; y++){free(t_im[y]);}
-    free(t_im);
+    TLfree(t_im, height);
 
     return threshold;
 }
@@ -8586,9 +8601,7 @@ int IMTFilterTText (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
     int h = height;
     int w = width;
 
-    WORD** b_im;
-    b_im = (WORD**)malloc(height * sizeof(WORD*));
-    for (y = 0; y < h; y++) {b_im[y] = (WORD*)malloc(width * sizeof(WORD));}
+    WORD** b_im = TLalloc(height, width);
 
     wr = 2 * radius;
     ws = wr * wr - 1;
@@ -8658,8 +8671,7 @@ int IMTFilterTText (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
         }
     }
 
-    for (y = 0; y < h; y++){free(b_im[y]);}
-    free(b_im);
+    TLfree(b_im, height);
 
     return threshold;
 }

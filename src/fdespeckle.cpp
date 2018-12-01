@@ -107,11 +107,8 @@ int main(int argc, char *argv[])
             {
                 unsigned width = FreeImage_GetWidth(dib);
                 unsigned height = FreeImage_GetHeight(dib);
-                unsigned y;
 
-                BYTE** p_im;
-                p_im = (BYTE**)malloc(height * sizeof(BYTE*));
-                for (y = 0; y < height; y++) {p_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
+                BYTE** p_im = BWalloc(height, width);
 
                 printf("Aperture= %d\n", Ksize);
 
@@ -141,8 +138,7 @@ int main(int argc, char *argv[])
                 }
                 despeckled = FreeImage_Allocate(width, height, 1);
                 ImthresholdSetDataBW(despeckled, p_im);
-                for (y = 0; y < height; y++){free(p_im[y]);}
-                free(p_im);
+				BWfree(p_im, height);
             } else {
                 despeckled = ImthresholdFilterNone(dib);
                 printf("%s\n", "Unsupported color mode.");

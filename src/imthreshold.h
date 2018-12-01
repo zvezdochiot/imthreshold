@@ -94,6 +94,12 @@ MAXMIN(const T* L, long n, T& max, T& min) {
 
 IMTpixel IMTset (BYTE c0, BYTE c1, BYTE c2);
 IMTpixel IMTcalcS (IMTpixel im);
+IMTpixel** IMTalloc (unsigned height, unsigned width);
+void IMTfree (IMTpixel** im, unsigned height);
+BYTE** BWalloc (unsigned height, unsigned width);
+void BWfree (BYTE** im, unsigned height);
+WORD** TLalloc (unsigned height, unsigned width);
+void TLfree (WORD** im, unsigned height);
 IMTpixel IMTdiffS (IMTpixel im);
 IMTpixel IMTrefilter1p (IMTpixel IMTim, IMTpixel IMTimf);
 IMTpixel IMTinterpolation (IMTpixel** p_im, unsigned height, unsigned width, double y, double x);

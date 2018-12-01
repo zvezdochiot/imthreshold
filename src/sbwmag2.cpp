@@ -83,7 +83,6 @@ int main(int argc, char *argv[])
                 unsigned width = FreeImage_GetWidth(dib);
                 unsigned height = FreeImage_GetHeight(dib);
                 unsigned width2, height2;
-                unsigned y;
                 if (freduce)
                 {
                     width2 = (width + 1) / 2;
@@ -94,12 +93,8 @@ int main(int argc, char *argv[])
                 }
                 printf("Width= %d\n", width2);
                 printf("Height= %d\n", height2);
-                BYTE** d_im;
-                d_im = (BYTE**)malloc(height * sizeof(BYTE*));
-                for (y = 0; y < height; y++) {d_im[y] = (BYTE*)malloc(width * sizeof(BYTE));}
-                BYTE** r_im;
-                r_im = (BYTE**)malloc(height2 * sizeof(BYTE*));
-                for (y = 0; y < height2; y++) {r_im[y] = (BYTE*)malloc(width2 * sizeof(BYTE));}
+                BYTE** d_im = BWalloc(height, width);
+                BYTE** r_im = BWalloc(height2, width2);
 
                 ImthresholdGetDataBW(dib, d_im);
                 FreeImage_Unload(dib);
@@ -112,12 +107,10 @@ int main(int argc, char *argv[])
                     printf("Mag= %d\n", threshold);
                 }
 
-                for (y = 0; y < height; y++){free(d_im[y]);}
-                free(d_im);
+                BWfree(d_im, height);
                 dst_dib = FreeImage_Allocate(width2, height2, 1);
                 ImthresholdSetDataBW(dst_dib, r_im);
-                for (y = 0; y < height2; y++){free(r_im[y]);}
-                free(r_im);
+                BWfree(r_im, height2);
 
                 if (dst_dib)
                 {
