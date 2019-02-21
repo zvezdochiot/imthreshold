@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 
     int opt;
-    int smode = 2;
+    unsigned smode = 2;
     bool reduce = false;
     bool fhelp = false;
     while ((opt = getopt(argc, argv, ":m:rh")) != -1)

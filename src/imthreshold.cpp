@@ -6021,91 +6021,32 @@ void IMTFilterSHRIS (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterSReduce (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int smode)
+void IMTFilterSReduce (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned reduce)
 {
-    unsigned d;
-    int yr, xr, y1, x1, y2, x2, y3, x3;
-    int h = height;
-    int w = width;
-    int h2, w2;
-
-    double imx, imr;
-
-    if (smode < 2) {smode = 2;}
-    if (smode > 3) {smode = 3;}
-
-    h2 = (height + smode - 1) / smode;
-    w2 = (width + smode - 1) / smode;
-
-    if (smode == 2)
+    unsigned y, x, y0, x0, y1, x1;
+    if (reduce > 1)
     {
-        for (yr = 0; yr < h2; yr++)
+        unsigned widthr = (width + reduce - 1) / reduce;
+        unsigned heightr = (height + reduce - 1) / reduce;
+        for (y = 0; y < heightr; y++)
         {
-            y1 = 2 * yr;
-            y2 = 2 * yr + 1;
-            if (y2 >= h) {y2 = h - 1;}
-            for (xr = 0; xr < w2; xr++)
+            y0 = y * reduce;
+            y1 = y0 + reduce;
+            if (y1 > height) {y1 = height;}
+            for (x = 0; x < widthr; x++)
             {
-                x1 = 2 * xr;
-                x2 = 2 * xr + 1;
-                if (x2 >= w) {x2 = w - 1;}
-                for (d = 0; d < 3; d++)
-                {
-                    imr = 0;
-                    imx = (double)p_im[y1][x1].c[d];
-                    imr += imx;
-                    imx = (double)p_im[y1][x2].c[d];
-                    imr += imx;
-                    imx = (double)p_im[y2][x1].c[d];
-                    imr += imx;
-                    imx = (double)p_im[y2][x2].c[d];
-                    imr += imx;
-                    imr /= 4.0;
-                    d_im[yr][xr].c[d] = (BYTE)MIN(MAX((int)0, (int)(imr + 0.5)), (int)255);
-                }
-                d_im[yr][xr] = IMTcalcS (d_im[yr][xr]);
+                x0 = x * reduce;
+                x1 = x0 + reduce;
+                if (x1 > width) {x1 = width;}
+                d_im[y][x] = IMTmeanIc(p_im, y0, x0, y1, x1);
             }
         }
     } else {
-        for (yr = 0; yr < h2; yr++)
+        for (y = 0; y < height; y++)
         {
-            y1 = 3 * yr;
-            y2 = 3 * yr + 1;
-            y3 = 3 * yr + 2;
-            if (y2 >= h) {y2 = h - 1;}
-            if (y3 >= h) {y3 = h - 2;}
-            for (xr = 0; xr < w2; xr++)
+            for (x = 0; x < width; x++)
             {
-                x1 = 3 * xr;
-                x2 = 3 * xr + 1;
-                x3 = 3 * xr + 2;
-                if (x2 >= w) {x2 = w - 1;}
-                if (x3 >= w) {x3 = w - 2;}
-                for (d = 0; d < 3; d++)
-                {
-                    imr = 0;
-                    imx = (double)p_im[y1][x1].c[d];
-                    imr += imx;
-                    imx = (double)p_im[y1][x2].c[d];
-                    imr += imx;
-                    imx = (double)p_im[y1][x3].c[d];
-                    imr += imx;
-                    imx = (double)p_im[y2][x1].c[d];
-                    imr += imx;
-                    imx = (double)p_im[y2][x2].c[d];
-                    imr += imx;
-                    imx = (double)p_im[y2][x3].c[d];
-                    imr += imx;
-                    imx = (double)p_im[y3][x1].c[d];
-                    imr += imx;
-                    imx = (double)p_im[y3][x2].c[d];
-                    imr += imx;
-                    imx = (double)p_im[y3][x3].c[d];
-                    imr += imx;
-                    imr /= 9.0;
-                    d_im[yr][xr].c[d] = (BYTE)MIN(MAX((int)0, (int)(imr + 0.5)), (int)255);
-                }
-                d_im[yr][xr] = IMTcalcS (d_im[yr][xr]);
+                d_im[y][x] = p_im[y][x];
             }
         }
     }
@@ -7223,6 +7164,8 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
     {
         fgk = sqrt(1.5 - imwb);
     }
+    if (doverlay < 0) {doverlay = 0;}
+    kover = doverlay + 1.0;
     if (wbmode == 0)
     {
         if (imwb < 0.5) {wbmode = -1;} else {wbmode = 1;}
@@ -7243,8 +7186,6 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
             bg_im[y][x] = IMTset(bgbase, bgbase, bgbase);
         }
     }
-    if (doverlay < 0) {doverlay = 0;}
-    kover = doverlay + 1.0;
     for (l = 0; l < level; l++)
     {
         cnth = (heightbg + blsz - 1) / blsz;
@@ -7350,20 +7291,7 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
         }
         blsz /= 2;
     }
-    for (y = 0; y < heightfg; y++)
-    {
-        y0 = y * fgs;
-        y1 = y0 + fgs;
-        if (y1 > heightbg) {y1 = heightbg;}
-        for (x = 0; x < widthfg; x++)
-        {
-            x0 = x * fgs;
-            x1 = x0 + fgs;
-            if (x1 > widthbg) {x1 = widthbg;}
-            fg_im[y][x] = IMTmeanIc(fgt_im, y0, x0, y1, x1);
-
-        }
-    }
+    IMTFilterSReduce (fgt_im, fg_im, heightbg, widthbg, fgs);
     if (fposter != 0)
     {
         double imsh = IMTFilterPosterize(fg_im, heightfg, widthfg, fposter);
@@ -7379,8 +7307,8 @@ int IMTFilterTDjVuL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** 
             pim = p_im[y][x];
             fgim = fg_im[yf][xf];
             bgim = bg_im[yb][xb];
-            fgdist = IMTdist(pim, fgim);
             bgdist = IMTdist(pim, bgim);
+            fgdist = IMTdist(pim, fgim);
             if (fgdist < bgdist)
             {
                 m_im[y][x] = 0;
