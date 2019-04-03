@@ -27,7 +27,9 @@ void ImthresholdFilterDespeckleUsage()
     printf("                    'hist'\n");
     printf("                    'invert'\n");
     printf("                    'mag2'\n");
+    printf("                    'minmax'\n");
     printf("                    'neuro'\n");
+    printf("                    'smearing'\n");
     printf("                    'simple' (default)\n");
     printf("          -a N    aperture size (int, optional, default = 3)\n");
     printf("          -i      invert (bool, optional, default = false)\n");
@@ -127,18 +129,24 @@ int main(int argc, char *argv[])
                     unsigned threshold = 0;
                     threshold = IMTFilterDMag2(p_im, height, width, Ksize);
                     printf("Despeckle= %d\n", threshold);
+                } else if (strcmp(namefilter, "minmax") == 0) {
+                    printf("Method= %s\n", namefilter);
+                    IMTFilterDMinMax(p_im, height, width, Ksize);
                 } else if (strcmp(namefilter, "neuro") == 0) {
                     printf("Method= %s\n", namefilter);
                     printf("Lambda= %f\n", lambda);
                     printf("Learnen= %d\n", lnum);
                     IMTFilterDNeuro2(p_im, height, width, Ksize, lambda, lnum);
+                } else if (strcmp(namefilter, "smearing") == 0) {
+                    printf("Method= %s\n", namefilter);
+                    IMTFilterDSmearing(p_im, height, width, Ksize);
                 } else {
                     printf("Method= simple\n");
                     IMTFilterDespeck2(p_im, height, width, Ksize);
                 }
                 despeckled = FreeImage_Allocate(width, height, 1);
                 ImthresholdSetDataBW(despeckled, p_im);
-				BWfree(p_im, height);
+                BWfree(p_im, height);
             } else {
                 despeckled = ImthresholdFilterNone(dib);
                 printf("%s\n", "Unsupported color mode.");

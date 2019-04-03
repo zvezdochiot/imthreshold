@@ -126,6 +126,8 @@ void IMTFilterDespeck2 (BYTE** p_im, unsigned height, unsigned width, unsigned K
 unsigned IMTFilterDMag2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize);
 void IMTFilterDNeuro2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize, double lambda, unsigned lnum);
 double IMTFilterDphist (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize);
+void IMTFilterDMinMax (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize);
+void IMTFilterDSmearing (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize);
 double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width, double kdenoise);
 double IMTFilterDeNoiseDiff (IMTpixel** p_im, unsigned height, unsigned width, unsigned radius, double kdenoise);
 void IMTBlurMask (IMTpixel** p_im, BYTE** m_im, unsigned height, unsigned width, int radius);

@@ -652,31 +652,32 @@ IMTpixel IMTaverageIc (IMTpixel** IMTim, IMTpixel IMTima, unsigned y0, unsigned 
 
 void IMTFilterDespeck2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize)
 {
-    int k2 = Ksize/2;
-    int kmax = Ksize - k2;
-    int i, j, y, x, y1, x1;
+    unsigned k2 = Ksize/2;
+    unsigned kmax = Ksize - k2;
+    unsigned y, x, y0, x0, y1, x1, y2, x2;
     unsigned n, val;
-    int h = height;
-    int w = width;
     BYTE** d_im = BWalloc(height, width);
 
-    for (y = 0; y < h; y++)
+    for (y = 0; y < height; y++)
     {
-        for (x = 0; x < w; x++)
+        y0 = 0;
+        if (y > k2) {y0 = y - k2;}
+        y2 = y + kmax;
+        if (y2 > height){y2 = height;}
+        for (x = 0; x < width; x++)
         {
+            x0 = 0;
+            if (x > k2) {x0 = x - k2;}
+            x2 = x + kmax;
+            if (x2 > width){x2 = width;}
             val = 0;
             n = 0;
-            for(i = -k2; i < kmax; i++)
+            for(y1 = y0; y1 < y2; y1++)
             {
-                for(j = -k2; j < kmax; j++)
+                for(x1 = x0; x1 < x2; x1++)
                 {
-                    y1 = y + i;
-                    x1 = x + j;
-                    if ((y1 >= 0) && (x1 >= 0) && (y1 < h) && (x1 < w))
-                    {
-                        n++;
-                        if (p_im[y1][x1] > 0) {val++;}
-                    }
+                    n++;
+                    if (p_im[y1][x1] > 0) {val++;}
                 }
             }
             val *= 2;
@@ -691,9 +692,9 @@ void IMTFilterDespeck2 (BYTE** p_im, unsigned height, unsigned width, unsigned K
             d_im[y][x] = (BYTE)val;
         }
     }
-    for (y = 0; y < h; y++)
+    for (y = 0; y < height; y++)
     {
-        for (x = 0; x < w; x++)
+        for (x = 0; x < width; x++)
         {
             p_im[y][x] = d_im[y][x];
         }
@@ -1005,6 +1006,148 @@ double IMTFilterDphist (BYTE** p_im, unsigned height, unsigned width, unsigned K
     free(d_im);
 
     return kdp;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterDMinMax (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize)
+{
+    unsigned k2 = Ksize;
+    unsigned kmax = Ksize + 1;
+    unsigned y, x, y0, x0, y1, x1, y2, x2;
+    unsigned val;
+    BYTE** d_im = BWalloc(height, width);
+
+    for (y = 0; y < height; y++)
+    {
+        y0 = 0;
+        if (y > k2) {y0 = y - k2;}
+        y2 = y + kmax;
+        if (y2 > height){y2 = height;}
+        for (x = 0; x < width; x++)
+        {
+            x0 = 0;
+            if (x > k2) {x0 = x - k2;}
+            x2 = x + kmax;
+            if (x2 > width){x2 = width;}
+            val = 255;
+            for(y1 = y0; y1 < y2; y1++)
+            {
+                for(x1 = x0; x1 < x2; x1++)
+                {
+                    if (p_im[y1][x1] == 0)
+                    {
+                        val = 0;
+                        y1 = y2;
+                        x1 = x2;
+                    }
+                }
+            }
+            d_im[y][x] = (BYTE)val;
+        }
+    }
+    for (y = 0; y < height; y++)
+    {
+        y0 = 0;
+        if (y > k2) {y0 = y - k2;}
+        y2 = y + kmax;
+        if (y2 > height){y2 = height;}
+        for (x = 0; x < width; x++)
+        {
+            x0 = 0;
+            if (x > k2) {x0 = x - k2;}
+            x2 = x + kmax;
+            if (x2 > width){x2 = width;}
+            val = 0;
+            for(y1 = y0; y1 < y2; y1++)
+            {
+                for(x1 = x0; x1 < x2; x1++)
+                {
+                     if (d_im[y1][x1] > 0)
+                    {
+                        val = 255;
+                        y1 = y2;
+                        x1 = x2;
+                    }
+                }
+            }
+            p_im[y][x] = (BYTE)val;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterDSmearing (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize)
+{
+    unsigned th = Ksize * 100;
+    unsigned tv = Ksize * 200;
+    unsigned y, x, y0, x0, yt, xt;
+    unsigned val, tt;
+    BYTE** dh_im = BWalloc(height, width);
+    BYTE** dv_im = BWalloc(height, width);
+
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            dh_im[y][x] = p_im[y][x];
+            dv_im[y][x] = p_im[y][x];
+        }
+    }
+    for (y = 0; y < height; y++)
+    {
+        x0 = 0;
+        for (x = 0; x < width; x++)
+        {
+            val = p_im[y][x];
+            if (val == 0)
+            {
+                tt = x - x0;
+                if (tt < th)
+                {
+                    for (xt = x0; xt < x; xt++)
+                    {
+                        dh_im[y][xt] = 0;
+                    }
+                }
+                x0 = x;
+            }
+        }
+    }
+    for (x = 0; x < width; x++)
+    {
+        y0 = 0;
+        for (y = 0; y < height; y++)
+        {
+            val = p_im[y][x];
+            if (val == 0)
+            {
+                tt = y - y0;
+                if (tt < tv)
+                {
+                    for (yt = y0; yt < y; yt++)
+                    {
+                        dv_im[yt][x] = 0;
+                    }
+                }
+                y0 = y;
+            }
+        }
+    }
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            if (dh_im[y][x] == 0 && dv_im[y][x] == 0)
+            {
+                p_im[y][x] = 0;
+            }
+        }
+    }
+
+    BWfree(dv_im, height);
+    BWfree(dh_im, height);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
