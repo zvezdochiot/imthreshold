@@ -1,3 +1,7 @@
+0.20190423
+
+    LibImthreshold: ByteClamp
+
 0.20190402
 
     Despeckle(BW): optimize

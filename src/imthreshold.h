@@ -92,6 +92,9 @@ MAXMIN(const T* L, long n, T& max, T& min) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+BYTE ByteClamp(int c);
+WORD Byte3Clamp(int c);
+unsigned IndexClamp(int i, unsigned threshold);
 IMTpixel IMTset (BYTE c0, BYTE c1, BYTE c2);
 IMTpixel IMTcalcS (IMTpixel im);
 IMTpixel** IMTalloc (unsigned height, unsigned width);
