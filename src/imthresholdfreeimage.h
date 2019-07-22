@@ -208,15 +208,15 @@ template <class T> void INPLACESWAP(T& a, T& b) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-BYTE ImthresholdGet1BitPixel(BYTE *bits, unsigned x);
-void ImthresholdSetPixel(BYTE *bits, unsigned x, BYTE* value);
-void ImthresholdGetData(FIBITMAP* dib, IMTpixel** p_im);
-void ImthresholdSetData(FIBITMAP* dib, IMTpixel** p_im);
-void ImthresholdGetDataBW(FIBITMAP* dib, BYTE** p_im);
-void ImthresholdSetDataBW(FIBITMAP* dib, BYTE** d_im);
-FIBITMAP* ImthresholdFilterNone(FIBITMAP* src_dib);
-void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char *message);
-FIBITMAP* ImthresholdGenericLoader(const char* lpszPathName, int flag);
+BYTE ImthresholdGet1BitPixel(BYTE*, unsigned);
+void ImthresholdSetPixel(BYTE*, unsigned, BYTE*);
+void ImthresholdGetData(FIBITMAP*, IMTpixel**);
+void ImthresholdSetData(FIBITMAP*, IMTpixel**);
+void ImthresholdGetDataBW(FIBITMAP*, BYTE**);
+void ImthresholdSetDataBW(FIBITMAP*, BYTE**);
+FIBITMAP* ImthresholdFilterNone(FIBITMAP*);
+void FreeImageErrorHandler(FREE_IMAGE_FORMAT, const char*);
+FIBITMAP* ImthresholdGenericLoader(const char*, int);
 
 ////////////////////////////////////////////////////////////////////////////////
 

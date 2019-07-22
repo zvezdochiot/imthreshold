@@ -1,10 +1,11 @@
 PNAME         = imthreshold
 PROGNAME      = $(PNAME)-deskew $(PNAME)-rotate $(PNAME)-filter $(PNAME)-fautoinv $(PNAME)-fdespeckle $(PNAME)-finfo $(PNAME)-fpmean $(PNAME)-math $(PNAME)-separate $(PNAME)-size $(PNAME)-sbwmag2 $(PNAME)-scris $(PNAME)-shris $(PNAME)-tglobal $(PNAME)-tlocal $(PNAME)-tlayer $(PNAME)-tdalg $(PNAME)-tdjvul $(PNAME)-tgatos $(PNAME)-thalftone2 $(PNAME)-ttext $(PNAME)-twhiterohrer
+CC            = gcc
 CPP           = g++
 CFLAGS        = -DUNIX -O2 -Wall -s
 LIBS          = -lfreeimage
 VER           = 0
-VERB          = 20190402
+VERB          = 20190722
 PLIBF         = lib$(PNAME).so.$(VER)
 PLIBFI        = lib$(PNAME)freeimage.so.$(VER)
 PLIB          = $(PLIBF) $(PLIBFI)
@@ -23,7 +24,7 @@ all: $(PROGNAME)
 clean:
 	rm -f $(PROGNAME) lib$(PNAME).so* lib$(PNAME)freeimage.so*
 
-$(PLIBF): src/imthreshold.cpp
+$(PLIBF): src/imthreshold.c
 	$(CPP) $(CFLAGS) -shared -Wl,-soname,$@ $^ -o $@
 	chmod 644 $@
 	mv $@ $@.$(VERB)
