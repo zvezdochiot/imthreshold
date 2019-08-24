@@ -5,7 +5,7 @@ CPP           = g++
 CFLAGS        = -DUNIX -O2 -Wall -s
 LIBS          = -lfreeimage
 VER           = 0
-VERB          = 20190722
+VERB          = 20190824
 PLIBF         = lib$(PNAME).so.$(VER)
 PLIBFI        = lib$(PNAME)freeimage.so.$(VER)
 PLIB          = $(PLIBF) $(PLIBFI)
@@ -25,7 +25,7 @@ clean:
 	rm -f $(PROGNAME) lib$(PNAME).so* lib$(PNAME)freeimage.so*
 
 $(PLIBF): src/imthreshold.c
-	$(CPP) $(CFLAGS) -shared -Wl,-soname,$@ $^ -o $@
+	$(CC) $(CFLAGS) -shared -Wl,-soname,$@ $^ -o $@
 	chmod 644 $@
 	mv $@ $@.$(VERB)
 	ln -s $@.$(VERB) $@

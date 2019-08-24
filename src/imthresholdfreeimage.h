@@ -25,7 +25,10 @@
 #include <vector>
 #include <stack>
 #include <sstream>
+extern "C"
+{
 #include "imthreshold.h"
+}
 
 // ==========================================================
 //   Bitmap palette and pixels alignment
