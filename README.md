@@ -13,15 +13,15 @@ Main directions:
  3) HRIS - image scaling up.
  ![Half Reverse Interpolation Scale](https://github.com/zvezdochiot/imthreshold/blob/master/images/hris_small.jpg)
 
- 2016 zvezdochiot.
- 
+ 2016-2019 zvezdochiot.
+
  2006-2016 monday2000.
- 
+
  Website: https://sourceforge.net/projects/imthreshold/
- 
+
  GIT: https://github.com/ImageProcessing-ElectronicPublications/imthreshold
- 
+
  BookScanLib.ru Website: http://djvu-soft.narod.ru/
- 
+
  Email: zvezdochiot@users.sourceforge.net
- 
+

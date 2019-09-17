@@ -28,7 +28,7 @@
 #define MAX(a,b)  ((a) > (b) ? (a) : (b))
 #endif
 #ifndef TRIM
-#define TRIM(x,a,b) (FA_MIN(FA_MAX(x,a),b))
+#define TRIM(x,a,b) (MIN(FA_MAX((x),(a)),(b)))
 #endif
 
 typedef uint8_t  BYTE;
@@ -149,6 +149,7 @@ IMTpixel IMTmeanMaxIcM (IMTpixel**, IMTpixel, bool**, unsigned, unsigned, unsign
 int IMTFilterKMeans (IMTpixel**, unsigned, unsigned, unsigned, unsigned);
 void IMTFilterPeron (IMTpixel**, IMTpixel**, unsigned, unsigned, double, double);
 double IMTFilterPosterize (IMTpixel**, unsigned, unsigned, unsigned);
+double IMTFilterQuant (IMTpixel**, unsigned, unsigned, unsigned);
 void IMTFilterPMean (IMTpixel**, IMTpixel**, unsigned, unsigned, double, int, bool);
 int IMTFilterRetinex (IMTpixel**, IMTpixel**, unsigned, unsigned, int, double);
 double IMTFilterRS (IMTpixel**, unsigned, unsigned);

@@ -45,4 +45,4 @@ This program is free software;
 You can redistribute it and/or
 modify it under the terms of the Zlib License.
 
-Copyright (C) 2016 zvezdochiot.
+Copyright (C) 2016-2019 zvezdochiot.

@@ -13,25 +13,25 @@ double RADGRD = 57.295779513082320876798154814105;
 ////////////////////////////////////////////////////////////////////////////////
 
 BYTE ByteClamp(int c)
-{ 
-    BYTE buff[3] = {(BYTE)c, 255, 0};
-    return buff[ (c < 0) + ((unsigned)c > 255) ];
+{
+    BYTE buff[3] = {0, (BYTE)c, 255};
+    return buff[ (int)(c > 0) + (int)(c > 255) ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 WORD Byte3Clamp(int c)
-{ 
-    WORD buff[3] = {(WORD)c, 765, 0};
-    return buff[ (c < 0) + ((unsigned)c > 765) ];
+{
+    WORD buff[3] = {0, (WORD)c, 765};
+    return buff[ (int)(c > 0) + (int)(c > 765) ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 unsigned IndexClamp(int i, unsigned threshold)
-{ 
-    unsigned buff[3] = {(unsigned)i, threshold, 0};
-    return buff[ (i < 0) + ((unsigned)i > threshold) ];
+{
+    unsigned buff[3] = {0, (unsigned)i, threshold};
+    return buff[ (int)(i > 0) + (int)(i > threshold) ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -722,7 +722,7 @@ unsigned IMTFilterDMag2 (BYTE** p_im, unsigned height, unsigned width, unsigned 
     unsigned height2, width2, y, threshold;
     height2 = height * 2;
     width2 = width * 2;
-    
+
     BYTE** d_im = BWalloc(height2, width2);
 
     threshold = 0;
@@ -733,9 +733,9 @@ unsigned IMTFilterDMag2 (BYTE** p_im, unsigned height, unsigned width, unsigned 
     }
     threshold /= Ksize;
     threshold /= 2;
-    
+
     BWfree(d_im, height2);
-    
+
     return threshold;
 }
 
@@ -2094,7 +2094,7 @@ void IMTFilterSeparateBGFGL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMT
             bgdist = IMTdist(pim, bgim);
             m_im[y][x] = (BYTE)((fgdist < bgdist) ? 0 : 255);
         }
-    }       
+    }
 
     IMTfree(fgt_im, heightbg);
 }
@@ -2574,7 +2574,7 @@ void IMTFilterMathDivide (IMTpixel** p_im, IMTpixel** m_im, unsigned height, uns
                 imm = m_im[y][x].c[d];
                 imm++;
                 im /= imm;
-                im *= 256; 
+                im *= 256;
                 im += delta;
                 im -= 0.5;
                 p_im[y][x].c[d] = ByteClamp((int)im);
@@ -3648,6 +3648,85 @@ double IMTFilterPosterize (IMTpixel** p_im, unsigned height, unsigned width, uns
 
     return ims;
  }
+
+////////////////////////////////////////////////////////////////////////////////
+
+double IMTFilterQuant (IMTpixel** p_im, unsigned height, unsigned width, unsigned quant)
+{
+    unsigned y, x, d, k, l, n;
+    unsigned im, imt;
+    int imd;
+    unsigned histogram[256];
+    unsigned histthres[256];
+    unsigned histquant[256];
+    double histstep, histsum, histsumk, imds = 0.0;
+
+    quant = (quant > 0) ? quant : 1;
+    n = height * width;
+    n = (n > 0) ? n : 1;
+    histstep = (double)n;
+    histstep /= quant;
+    for (d = 0; d < 3; d++)
+    {
+        for (k = 0; k < 256; k++)
+        {
+            histogram[k] = 0;
+            histthres[k] = 0;
+            histquant[k] = 0;
+        }
+        for (y = 0; y < height; y++)
+        {
+            for (x = 0; x < width; x++)
+            {
+                im = p_im[y][x].c[d];
+                histogram[im]++;
+            }
+        }
+        histsum = 0.0;
+        for (k = 0; k < 256; k++)
+        {
+            histsum += histogram[k];
+            l = (histsum > 0.0) ? (int)((histsum - 1.0)/ histstep) : 0;
+            histthres[k] = l;
+        }
+        for (l = 0; l < quant; l++)
+        {
+            histsum = 0;
+            histsumk = 0;
+            for (k = 0; k < 256; k++)
+            {
+                if (histthres[k] == l)
+                {
+                    histsum += histogram[k];
+                    histsumk += (histogram[k] * k);
+                }
+            }
+            histsumk = (histsum > 0) ? (histsumk / histsum) : histsumk;
+            for (k = 0; k < 256; k++)
+            {
+                if (histthres[k] == l)
+                {
+                    histquant[k] = histsumk;
+                }
+            }
+        }
+        for (y = 0; y < height; y++)
+        {
+            for (x = 0; x < width; x++)
+            {
+                im = p_im[y][x].c[d];
+                imt = histquant[im];
+                imd = (im < imt) ? (imt - im) : (im - imt);
+                p_im[y][x].c[d] = ByteClamp(imt);
+                imds += imd;
+            }
+        }
+    }
+    imds /= n;
+    imds /= 3;
+
+    return imds;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -4918,7 +4997,7 @@ double IMTFilterClusterBWC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
         if (gpart == 0) {gpart = 1;}
         for (y = 0; y < height; y++)
         {
-            
+
             if (y <= radius) {y1 = 0;} else {y1 = y - radius;}
             y2 = y;
             y2 += radius;
@@ -5521,7 +5600,7 @@ void IMTFilterSBicont (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsign
                 {
                     pdist[k] += sdist;
                     pdist[k] = sdist / pdist[k];
-                     
+
                     pdist[k] -= 0.5;
                     zdist = (pdist[k] < 0.0) ? -1.0: 1.0;
                     pdist[k] *= zdist;
@@ -6225,7 +6304,7 @@ int IMTFilterThresholdLayer (IMTpixel** p_im, WORD** t_im, BYTE** d_im, unsigned
     imts /= height;
     imts /= width;
     threshold = (int)(imts + 0.5);
-    
+
     return threshold;
 }
 
@@ -6704,7 +6783,7 @@ int IMTFilterTBiModValue (IMTpixel** p_im, unsigned height, unsigned width)
 int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta)
 {
     int threshold = 0;
-    
+
     threshold = IMTFilterTBiModValue (p_im, height, width);
     threshold += delta;
     threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);
@@ -8198,7 +8277,7 @@ int IMTFilterTMscaleLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsign
                     for (x = x0; x < x1; x++)
                     {
                         if (p_im[y][x].s < immin) {immin = p_im[y][x].s;}
-                        if (p_im[y][x].s > immax) {immax = p_im[y][x].s;}                       
+                        if (p_im[y][x].s > immax) {immax = p_im[y][x].s;}
                     }
                 }
                 immean = immax + immin;
@@ -8438,7 +8517,7 @@ int IMTFilterTQuadModValue (IMTpixel** p_im, unsigned height, unsigned width)
 int IMTFilterTQuadMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int delta)
 {
     int threshold = 0;
-    
+
     threshold = IMTFilterTQuadModValue (p_im, height, width);
     threshold += delta;
     threshold = IMTFilterThreshold (p_im, d_im, height, width, threshold);

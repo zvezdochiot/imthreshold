@@ -47,6 +47,7 @@ void ImthresholdFilterUsage()
     printf("                    'none' (default)\n");
     printf("                    'peron'\n");
     printf("                    'posterize'\n");
+    printf("                    'quant'\n");
     printf("                    'retinex'\n");
     printf("                    'rs'\n");
     printf("                    'selgauss'\n");
@@ -485,6 +486,20 @@ int main(int argc, char *argv[])
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
                 imsh = IMTFilterPosterize(p_im, height, width, posterdiv);
+                printf("Delta= %f\n", imsh);
+                dst_dib = FreeImage_Allocate(width, height, 24);
+                ImthresholdSetData(dst_dib, p_im);
+                IMTfree(p_im, height);
+            } else if (strcmp(namefilter, "quant") == 0) {
+                printf("Filter= %s\n", namefilter);
+                double imsh = 0;
+                IMTpixel** p_im = IMTalloc(height, width);
+
+                if (posterdiv < 1) {posterdiv = 1;}
+                printf("Quant= %d\n", posterdiv);
+                ImthresholdGetData(dib, p_im);
+                FreeImage_Unload(dib);
+                imsh = IMTFilterQuant(p_im, height, width, posterdiv);
                 printf("Delta= %f\n", imsh);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, p_im);
