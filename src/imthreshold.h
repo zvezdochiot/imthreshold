@@ -174,6 +174,7 @@ int IMTFilterSBWMag2 (BYTE**, BYTE**, unsigned, unsigned, unsigned, unsigned);
 int IMTFilterSBWReduce2 (BYTE**, BYTE**, unsigned, unsigned, unsigned, unsigned);
 void IMTFilterSGsample (IMTpixel**, IMTpixel**, unsigned, unsigned, unsigned, unsigned);
 void IMTFilterSHRIS (IMTpixel**, IMTpixel**, unsigned, unsigned, int);
+void IMTFilterSGSampleUp (IMTpixel**, IMTpixel**, unsigned, unsigned, int);
 void IMTFilterSReduce (IMTpixel**, IMTpixel**, unsigned, unsigned, unsigned);
 void IMTFilterSNearest (IMTpixel**, IMTpixel**, unsigned, unsigned, unsigned, unsigned);
 int IMTFilterThreshold (IMTpixel**, BYTE**, unsigned, unsigned, int);

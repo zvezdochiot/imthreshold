@@ -23,6 +23,9 @@ void ImthresholdFilterSHRISUsage()
 {
     printf("Usage : imthreshold-shris [options] <input_file> <output_file>\n\n");
     printf("options:\n");
+    printf("          -f str  name filter:\n");
+    printf("                    'hris'\n");
+    printf("                    'gsample'\n");
     printf("          -m      mode (int, optional, default = 2, {2,3})\n");
     printf("          -r      reduce scale (bool, optional)\n");
     printf("          -h      this help\n");
@@ -41,10 +44,15 @@ int main(int argc, char *argv[])
     unsigned smode = 2;
     bool reduce = false;
     bool fhelp = false;
-    while ((opt = getopt(argc, argv, ":m:rh")) != -1)
+    char *namefilter;
+    namefilter="hris";
+    while ((opt = getopt(argc, argv, ":f:m:rh")) != -1)
     {
         switch(opt)
         {
+            case 'f':
+                namefilter = optarg;
+                break;
             case 'm':
                 smode = atof(optarg);
                 break;
@@ -74,7 +82,10 @@ int main(int argc, char *argv[])
     const char *output_filename = argv[optind + 1];
 
     if (smode < 2) {smode = 2;}
-    if (smode > 3) {smode = 3;}
+    if (strcmp(namefilter, "hris") == 0)
+    {
+        if (smode > 3) {smode = 3;}
+    }
 
     FreeImage_SetOutputMessage(FreeImageErrorHandler);
 
@@ -112,8 +123,14 @@ int main(int argc, char *argv[])
                 printf("Scale= Reduce.\n");
                 IMTFilterSReduce(p_im, d_im, height, width, smode);
             } else {
-                printf("Scale= Up.\n");
-                IMTFilterSHRIS(p_im, d_im, height, width, smode);
+                if (strcmp(namefilter, "gsample") == 0)
+                {
+                    printf("Scale= Up GSample.\n");
+                    IMTFilterSGSampleUp(p_im, d_im, height, width, smode);
+                } else {
+                    printf("Scale= Up HRIS.\n");
+                    IMTFilterSHRIS(p_im, d_im, height, width, smode);
+                }
             }
 
             IMTfree(p_im, height);

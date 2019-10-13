@@ -1,4 +1,4 @@
-.TH "ImThreshold User Manual" 1 "18 Jun 2018" "ImThreshold documentation"
+.TH "ImThreshold User Manual" 1 "13 Oct 2019" "ImThreshold documentation"
 
 .SH NAME
 imthreshold-shris
@@ -12,8 +12,13 @@ imthreshold-shris [options] <input_file> <output_file>
 
 .SH OPTIONS
 .TP
+-f str
+name filter:
+    'hris'
+    'gsample'
+.TP
 -m
-mode (int, optional, default = 2, {2,3})
+mode (int, optional, default = 2, {2,{3(hris),all(gsample)}})
 .TP
 -r
 reduce scale (bool, optional)

@@ -6207,6 +6207,84 @@ void IMTFilterSHRIS (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void IMTFilterSGSampleUp (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int smode)
+{
+    unsigned y, x, yf, xf, yr, xr, d, k, l, bpp = 3;
+    int dx, dy, ir, isz;
+    IMTpixel wm, wr;
+    double imx, k0, kx, ky, kz, dd;
+
+    if (smode < 2) {smode = 2;}
+    ir = 2 * smode;
+    isz = ir * ir;
+    dd = 1.0 / (double)isz;
+
+    for (y = 0; y < height; y++)
+    {
+        yr = y * smode;
+        for (x = 0; x < width; x++)
+        {
+            xr = x * smode;
+            for (d = 0; d < bpp; d++)
+            {
+                imx = (double)p_im[y][x].c[d];
+                imx *= 36.0;
+                yf = (y > 0) ? (y - 1) : y;
+                xf = (x > 0) ? (x - 1) : x;
+                imx -= (double)p_im[yf][xf].c[d];
+                imx -= (double)p_im[yf][x].c[d];
+                imx -= (double)p_im[yf][x].c[d];
+                xf = (x < width - 1) ? (x + 1) : x;
+                imx -= (double)p_im[yf][xf].c[d];
+                imx -= (double)p_im[y][xf].c[d];
+                imx -= (double)p_im[y][xf].c[d];
+                xf = (x > 0) ? (x - 1) : x;
+                imx -= (double)p_im[y][xf].c[d];
+                imx -= (double)p_im[y][xf].c[d];
+                yf = (y < height - 1) ? (y + 1) : y;
+                imx -= (double)p_im[yf][xf].c[d];
+                imx -= (double)p_im[yf][x].c[d];
+                imx -= (double)p_im[yf][x].c[d];
+                xf = (x < width - 1) ? (x + 1) : x;
+                imx -= (double)p_im[yf][xf].c[d];
+                imx /= 24.0;
+                wm.c[d] = ByteClamp((int)(imx + 0.5));
+            }
+            for (k =  0; k < smode; k++)
+            {
+                dy = (k + k - smode + 1);
+                yf = (dy < 0) ? ((y > 0) ? (y - 1) : y) : ((y < height - 1) ? (y + 1) : y);
+                for (l =  0; l < smode; l++)
+                {
+                    dx = (l + l - smode + 1);
+                    xf = (dx < 0) ? ((x > 0) ? (x - 1) : x) : ((x < width - 1) ? (x + 1) : x);
+                    k0 = (double)isz;
+                    kx = (double)ABS(dx * ir);
+                    ky = (double)ABS(dy * ir);
+                    kz = (double)ABS(dx * dy);
+                    kx -= kz;
+                    ky -= kz;
+                    k0 -= kz;
+                    k0 -= kx;
+                    k0 -= ky;
+                    for (d = 0; d < bpp; d++)
+                    {
+                        imx = (k0 * (double)wm.c[d]);
+                        imx += (ky * (double)p_im[yf][x].c[d]);
+                        imx += (kx * (double)p_im[y][xf].c[d]);
+                        imx += (kz * (double)p_im[yf][xf].c[d]);
+                        imx *= dd;
+                        wr.c[d] = ByteClamp((int)(imx + 0.5));
+                    }
+                    d_im[yr + k][xr + l] = wr;
+                }
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void IMTFilterSReduce (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned reduce)
 {
     unsigned y, x, y0, x0, y1, x1;
