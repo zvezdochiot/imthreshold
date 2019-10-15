@@ -14,24 +14,24 @@ double RADGRD = 57.295779513082320876798154814105;
 
 BYTE ByteClamp(int c)
 {
-    BYTE buff[3] = {0, (BYTE)c, 255};
-    return buff[ (int)(c > 0) + (int)(c > 255) ];
+    BYTE buff[3] = {(BYTE)c, 255, 0};
+    return buff[ (int)(c < 0) + (int)((unsigned)c > 255) ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 WORD Byte3Clamp(int c)
 {
-    WORD buff[3] = {0, (WORD)c, 765};
-    return buff[ (int)(c > 0) + (int)(c > 765) ];
+    WORD buff[3] = {(WORD)c, 765, 0};
+    return buff[ (int)(c < 0) + (int)((unsigned)c > 765) ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 unsigned IndexClamp(int i, unsigned threshold)
 {
-    unsigned buff[3] = {0, (unsigned)i, threshold};
-    return buff[ (int)(i > 0) + (int)(i > threshold) ];
+    unsigned buff[3] = {(unsigned)i, threshold, 0};
+    return buff[ (int)(i < 0) + (int)((unsigned)i > threshold) ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -6335,6 +6335,89 @@ void IMTFilterSNearest (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
             d_im[y][x] = p_im[oy][ox];
         }
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void IMTFilterSFRP (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int smode)
+{
+    unsigned y, x, yf, xf, ys, xs, ysf, xsf, ym, xm, yr, xr, d, k, l, bpp = 3, r = 1, rd = (2 * r + 1);
+    unsigned widths, heights, imdm, imdt, imdms = (512 * bpp * rd * rd);
+    int im, ims, imd;
+    IMTpixel **s_im, **r_im;
+
+    if (smode < 2) {smode = 2;}
+    heights = (height + smode - 1) / smode;
+    widths = (width + smode - 1) / smode;
+    s_im = IMTalloc(heights, widths);
+    r_im = IMTalloc(rd, rd);
+    IMTFilterSReduce(p_im, s_im, height, width, smode);
+
+    for (y = 0; y < height; y++)
+    {
+        yr = y * smode;
+        for (x = 0; x < width; x++)
+        {
+            xr = x * smode;
+            for (k = 0; k < rd; k++)
+            {
+                yf = IndexClamp(((int)(y + k) - r), (height - 1));
+                for (l = 0; l < rd; l++)
+                {
+                    xf = IndexClamp(((int)(x + l) - r), (width - 1));
+                    r_im[k][l] = p_im[yf][xf];
+                }
+            }
+            ym = 0;
+            xm = 0;
+            imdm = imdms;
+            for (ys = 0; ys < heights; ys++)
+            {
+                for (xs = 0; xs < widths; xs++)
+                {
+                    imdt = 0;
+                    for (k = 0; k < rd; k++)
+                    {
+                        ysf = IndexClamp(((int)(ys + k) - r), (heights - 1));
+                        for (l = 0; l < rd; l++)
+                        {
+                            xsf = IndexClamp(((int)(xs + l) - r), (widths - 1));
+                            im = r_im[k][l].s;
+                            ims = s_im[ysf][xsf].s;
+                            imd = (im > ims) ? (im - ims) : (ims - im);
+                            imdt += imd;
+                            for (d = 0; d < bpp; d++)
+                            {
+                                im = r_im[k][l].c[d];
+                                ims = s_im[ysf][xsf].c[d];
+                                imd = (im > ims) ? (im - ims) : (ims - im);
+                                imdt += imd;
+                            }
+                        }
+                    }
+                    if (imdt < imdm)
+                    {
+                        ym = ys;
+                        xm = xs;
+                        imdm = imdt;
+                    }
+                }
+            }
+            ym *= smode;
+            xm *= smode;
+            for (k =  0; k < smode; k++)
+            {
+                yf = IndexClamp((ym + k), (height - 1));
+                for (l =  0; l < smode; l++)
+                {
+                    xf = IndexClamp((xm + l), (width - 1));
+                    d_im[yr + k][xr + l] = p_im[yf][xf];
+                }
+            }
+        }
+    }
+    IMTfree(r_im, rd);
+    IMTfree(s_im, heights);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

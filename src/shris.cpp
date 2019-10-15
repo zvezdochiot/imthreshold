@@ -24,8 +24,9 @@ void ImthresholdFilterSHRISUsage()
     printf("Usage : imthreshold-shris [options] <input_file> <output_file>\n\n");
     printf("options:\n");
     printf("          -f str  name filter:\n");
-    printf("                    'hris'\n");
+    printf("                    'hris' (default)\n");
     printf("                    'gsample'\n");
+    printf("                    'frp' (long!)\n");
     printf("          -m      mode (int, optional, default = 2, {2,3})\n");
     printf("          -r      reduce scale (bool, optional)\n");
     printf("          -h      this help\n");
@@ -82,7 +83,7 @@ int main(int argc, char *argv[])
     const char *output_filename = argv[optind + 1];
 
     if (smode < 2) {smode = 2;}
-    if (strcmp(namefilter, "hris") == 0)
+    if ((strcmp(namefilter, "gsample") > 0) && (strcmp(namefilter, "frp") > 0) && !(reduce))
     {
         if (smode > 3) {smode = 3;}
     }
@@ -101,8 +102,6 @@ int main(int argc, char *argv[])
             unsigned width2;
             unsigned height2;
             printf("Mode= %d\n", smode);
-            width2 = width * smode;
-            height2 = height * smode;
             if (reduce > 0)
             {
                 width2 = (width + smode - 1) / smode;
@@ -127,6 +126,9 @@ int main(int argc, char *argv[])
                 {
                     printf("Scale= Up GSample.\n");
                     IMTFilterSGSampleUp(p_im, d_im, height, width, smode);
+                } else if (strcmp(namefilter, "frp") == 0) {
+                    printf("Scale= Up FRP.\n");
+                    IMTFilterSFRP(p_im, d_im, height, width, smode);
                 } else {
                     printf("Scale= Up HRIS.\n");
                     IMTFilterSHRIS(p_im, d_im, height, width, smode);

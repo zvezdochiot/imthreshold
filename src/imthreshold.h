@@ -177,6 +177,7 @@ void IMTFilterSHRIS (IMTpixel**, IMTpixel**, unsigned, unsigned, int);
 void IMTFilterSGSampleUp (IMTpixel**, IMTpixel**, unsigned, unsigned, int);
 void IMTFilterSReduce (IMTpixel**, IMTpixel**, unsigned, unsigned, unsigned);
 void IMTFilterSNearest (IMTpixel**, IMTpixel**, unsigned, unsigned, unsigned, unsigned);
+void IMTFilterSFRP (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int smode);
 int IMTFilterThreshold (IMTpixel**, BYTE**, unsigned, unsigned, int);
 int IMTFilterThresholdLayer (IMTpixel**, WORD**, BYTE**, unsigned, unsigned);
 void IMTFilterTLayerToImg (WORD**, IMTpixel**, unsigned, unsigned);
