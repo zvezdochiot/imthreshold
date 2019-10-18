@@ -6342,7 +6342,7 @@ void IMTFilterSNearest (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
 void IMTFilterSFRP (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int smode)
 {
     unsigned y, x, yf, xf, ys, xs, ysf, xsf, ym, xm, yr, xr, d, k, l, bpp = 3, r = 1, rd = (2 * r + 1);
-    unsigned widths, heights, imdm, imdt, imdms = (512 * bpp * rd * rd);
+    unsigned widths, heights, imdm, imdt, imdms = (512 * bpp * (rd * rd + 4));
     int im, ims, imd;
     IMTpixel **s_im, **r_im;
 
@@ -6376,6 +6376,23 @@ void IMTFilterSFRP (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned 
                 for (xs = 0; xs < widths; xs++)
                 {
                     imdt = 0;
+                    im = p_im[y][x].s;
+                    ims = s_im[ys][xs].s;
+                    imd = (im > ims) ? (im - ims) : (ims - im);
+                    imdt += imd;
+                    imdt += imd;
+                    imdt += imd;
+                    imdt += imd;
+                    for (d = 0; d < bpp; d++)
+                    {
+                        im = p_im[y][x].c[d];
+                        ims = s_im[ys][xs].c[d];
+                        imd = (im > ims) ? (im - ims) : (ims - im);
+                        imdt += imd;
+                        imdt += imd;
+                        imdt += imd;
+                        imdt += imd;
+                    }
                     for (k = 0; k < rd; k++)
                     {
                         ysf = IndexClamp(((int)(ys + k) - r), (heights - 1));
