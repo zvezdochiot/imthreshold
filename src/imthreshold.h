@@ -31,8 +31,8 @@
 #define TRIM(x,a,b) (MIN(FA_MAX((x),(a)),(b)))
 #endif
 
-typedef uint8_t  BYTE;
-typedef uint16_t  WORD;
+typedef uint8_t BYTE;
+typedef uint16_t WORD;
 
 typedef struct
 {

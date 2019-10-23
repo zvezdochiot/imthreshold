@@ -165,10 +165,10 @@ FIBITMAP* ImthresholdFilterNone(FIBITMAP* src_dib)
 
 ////////////////////////////////////////////////////////////////////////////////
 /**
-FreeImage error handler
-@param fif Format / Plugin responsible for the error
-@param message Error message
-*/
+   FreeImage error handler
+   @param fif Format / Plugin responsible for the error
+   @param message Error message
+ */
 void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char *message)
 {
     printf("\n*** ");
@@ -181,10 +181,10 @@ void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char *message)
 
 /** Generic image loader
 
-  @param lpszPathName Pointer to the full file name
-  @param flag Optional load flag constant
-  @return Returns the loaded dib if successful, returns NULL otherwise
-*/
+   @param lpszPathName Pointer to the full file name
+   @param flag Optional load flag constant
+   @return Returns the loaded dib if successful, returns NULL otherwise
+ */
 
 FIBITMAP* ImthresholdGenericLoader(const char* lpszPathName, int flag)
 {

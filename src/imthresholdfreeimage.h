@@ -56,19 +56,19 @@ void FreeImage_Aligned_Free(void* mem);
 #endif // _WIN32
 
 typedef struct tagFILE_RGBA {
-  unsigned char r,g,b,a;
+    unsigned char r,g,b,a;
 } FILE_RGBA;
 
 typedef struct tagFILE_BGRA {
-  unsigned char b,g,r,a;
+    unsigned char b,g,r,a;
 } FILE_BGRA;
 
 typedef struct tagFILE_RGB {
-  unsigned char r,g,b;
+    unsigned char r,g,b;
 } FILE_RGB;
 
 typedef struct tagFILE_BGR {
-  unsigned char b,g,r;
+    unsigned char b,g,r;
 } FILE_BGR;
 
 #ifdef _WIN32
@@ -90,13 +90,13 @@ i2a(unsigned i, char *a, unsigned r) {
 }
 
 /**
- Transforms integer i into an ascii string and stores the result in a;
- string is encoded in the base indicated by r.
- @param i Number to be converted
- @param a String result
- @param r Base of value; must be in the range 2 - 36
- @return Returns a
-*/
+   Transforms integer i into an ascii string and stores the result in a;
+   string is encoded in the base indicated by r.
+   @param i Number to be converted
+   @param a String result
+   @param r Base of value; must be in the range 2 - 36
+   @return Returns a
+ */
 inline char *
 _itoa(int i, char *a, int r) {
     r = ((r < 2) || (r > 36)) ? 10 : r;
@@ -196,8 +196,8 @@ SwapLong(DWORD *lp) {
 
 #define GREY(r, g, b) (BYTE)(((WORD)r * 77 + (WORD)g * 150 + (WORD)b * 29) >> 8)    // .299R + .587G + .114B
 /*
-#define GREY(r, g, b) (BYTE)(((WORD)r * 169 + (WORD)g * 256 + (WORD)b * 87) >> 9)    // .33R + 0.5G + .17B
-*/
+ #define GREY(r, g, b) (BYTE)(((WORD)r * 169 + (WORD)g * 256 + (WORD)b * 87) >> 9)    // .33R + 0.5G + .17B
+ */
 
 // ==========================================================
 //   Template utility functions
