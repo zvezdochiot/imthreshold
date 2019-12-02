@@ -7159,25 +7159,53 @@ int IMTFilterTChistianLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsi
     lower_bound *= 3;
     upper_bound *= 3;
 
-    imMg = 0;
-    imVg = 0;
-    n = 0;
+    imMg = 765.0;
+    imVg = 0.0;
     for (y = 0; y < height; y++)
     {
+        y1 = y;
+        y1 -= radius;
+        if (y1 < 0) {y1 = 0;}
+        y2 = y + 1;
+        y2 += radius;
+        if (y2 > h) {y2 = h;}
         for (x = 0; x < width; x++)
         {
-            imx = (double)p_im[y][x].s;
-            imMg += imx;
-            imVg += (imx * imx);
-            n++;
+            x1 = x;
+            x1 -= radius;
+            if (x1 < 0) {x1 = 0;}
+            x2 = x + 1;
+            x2 += radius;
+            if (x2 > w) {x2 = w;}
+            imm = 0;
+            imv = 0;
+            n = 0;
+            for (yf = y1; yf < y2; yf++)
+            {
+                for (xf = x1; xf < x2; xf++)
+                {
+                    imx = (double)p_im[yf][xf].s;
+                    imm += imx;
+                    imv += (imx * imx);
+                    n++;
+                }
+            }
+            if (n == 0) {n = 1;}
+            imm /= n;
+            imv /= n;
+            imv -= (imm * imm);
+            if (imv < 0) {imv = -imv;}
+            imv = sqrt(imv);
+            if (imm < imMg)
+            {
+                imMg = imm;
+            }
+            if (imv > imVg)
+            {
+                imVg = imv;
+            }
         }
     }
-    if (n == 0) {n = 1;}
-    imMg /= n;
-    imVg /= n;
-    imVg -= (imMg * imMg);
-    if (imVg < 0) {imVg = -imVg;}
-    imVg = sqrt(imVg);
     if (imVg == 0) {imVg = 1;}
     for (y = 0; y < height; y++)
     {
@@ -8068,6 +8096,121 @@ int IMTFilterTGrad (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
 
 ////////////////////////////////////////////////////////////////////////////////
 
+int IMTFilterTGravureLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta)
+{
+    unsigned x, y, n;
+    int y1, x1, y2, x2, yf, xf;
+    double imx, imMg, imVg, imm, imv, t, st = 0, sn = 0;
+    int threshold = 0;
+    int h = height;
+    int w = width;
+    WORD val;
+
+    if (radius < 0) {radius = -radius;}
+    if (upper_bound < lower_bound)
+    {
+        upper_bound += lower_bound;
+        lower_bound = upper_bound - lower_bound;
+        upper_bound -= lower_bound;
+    }
+    lower_bound *= 3;
+    upper_bound *= 3;
+
+    imMg = 0;
+    imVg = 0;
+    n = 0;
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            imx = (double)p_im[y][x].s;
+            imMg += imx;
+            imVg += (imx * imx);
+            n++;
+        }
+    }
+    if (n == 0) {n = 1;}
+    imMg /= n;
+    imVg /= n;
+    imVg -= (imMg * imMg);
+    if (imVg < 0) {imVg = -imVg;}
+    imVg = sqrt(imVg);
+    if (imVg == 0) {imVg = 1;}
+    for (y = 0; y < height; y++)
+    {
+        y1 = y;
+        y1 -= radius;
+        if (y1 < 0) {y1 = 0;}
+        y2 = y + 1;
+        y2 += radius;
+        if (y2 > h) {y2 = h;}
+        for (x = 0; x < width; x++)
+        {
+            x1 = x;
+            x1 -= radius;
+            if (x1 < 0) {x1 = 0;}
+            x2 = x + 1;
+            x2 += radius;
+            if (x2 > w) {x2 = w;}
+            imm = 0;
+            imv = 0;
+            n = 0;
+            for (yf = y1; yf < y2; yf++)
+            {
+                for (xf = x1; xf < x2; xf++)
+                {
+                    imx = (double)p_im[yf][xf].s;
+                    imm += imx;
+                    imv += (imx * imx);
+                    n++;
+                }
+            }
+            if (n == 0) {n = 1;}
+            imm /= n;
+            imv /= n;
+            imv -= (imm * imm);
+            if (imv < 0) {imv = -imv;}
+            imv = sqrt(imv);
+            imx = (double)p_im[y][x].s;
+            imx /= 3;
+            if (imx < lower_bound)
+            {
+                t = lower_bound;
+            } else if (imx > upper_bound)
+            {
+                t = upper_bound;
+            } else {
+                t = (imm + sensitivity * (imMg - imm + (imv / imVg) * (imm - imMg)) + delta);
+            }
+            val = Byte3Clamp((int)(t + 0.5));
+            st += t;
+            sn++;
+            t_im[y][x] = val;
+        }
+    }
+    if (sn == 0) { sn = 1;}
+    threshold =  (st / sn);
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTGravure (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta)
+{
+    int threshold = 0;
+    WORD** t_im = TLalloc(height, width);
+
+    threshold = IMTFilterTGravureLayer (p_im, t_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
+    threshold = IMTFilterThresholdLayer (p_im, t_im, d_im, height, width);
+
+    TLfree(t_im, height);
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 int IMTFilterTHalftone2 (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width)
 {
     unsigned y, x, im, n, s, threshold = 0;
@@ -8843,7 +8986,7 @@ int IMTFilterTSauvolaLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsig
             {
                 t = upper_bound;
             } else {
-                t = imm + (1.0 - sensitivity * ima) + delta;
+                t = imm * (1.0 - sensitivity * ima) + delta;
             }
             val = Byte3Clamp((int)(t + 0.5));
             st += t;

@@ -30,6 +30,7 @@ void ImthresholdFilterTSauvolaUsage()
     printf("                    'blur'\n");
     printf("                    'chistian'\n");
     printf("                    'edge'\n");
+    printf("                    'gravure'\n");
     printf("                    'mscale'\n");
     printf("                    'niblack'\n");
     printf("                    'sauvola' (default)\n");
@@ -41,7 +42,7 @@ void ImthresholdFilterTSauvolaUsage()
     printf("          -n      norm (bool, optional, default = false)\n");
     printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
     printf("          -r N    radius (int, optional, default = 7)\n");
-    printf("          -s N.N  sensitivity (double, optional, default = 0.5)\n");
+    printf("          -s N.N  sensitivity (double, optional, default = 0.2)\n");
     printf("          -u N    upper bound (int, optional, default = 255)\n");
     printf("          -z      mirror of mean (bool, optional, default = false)\n");
     printf("          -h      this help\n");
@@ -59,7 +60,7 @@ int main(int argc, char *argv[])
     int opt;
     int radius = 7;
     double doverlay = 0.5;
-    double sensitivity = 0.5;
+    double sensitivity = 0.2;
     unsigned contrast_limit = 128;
     int dynamic_range = 128;
     int lower_bound = 0;
@@ -198,6 +199,13 @@ int main(int argc, char *argv[])
                 IMTfree(b_im, height);
                 printf("Delta= %f\n", delta);
                 threshold = IMTFilterTBiMod (p_im, d_im, height, width, delta);
+            } else if (strcmp(namefilter, "gravure") == 0) {
+                printf("Filter= %s\n", namefilter);
+                printf("Sensitivity= %f\n", sensitivity);
+                printf("Lower= %d\n", lower_bound);
+                printf("Upper= %d\n", upper_bound);
+                printf("Delta= %f\n", delta);
+                threshold = IMTFilterTGravure(p_im, d_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
             } else if (strcmp(namefilter, "mscale") == 0) {
                 printf("Filter= %s\n", namefilter);
                 printf("Sensitivity= %f\n", sensitivity);

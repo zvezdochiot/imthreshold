@@ -207,6 +207,8 @@ int IMTFilterGatosBG (IMTpixel**, BYTE**, IMTpixel**, unsigned, unsigned, int);
 int IMTFilterTGatos (IMTpixel**, BYTE**, IMTpixel**, BYTE**, unsigned, unsigned, double, double, double);
 int IMTFilterTGradValue (IMTpixel**, unsigned, unsigned);
 int IMTFilterTGrad (IMTpixel**, BYTE**, unsigned, unsigned);
+int IMTFilterTGravureLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta);
+int IMTFilterTGravure (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, double sensitivity, int lower_bound, int upper_bound, double delta);
 int IMTFilterTHalftone2 (IMTpixel**, BYTE**, unsigned, unsigned);
 int IMTFilterTJanniValue (IMTpixel**, unsigned, unsigned);
 int IMTFilterTJanni (IMTpixel**, BYTE**, unsigned, unsigned);
