@@ -5,7 +5,7 @@ CPP           = g++
 CFLAGS        = -DUNIX -O2 -Wall -s
 LIBS          = -lfreeimage
 VER           = 0
-VERB          = 20191202
+VERB          = 20200111
 PLIBF         = lib$(PNAME).so.$(VER)
 PLIBFI        = lib$(PNAME)freeimage.so.$(VER)
 PLIB          = $(PLIBF) $(PLIBFI)
@@ -24,7 +24,7 @@ all: $(PROGNAME)
 clean:
 	rm -f $(PROGNAME) lib$(PNAME).so* lib$(PNAME)freeimage.so*
 
-$(PLIBF): src/imthreshold.c
+$(PLIBF): src/lib/color.c src/lib/commom.c src/lib/denoise.c src/lib/despeckle.c src/lib/filter.c src/lib/math.c src/lib/pmean.c src/lib/rotate.c src/lib/separate.c src/lib/size.c src/lib/threshold.c
 	$(CC) $(CFLAGS) -shared -Wl,-soname,$@ $^ -o $@
 	chmod 644 $@
 	mv $@ $@.$(VERB)

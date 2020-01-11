@@ -18,6 +18,9 @@
 #ifndef PI
 #define PI  ((double)3.14159265358979323846264338327950288419716939937510)
 #endif
+#ifndef RADGRD
+#define RADGRD ((double)57.295779513082320876798154814105)
+#endif
 #ifndef ABS
 #define ABS(a)    ((a) < 0 ? (-(a)) : (a))
 #endif
@@ -146,7 +149,7 @@ IMTpixel IMTmeanRadIcM (IMTpixel**, IMTpixel, double**, bool**, unsigned, unsign
 IMTpixel IMTmeanBlIcM (IMTpixel**, IMTpixel, double**, double*, bool**, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned);
 IMTpixel IMTmeanMinIcM (IMTpixel**, IMTpixel, bool**, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned);
 IMTpixel IMTmeanMaxIcM (IMTpixel**, IMTpixel, bool**, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned);
-int IMTFilterKMeans (IMTpixel**, unsigned, unsigned, unsigned, unsigned);
+unsigned IMTFilterKMeans (IMTpixel**, unsigned, unsigned, unsigned, unsigned);
 void IMTFilterPeron (IMTpixel**, IMTpixel**, unsigned, unsigned, double, double);
 double IMTFilterPosterize (IMTpixel**, unsigned, unsigned, unsigned);
 double IMTFilterQuant (IMTpixel**, unsigned, unsigned, unsigned);
