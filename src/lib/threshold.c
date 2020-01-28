@@ -1685,7 +1685,7 @@ int IMTFilterTGravureLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsig
     lower_bound *= 3;
     upper_bound *= 3;
 
-    imMg = 0;
+    imMg = IMTFilterTBiModValue (p_im, height, width);
     imVg = 0;
     n = 0;
     for (y = 0; y < height; y++)
@@ -1693,15 +1693,13 @@ int IMTFilterTGravureLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsig
         for (x = 0; x < width; x++)
         {
             imx = (double)p_im[y][x].s;
-            imMg += imx;
+            imx -= imMg;
             imVg += (imx * imx);
             n++;
         }
     }
     if (n == 0) {n = 1;}
-    imMg /= n;
     imVg /= n;
-    imVg -= (imMg * imMg);
     if (imVg < 0) {imVg = -imVg;}
     imVg = sqrt(imVg);
     if (imVg == 0) {imVg = 1;}
