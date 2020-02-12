@@ -29,6 +29,7 @@ void ImthresholdFilterTSauvolaUsage()
     printf("                    'bimod'\n");
     printf("                    'blur'\n");
     printf("                    'chistian'\n");
+    printf("                    'dalg'\n");
     printf("                    'edge'\n");
     printf("                    'gravure'\n");
     printf("                    'mscale'\n");
@@ -191,6 +192,12 @@ int main(int argc, char *argv[])
                 printf("Upper= %d\n", upper_bound);
                 printf("Delta= %f\n", delta);
                 threshold = IMTFilterTChistian(p_im, d_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
+            } else if (strcmp(namefilter, "dalg") == 0) {
+                printf("Filter= %s\n", namefilter);
+                printf("Lower= %d\n", lower_bound);
+                printf("Upper= %d\n", upper_bound);
+                printf("Delta= %f\n", delta);
+                threshold = IMTFilterTDalg(p_im, d_im, height, width, radius, lower_bound, upper_bound, delta);
             } else if (strcmp(namefilter, "edge") == 0) {
                 printf("Filter= %s\n", namefilter);
                 IMTpixel** b_im = IMTalloc(height, width);

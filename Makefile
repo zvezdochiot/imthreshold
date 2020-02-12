@@ -1,11 +1,11 @@
 PNAME         = imthreshold
-PROGNAME      = $(PNAME)-deskew $(PNAME)-rotate $(PNAME)-filter $(PNAME)-fautoinv $(PNAME)-fdespeckle $(PNAME)-finfo $(PNAME)-fpmean $(PNAME)-math $(PNAME)-separate $(PNAME)-size $(PNAME)-sbwmag2 $(PNAME)-scris $(PNAME)-shris $(PNAME)-tglobal $(PNAME)-tlocal $(PNAME)-tlayer $(PNAME)-tdalg $(PNAME)-tdjvul $(PNAME)-tgatos $(PNAME)-thalftone2 $(PNAME)-ttext $(PNAME)-twhiterohrer
+PROGNAME      = $(PNAME)-deskew $(PNAME)-rotate $(PNAME)-filter $(PNAME)-fautoinv $(PNAME)-fdespeckle $(PNAME)-finfo $(PNAME)-fpmean $(PNAME)-math $(PNAME)-separate $(PNAME)-size $(PNAME)-sbwmag2 $(PNAME)-scris $(PNAME)-shris $(PNAME)-tglobal $(PNAME)-tlocal $(PNAME)-tlayer $(PNAME)-tdjvul $(PNAME)-tgatos $(PNAME)-thalftone2 $(PNAME)-ttext $(PNAME)-twhiterohrer
 CC            = gcc
 CPP           = g++
 CFLAGS        = -DUNIX -O2 -Wall -s
 LIBS          = -lfreeimage
 VER           = 0
-VERB          = 20200128
+VERB          = 20200212
 PLIBF         = lib$(PNAME).so.$(VER)
 PLIBFI        = lib$(PNAME)freeimage.so.$(VER)
 PLIB          = $(PLIBF) $(PLIBFI)
@@ -84,9 +84,6 @@ $(PNAME)-tlocal: src/tlocal.cpp $(PLIB)
 	$(CPP) $(CFLAGS) $^ $(LIBS) -o $@
 
 $(PNAME)-tlayer: src/tlayer.cpp $(PLIB)
-	$(CPP) $(CFLAGS) $^ $(LIBS) -o $@
-
-$(PNAME)-tdalg: src/tdalg.cpp $(PLIB)
 	$(CPP) $(CFLAGS) $^ $(LIBS) -o $@
 
 $(PNAME)-tdjvul: src/tdjvul.cpp $(PLIB)

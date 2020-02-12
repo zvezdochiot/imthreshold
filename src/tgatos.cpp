@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
                     threshold = IMTFilterTBiMod(p_im, d_im, height, width, delta);
                     break;
                 case 4:
-                    threshold = IMTFilterTDalg(p_im, d_im, height, width, radius, delta);
+                    threshold = IMTFilterTDalg(p_im, d_im, height, width, radius, lower_bound, upper_bound, delta);
                     break;
             }
             threshold = IMTFilterGatosBG(p_im, d_im, bg_im, height, width, radius);

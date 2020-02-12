@@ -851,10 +851,9 @@ int IMTFilterTChistian (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTDalg (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int region_size, int delta)
+int IMTFilterTDalg (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int region_size, int lower_bound, int upper_bound, int delta)
 {
     unsigned x, y, i, j;
-
     unsigned whg, wwn, iy0, ix0, iyn, ixn, tx, tt;
     unsigned wwidth = region_size;
     double sw, swt, dsr, dst;
@@ -862,8 +861,17 @@ int IMTFilterTDalg (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
     int histogram[768] = {0};
     int threshold = 0;
 
+    if (upper_bound < lower_bound)
+    {
+        upper_bound += lower_bound;
+        lower_bound = upper_bound - lower_bound;
+        upper_bound -= lower_bound;
+    }
+    lower_bound *= 3;
+    upper_bound *= 3;
+
     whg = (height + wwidth - 1) / wwidth;
-    wwn = (width + wwidth-1) / wwidth;
+    wwn = (width + wwidth - 1) / wwidth;
     for (y = 0; y < whg; y++)
     {
         iy0 = y * wwidth;
@@ -914,7 +922,18 @@ int IMTFilterTDalg (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
                 for (i = ix0; i < ixn; i++)
                 {
                     tx = p_im[j][i].s;
-                    val = (BYTE) ( ( tx > tt ) ? 255 : 0 );
+                    if (tx < lower_bound)
+                    {
+                        val = (BYTE)0;
+                    }
+                    else if (tx > upper_bound)
+                    {
+                        val = (BYTE)255;
+                    }
+                    else
+                    {
+                        val = (BYTE) ( ( tx > tt ) ? 255 : 0 );
+                    }
                     d_im[j][i] = val;
                 }
             }
@@ -1080,6 +1099,104 @@ int IMTFilterTDither (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wi
         }
     }
     if (sn > 0) {threshold = 765 * s / sn;}
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int kpoint)
+{
+    unsigned x, y, i, j, k, l, lmin = 0;
+    unsigned whg, wwn, iy0, ix0, iy, ix, tx, tt;
+    unsigned wwidth = 4, herrmin;
+    BYTE val;
+    int threshold = 0;
+    // Knuth D.E. dither matrix
+    int hdith1[4][4] = {
+        {  1,  5, 10, 14 },
+        {  3,  7,  8, 12 },
+        { 13,  9,  6,  2 },
+        { 15, 11,  4,  0 }
+    };
+    char hdith1s[17] = "ABCDEFGIJKLMNOPQR";
+    int hdith2[4][4] = {
+        { 14, 10,  5,  1 },
+        { 12,  8,  7,  3 },
+        {  2,  6,  9, 13 },
+        {  0,  4, 11, 15 }
+    };
+    char hdith2s[17] = "abcdefgijklmnopqr";
+    int hdithy[2][17], hdithx[2][17], herr, herrp, herrg;
+    for (y = 0; y < wwidth; y++)
+    {
+        for (x = 0; x < wwidth; x++)
+        {
+            l = hdith1[y][x] + 1;
+            hdithy[0][l] = y;
+            hdithx[0][l] = x;
+            l = hdith2[y][x] + 1;
+            hdithy[1][l] = y;
+            hdithx[1][l] = x;
+        }
+    }
+    whg = (height + wwidth - 1) / wwidth;
+    wwn = (width + wwidth - 1) / wwidth;
+    for (y = 0; y < whg; y++)
+    {
+        iy0 = y * wwidth;
+        for (x = 0; x < wwn; x++)
+        {
+            ix0 = x * wwidth;
+            k = (y + x) % 2;
+            herrp = 0;
+            for (l = 1; l < 17; l++)
+            {
+                j = hdithy[k][l];
+                i = hdithx[k][l];
+                iy = iy0 + j;
+                ix = ix0 + i;
+                tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
+                herrp += (765 - tx);
+            }
+            herrg = herrp;
+            herrmin = herrp * kpoint + herrg;
+            lmin = 0;
+            for (l = 1; l < 17; l++)
+            {
+                j = hdithy[k][l];
+                i = hdithx[k][l];
+                iy = iy0 + j;
+                ix = ix0 + i;
+                tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
+                herrp += (tx + tx - 765);
+                herrg -= 765;
+                herr = herrp * kpoint;
+                herr += (herrg < 0) ? (-herrg) : herrg;
+                if (herr < herrmin)
+                {
+                    herrmin = herr;
+                    lmin = l;
+                }
+            }
+            for (l = 1; l < 17; l++)
+            {
+                j = hdithy[k][l];
+                i = hdithx[k][l];
+                iy = iy0 + j;
+                ix = ix0 + i;
+                if (iy < height && ix < width)
+                {
+                    val = (BYTE) ( ( l > lmin ) ? 255 : 0 );
+                    d_im[iy][ix] = val;
+                }
+            }
+            tt = 48 * (16 - lmin);
+            threshold += tt;
+        }
+    }
+    threshold /= whg;
+    threshold /= wwn;
 
     return threshold;
 }

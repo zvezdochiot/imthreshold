@@ -29,6 +29,7 @@ void ImthresholdFilterTGlobalUsage()
     printf("                    'bimodc'\n");
     printf("                    'color'\n");
     printf("                    'dither'\n");
+    printf("                    'dithh'\n");
     printf("                    'entropy'\n");
     printf("                    'eqbright'\n");
     printf("                    'grad'\n");
@@ -41,7 +42,7 @@ void ImthresholdFilterTGlobalUsage()
     printf("                    'use'\n");
     printf("          -d N    delta (int, optional, default = 0)\n");
     printf("          -i      invert (bool, optional, default = false)\n");
-    printf("          -k N    K par (k/2) (int, optional, default = 1)\n");
+    printf("          -k N    K par (k/2) (int, optional, default = 2)\n");
     printf("          -m N    max iteration (int, optional, default = 10)\n");
     printf("          -n      norm (bool, optional, default = false)\n");
     printf("          -s N    shift (int, optional, default = -32)\n");
@@ -167,6 +168,9 @@ int main(int argc, char *argv[])
             } else if (strcmp(namefilter, "dither") == 0) {
                 printf("Filter= %s\n", namefilter);
                 threshold = IMTFilterTDither(p_im, d_im, height, width);
+            } else if (strcmp(namefilter, "dithh") == 0) {
+                printf("Filter= %s\n", namefilter);
+                threshold = IMTFilterTDithH(p_im, d_im, height, width, knum);
             } else if (strcmp(namefilter, "entropy") == 0) {
                 printf("Filter= %s\n", namefilter);
                 threshold = IMTFilterTEnt(p_im, d_im, height, width);
