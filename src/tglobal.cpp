@@ -30,6 +30,7 @@ void ImthresholdFilterTGlobalUsage()
     printf("                    'color'\n");
     printf("                    'dither'\n");
     printf("                    'dithh'\n");
+    printf("                    'ditho'\n");
     printf("                    'entropy'\n");
     printf("                    'eqbright'\n");
     printf("                    'grad'\n");
@@ -171,6 +172,9 @@ int main(int argc, char *argv[])
             } else if (strcmp(namefilter, "dithh") == 0) {
                 printf("Filter= %s\n", namefilter);
                 threshold = IMTFilterTDithH(p_im, d_im, height, width, knum);
+            } else if (strcmp(namefilter, "ditho") == 0) {
+                printf("Filter= %s\n", namefilter);
+                threshold = IMTFilterTDithO(p_im, d_im, height, width, knum);
             } else if (strcmp(namefilter, "entropy") == 0) {
                 printf("Filter= %s\n", namefilter);
                 threshold = IMTFilterTEnt(p_im, d_im, height, width);

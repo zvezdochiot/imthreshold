@@ -1105,11 +1105,12 @@ int IMTFilterTDither (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wi
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int kpoint)
+int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int kpg)
 {
     unsigned x, y, i, j, k, l, lmin = 0;
     unsigned whg, wwn, iy0, ix0, iy, ix, tx, tt;
     unsigned wwidth = 4, herrmin;
+    float kpoint = 0.5 * kpg;
     BYTE val;
     int threshold = 0;
     // Knuth D.E. dither matrix
@@ -1119,14 +1120,14 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
         { 13,  9,  6,  2 },
         { 15, 11,  4,  0 }
     };
-    char hdith1s[17] = "ABCDEFGIJKLMNOPQR";
+    char hdith1s = "A";
     int hdith2[4][4] = {
         { 14, 10,  5,  1 },
         { 12,  8,  7,  3 },
         {  2,  6,  9, 13 },
         {  0,  4, 11, 15 }
     };
-    char hdith2s[17] = "abcdefgijklmnopqr";
+    char hdith2s = "a";
     int hdithy[2][17], hdithx[2][17], herr, herrp, herrg;
     for (y = 0; y < wwidth; y++)
     {
@@ -1192,6 +1193,98 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
                 }
             }
             tt = 48 * (16 - lmin);
+            threshold += tt;
+        }
+    }
+    threshold /= whg;
+    threshold /= wwn;
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTDithO (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int kpg)
+{
+    unsigned x, y, i, j, l, lmin = 0;
+    unsigned whg, wwn, iy0, ix0, iy, ix, tx, tt;
+    unsigned wwidth = 8, herrmin;
+    float kpoint = 0.5 * kpg;
+    BYTE val;
+    int threshold = 0;
+    // Knuth D.E. dither matrix
+    int odith[8][8] = {
+        { 35, 48, 40, 32, 28, 15, 23, 31 },
+        { 43, 59, 56, 52, 20,  4,  7, 11 },
+        { 51, 62, 60, 44, 12,  1,  3, 19 },
+        { 38, 46, 54, 36, 25, 17,  9, 27 },
+        { 29, 14, 22, 30, 34, 49, 41, 33 },
+        { 21,  5,  6, 10, 42, 58, 57, 53 },
+        { 13,  0,  2, 18, 50, 63, 61, 45 },
+        { 24, 16,  8, 26, 39, 47, 55, 37 }
+    };
+    char odiths = "0";
+    int odithy[65], odithx[65], herr, herrp, herrg;
+    for (y = 0; y < wwidth; y++)
+    {
+        for (x = 0; x < wwidth; x++)
+        {
+            l = odith[y][x] + 1;
+            odithy[l] = y;
+            odithx[l] = x;
+        }
+    }
+    whg = (height + wwidth - 1) / wwidth;
+    wwn = (width + wwidth - 1) / wwidth;
+    for (y = 0; y < whg; y++)
+    {
+        iy0 = y * wwidth;
+        for (x = 0; x < wwn; x++)
+        {
+            ix0 = x * wwidth;
+            herrp = 0;
+            for (l = 1; l < 65; l++)
+            {
+                j = odithy[l];
+                i = odithx[l];
+                iy = iy0 + j;
+                ix = ix0 + i;
+                tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
+                herrp += (765 - tx);
+            }
+            herrg = herrp;
+            herrmin = herrp * kpoint + herrg;
+            lmin = 0;
+            for (l = 1; l < 65; l++)
+            {
+                j = odithy[l];
+                i = odithx[l];
+                iy = iy0 + j;
+                ix = ix0 + i;
+                tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
+                herrp += (tx + tx - 765);
+                herrg -= 765;
+                herr = herrp * kpoint;
+                herr += (herrg < 0) ? (-herrg) : herrg;
+                if (herr < herrmin)
+                {
+                    herrmin = herr;
+                    lmin = l;
+                }
+            }
+            for (l = 1; l < 65; l++)
+            {
+                j = odithy[l];
+                i = odithx[l];
+                iy = iy0 + j;
+                ix = ix0 + i;
+                if (iy < height && ix < width)
+                {
+                    val = (BYTE) ( ( l > lmin ) ? 255 : 0 );
+                    d_im[iy][ix] = val;
+                }
+            }
+            tt = 12 * (64 - lmin);
             threshold += tt;
         }
     }
