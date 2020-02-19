@@ -201,8 +201,8 @@ int IMTFilterTChistianLayer (IMTpixel**, WORD**, unsigned, unsigned, int, double
 int IMTFilterTChistian (IMTpixel**, BYTE**, unsigned, unsigned, int, double, int, int, double);
 int IMTFilterTDalg (IMTpixel**, BYTE**, unsigned, unsigned, int, int, int, int);
 int IMTFilterTDither (IMTpixel**, BYTE**, unsigned, unsigned);
-int IMTFilterTDithH (IMTpixel**, BYTE**, unsigned, unsigned, int);
-int IMTFilterTDithO (IMTpixel**, BYTE**, unsigned, unsigned, int);
+int IMTFilterTDithH (IMTpixel**, BYTE**, unsigned, unsigned, int, int);
+int IMTFilterTDithO (IMTpixel**, BYTE**, unsigned, unsigned, int, int);
 int IMTFilterTDjVuL (IMTpixel**, BYTE**, IMTpixel**, IMTpixel**, unsigned, unsigned, unsigned, unsigned, unsigned, int, double, double, unsigned);
 int IMTFilterTEntValue (IMTpixel**, unsigned, unsigned);
 int IMTFilterTEnt (IMTpixel**, BYTE**, unsigned, unsigned);

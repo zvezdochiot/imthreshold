@@ -1105,14 +1105,13 @@ int IMTFilterTDither (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wi
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int kpg)
+int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int kpg, int delta)
 {
     unsigned x, y, i, j, k, l, lmin = 0;
-    unsigned whg, wwn, iy0, ix0, iy, ix, tx, tt;
-    unsigned wwidth = 4, herrmin;
-    float kpoint = 0.5 * kpg;
+    unsigned whg, wwn, iy0, ix0, iy, ix, tt;
+    unsigned wwidth = 4, herrmin, ww = wwidth * wwidth, kw = 768 / ww;
     BYTE val;
-    int threshold = 0;
+    int tx, imm, threshold = 0;
     // Knuth D.E. dither matrix
     int hdith1[4][4] = {
         {  1,  5, 10, 14 },
@@ -1150,29 +1149,51 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
         {
             ix0 = x * wwidth;
             k = (y + x) % 2;
-            herrp = 0;
-            for (l = 1; l < 17; l++)
+            imm = 0;
+            for (l = 1; l < (ww + 1); l++)
             {
                 j = hdithy[k][l];
                 i = hdithx[k][l];
                 iy = iy0 + j;
                 ix = ix0 + i;
                 tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
+                tx += delta;
+                imm += tx;
+            }
+            imm /= ww;
+            herrp = herrg = 0;
+            for (l = 1; l < (ww + 1); l++)
+            {
+                j = hdithy[k][l];
+                i = hdithx[k][l];
+                iy = iy0 + j;
+                ix = ix0 + i;
+                tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
+                tx += delta;
+                herrg += (765 - tx);
+                tx -= imm;
+                tx *= kpg;
+                tx += imm;
+                tx = (int)Byte3Clamp(tx);
                 herrp += (765 - tx);
             }
-            herrg = herrp;
-            herrmin = herrp * kpoint + herrg;
+            herrmin = herrp + herrg;
             lmin = 0;
-            for (l = 1; l < 17; l++)
+            for (l = 1; l < (ww + 1); l++)
             {
                 j = hdithy[k][l];
                 i = hdithx[k][l];
                 iy = iy0 + j;
                 ix = ix0 + i;
                 tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
+                tx += delta;
+                tx -= imm;
+                tx *= kpg;
+                tx += imm;
+                tx = (int)Byte3Clamp(tx);
                 herrp += (tx + tx - 765);
                 herrg -= 765;
-                herr = herrp * kpoint;
+                herr = (herrp < 0) ? (-herrp) : herrp;
                 herr += (herrg < 0) ? (-herrg) : herrg;
                 if (herr < herrmin)
                 {
@@ -1180,7 +1201,7 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
                     lmin = l;
                 }
             }
-            for (l = 1; l < 17; l++)
+            for (l = 1; l < (ww + 1); l++)
             {
                 j = hdithy[k][l];
                 i = hdithx[k][l];
@@ -1192,7 +1213,7 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
                     d_im[iy][ix] = val;
                 }
             }
-            tt = 48 * (16 - lmin);
+            tt = kw * (ww - lmin);
             threshold += tt;
         }
     }
@@ -1204,14 +1225,13 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTDithO (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int kpg)
+int IMTFilterTDithO (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int kpg, int delta)
 {
     unsigned x, y, i, j, l, lmin = 0;
-    unsigned whg, wwn, iy0, ix0, iy, ix, tx, tt;
-    unsigned wwidth = 8, herrmin;
-    float kpoint = 0.5 * kpg;
+    unsigned whg, wwn, iy0, ix0, iy, ix, tt;
+    unsigned wwidth = 8, herrmin, ww = wwidth * wwidth, kw = 768 / ww;
     BYTE val;
-    int threshold = 0;
+    int tx, imm, threshold = 0;
     // Knuth D.E. dither matrix
     int odith[8][8] = {
         { 35, 48, 40, 32, 28, 15, 23, 31 },
@@ -1242,29 +1262,51 @@ int IMTFilterTDithO (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
         for (x = 0; x < wwn; x++)
         {
             ix0 = x * wwidth;
-            herrp = 0;
-            for (l = 1; l < 65; l++)
+            imm = 0;
+            for (l = 1; l < (ww + 1); l++)
             {
                 j = odithy[l];
                 i = odithx[l];
                 iy = iy0 + j;
                 ix = ix0 + i;
                 tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
+                tx += delta;
+                imm += tx;
+            }
+            imm /= ww;
+            herrp = herrg = 0;
+            for (l = 1; l < (ww + 1); l++)
+            {
+                j = odithy[l];
+                i = odithx[l];
+                iy = iy0 + j;
+                ix = ix0 + i;
+                tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
+                tx += delta;
+                herrg += (765 - tx);
+                tx -= imm;
+                tx *= kpg;
+                tx += imm;
+                tx = (int)Byte3Clamp(tx);
                 herrp += (765 - tx);
             }
-            herrg = herrp;
-            herrmin = herrp * kpoint + herrg;
+            herrmin = herrp + herrg;
             lmin = 0;
-            for (l = 1; l < 65; l++)
+            for (l = 1; l < (ww + 1); l++)
             {
                 j = odithy[l];
                 i = odithx[l];
                 iy = iy0 + j;
                 ix = ix0 + i;
                 tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
+                tx += delta;
+                tx -= imm;
+                tx *= kpg;
+                tx += imm;
+                tx = (int)Byte3Clamp(tx);
                 herrp += (tx + tx - 765);
                 herrg -= 765;
-                herr = herrp * kpoint;
+                herr = (herrp < 0) ? (-herrp) : herrp;
                 herr += (herrg < 0) ? (-herrg) : herrg;
                 if (herr < herrmin)
                 {
@@ -1272,7 +1314,7 @@ int IMTFilterTDithO (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
                     lmin = l;
                 }
             }
-            for (l = 1; l < 65; l++)
+            for (l = 1; l < (ww + 1); l++)
             {
                 j = odithy[l];
                 i = odithx[l];
@@ -1284,7 +1326,7 @@ int IMTFilterTDithO (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
                     d_im[iy][ix] = val;
                 }
             }
-            tt = 12 * (64 - lmin);
+            tt = kw * (ww - lmin);
             threshold += tt;
         }
     }

@@ -1,3 +1,7 @@
+0.20200220
+
+    Threshold: normalization of the equation (k*dp + dg - d) for dith Knuth D.E.
+
 0.20200213
 
     Threshold: added ditho Knuth D.E.

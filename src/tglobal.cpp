@@ -171,10 +171,14 @@ int main(int argc, char *argv[])
                 threshold = IMTFilterTDither(p_im, d_im, height, width);
             } else if (strcmp(namefilter, "dithh") == 0) {
                 printf("Filter= %s\n", namefilter);
-                threshold = IMTFilterTDithH(p_im, d_im, height, width, knum);
+                printf("Coeff= %d\n", knum);
+                printf("Delta= %d\n", delta);
+                threshold = IMTFilterTDithH(p_im, d_im, height, width, knum, delta);
             } else if (strcmp(namefilter, "ditho") == 0) {
                 printf("Filter= %s\n", namefilter);
-                threshold = IMTFilterTDithO(p_im, d_im, height, width, knum);
+                printf("Coeff= %d\n", knum);
+                printf("Delta= %d\n", delta);
+                threshold = IMTFilterTDithO(p_im, d_im, height, width, knum, delta);
             } else if (strcmp(namefilter, "entropy") == 0) {
                 printf("Filter= %s\n", namefilter);
                 threshold = IMTFilterTEnt(p_im, d_im, height, width);
@@ -189,7 +193,8 @@ int main(int argc, char *argv[])
                 threshold = IMTFilterTJanni(p_im, d_im, height, width);
             } else if (strcmp(namefilter, "kmeans") == 0) {
                 printf("Filter= %s\n", namefilter);
-                threshold = IMTFilterTKMeans(p_im, d_im, height, width, knum, iters);
+                printf("Cluster= %d\n", knum);
+               threshold = IMTFilterTKMeans(p_im, d_im, height, width, knum, iters);
             } else if (strcmp(namefilter, "otsu") == 0) {
                 printf("Filter= %s\n", namefilter);
                 threshold = IMTFilterTOtsu(p_im, d_im, height, width);
