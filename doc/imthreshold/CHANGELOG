@@ -1,3 +1,7 @@
+0.20200306
+
+    Pmean: fix wbselect
+
 0.20200220
 
     Threshold: normalization of the equation (k*dp + dg - d) for dith Knuth D.E.

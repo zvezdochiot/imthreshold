@@ -190,6 +190,10 @@ IMTpixel IMTmeanThIcM (IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigned
             immt.c[d] = ByteClamp(imsc[d]);
         }
     }
+    else
+    {
+        immt = IMTimm;
+    }
 
     return immt;
 }
