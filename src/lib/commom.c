@@ -172,10 +172,10 @@ IMTpixel IMTrefilter1p (IMTpixel IMTim, IMTpixel IMTimf)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-IMTpixel IMTinterpolation (IMTpixel** p_im, unsigned height, unsigned width, double y, double x)
+IMTpixel IMTinterpolation (IMTpixel** p_im, unsigned height, unsigned width, float y, float x)
 {
     unsigned d, y1, x1, y2, x2;
-    double p11, p21, p12, p22, ky, kx, k11, k21, k12, k22, t;
+    float p11, p21, p12, p22, ky, kx, k11, k21, k12, k22, t;
     IMTpixel res;
 
     y1 = IndexClamp((int)y, (height - 1));
@@ -194,10 +194,10 @@ IMTpixel IMTinterpolation (IMTpixel** p_im, unsigned height, unsigned width, dou
     k22 = ky * kx;
     for (d = 0; d < 3; d++)
     {
-        p11 = (double)p_im[y1][x1].c[d];
-        p21 = (double)p_im[y2][x1].c[d];
-        p12 = (double)p_im[y1][x2].c[d];
-        p22 = (double)p_im[y2][x2].c[d];
+        p11 = (float)p_im[y1][x1].c[d];
+        p21 = (float)p_im[y2][x1].c[d];
+        p12 = (float)p_im[y1][x2].c[d];
+        p22 = (float)p_im[y2][x2].c[d];
         t = p11 * k11 + p21 * k21 + p12 * k12 + p22 * k22;
         res.c[d] = ByteClamp((int)(t + 0.5));
     }
@@ -252,16 +252,16 @@ BYTE IMTmin (IMTpixel** IMTim, unsigned height, unsigned width)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTmean (IMTpixel** IMTim, unsigned height, unsigned width)
+float IMTmean (IMTpixel** IMTim, unsigned height, unsigned width)
 {
     unsigned x, y;
-    double imx, immean = 0;
+    float imx, immean = 0;
 
     for (y = 0; y < height; y++)
     {
         for (x = 0; x < width; x++)
         {
-            imx = (double)IMTim[y][x].s;
+            imx = (float)IMTim[y][x].s;
             immean += imx;
         }
     }
@@ -274,16 +274,16 @@ double IMTmean (IMTpixel** IMTim, unsigned height, unsigned width)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTdev (IMTpixel** IMTim, double immean, unsigned height, unsigned width)
+float IMTdev (IMTpixel** IMTim, float immean, unsigned height, unsigned width)
 {
     unsigned x, y;
-    double imx, imd, imdev = 0;
+    float imx, imd, imdev = 0;
 
     for (y = 0; y < height; y++)
     {
         for (x = 0; x < width; x++)
         {
-            imx = (double)IMTim[y][x].s / 3.0;
+            imx = (float)IMTim[y][x].s / 3.0;
             imd = imx - immean;
             imdev += (imd * imd);
         }
@@ -298,22 +298,22 @@ double IMTdev (IMTpixel** IMTim, double immean, unsigned height, unsigned width)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTwb (IMTpixel** IMTim, double immean, unsigned height, unsigned width)
+float IMTwb (IMTpixel** IMTim, float immean, unsigned height, unsigned width)
 {
     unsigned x, y;
-    double imx;
+    float imx;
     long imwn = 0;
-    double imwb;
+    float imwb;
 
     for (y = 0; y < height; y++)
     {
         for (x = 0; x < width; x++)
         {
-            imx = (double)IMTim[y][x].s / 3.0;
+            imx = (float)IMTim[y][x].s / 3.0;
             if (imx > immean) {imwn++;}
         }
     }
-    imwb = (double)imwn;
+    imwb = (float)imwn;
     imwb /= height;
     imwb /= width;
 
@@ -340,15 +340,15 @@ unsigned IMTdist (IMTpixel IMTim0, IMTpixel IMTim1)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTdist3c2p(IMTpixel IMTim, double* IMTimc)
+float IMTdist3c2p(IMTpixel IMTim, float* IMTimc)
 {
     unsigned d;
-    double imd, imds = 0;
+    float imd, imds = 0;
 
     for (d = 0; d < 3; d++)
     {
-        imd = (double)IMTim.c[d];
-        imd -= (double)IMTimc[d];
+        imd = (float)IMTim.c[d];
+        imd -= (float)IMTimc[d];
         imd /= 255;
         imd *= imd;
         imds += imd;
@@ -364,7 +364,7 @@ IMTpixel IMTmeanIc (IMTpixel** IMTim, unsigned y0, unsigned x0, unsigned y1, uns
 {
     unsigned y, x, d;
     unsigned imm, n = 0;
-    double ims;
+    float ims;
     IMTpixel immean;
 
     ims = 0;
@@ -373,7 +373,7 @@ IMTpixel IMTmeanIc (IMTpixel** IMTim, unsigned y0, unsigned x0, unsigned y1, uns
         for (x = x0; x < x1; x++)
         {
             imm = (unsigned)IMTim[y][x].s;
-            ims += (double)imm;
+            ims += (float)imm;
             n++;
         }
     }
@@ -391,7 +391,7 @@ IMTpixel IMTmeanIc (IMTpixel** IMTim, unsigned y0, unsigned x0, unsigned y1, uns
             for (x = x0; x < x1; x++)
             {
                 imm = (unsigned)IMTim[y][x].c[d];
-                ims += (double)imm;
+                ims += (float)imm;
             }
         }
         if (n > 0)
@@ -468,21 +468,21 @@ IMTpixel IMTminIc (IMTpixel** IMTim, unsigned y0, unsigned x0, unsigned y1, unsi
 
 ////////////////////////////////////////////////////////////////////////////////
 
-IMTpixel IMTaverageIc (IMTpixel** IMTim, IMTpixel IMTima, unsigned y0, unsigned x0, unsigned y1, unsigned x1, double part)
+IMTpixel IMTaverageIc (IMTpixel** IMTim, IMTpixel IMTima, unsigned y0, unsigned x0, unsigned y1, unsigned x1, float part)
 {
     unsigned y, x, d, n = 0;
     int imm;
     IMTpixel immean;
-    double imx, ims, parts = 1.0 /((double)part + 1.0);
+    float imx, ims, parts = 1.0 /((float)part + 1.0);
 
     ims = 0;
     for (y = y0; y < y1; y++)
     {
         for (x = x0; x < x1; x++)
         {
-            imx = (double)IMTim[y][x].s;
+            imx = (float)IMTim[y][x].s;
             imx *= part;
-            imx += (double)IMTima.s;
+            imx += (float)IMTima.s;
             imx *= parts;
             imm = (int)(imx + 0.5);
             IMTim[y][x].s = (WORD)Byte3Clamp(imm);
@@ -499,9 +499,9 @@ IMTpixel IMTaverageIc (IMTpixel** IMTim, IMTpixel IMTima, unsigned y0, unsigned 
         {
             for (x = x0; x < x1; x++)
             {
-                imx = (double)IMTim[y][x].c[d];
+                imx = (float)IMTim[y][x].c[d];
                 imx *= part;
-                imx += (double)IMTima.c[d];
+                imx += (float)IMTima.c[d];
                 imx *= parts;
                 imm = (int)(imx + 0.5);
                 IMTim[y][x].c[d] = ByteClamp(imm);

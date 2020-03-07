@@ -1,4 +1,4 @@
-.TH "ImThreshold" 1 0.20200212 "12 Feb 2020" "User Manual"
+.TH "ImThreshold" 1 0.20200307 "07 Mar 2020" "User Manual"
 
 .SH NAME
 imthreshold-filter
@@ -14,6 +14,7 @@ imthreshold-filter [options] <input_image> <output_image>
 -f str
 name filter:
     'adsmooth'
+    'bimod'
     'blur'
     'bwc'
     'cluster'
@@ -48,10 +49,10 @@ name filter:
     'wiener'
 .TP
 -a N.N
-amount (double, optional, default = 0.5)
+amount (float, optional, default = 0.5)
 .TP
 -c N.N
-contour factor (double, optional, default = -1[auto])
+contour factor (float, optional, default = -1[auto])
 .TP
 -d N
 max delta (int, optional, default = 50)
@@ -66,19 +67,19 @@ K num (int, optional, default = 2)
 lower bound (int, optional, default = 32)
 .TP
 -n N.N
-noise size (double, optional, default = -1.0[auto])
+noise size (float, optional, default = -1.0[auto])
 .TP
 -p N
 posterize divide factor (int, optional, default = 16)
 .TP
 -r N.N
-radius (double, optional, default = 3.0)
+radius (float, optional, default = 3.0)
 .TP
 -s N.N
-sigma (double, optional, default = 4.0)
+sigma (float, optional, default = 4.0)
 .TP
 -t N.N
-threshold (double, optional, default = 0.0)
+threshold (float, optional, default = 0.0)
 .TP
 -u N
 upper bound (int, optional, default = 223)

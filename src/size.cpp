@@ -29,7 +29,7 @@ void ImthresholdFilterSizeUsage()
     printf("                    'bicont'\n");
     printf("                    'gsample' (default)\n");
     printf("                    'nearest'\n");
-    printf("          -r N.N  ratio (double, optional, default = 1.0)\n");
+    printf("          -r N.N  ratio (float, optional, default = 1.0)\n");
     printf("          -w N    new width (int, optional, default = [auto])\n");
     printf("          -z N    new height (int, optional, default = [auto])\n");
     printf("          -h      this help\n");
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 
     int opt;
-    double ratio = 1.0;
+    float ratio = 1.0;
     int newh = 0;
     int neww = 0;
     bool fhelp = false;

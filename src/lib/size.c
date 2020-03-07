@@ -10,9 +10,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double BiCubicKernel (double x)
+float BiCubicKernel (float x)
 {
-    double a, b, c, d, xm1, xp1, xp2;
+    float a, b, c, d, xm1, xp1, xp2;
 
     if ( x > 2.0 )
         return 0.0;
@@ -35,11 +35,11 @@ void IMTFilterSBicub (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
 {
 
     unsigned d;
-    double xFactor = (double)width / new_width;
-    double yFactor = (double)height / new_height;
-    double ox, oy, dx, dy, k1, k2;
+    float xFactor = (float)width / new_width;
+    float yFactor = (float)height / new_height;
+    float ox, oy, dx, dy, k1, k2;
     int y, x, ox1, oy1, ox2, oy2, m, n;
-    double p_g[3] = {0};
+    float p_g[3] = {0};
     int h = new_height;
     int w = new_width;
     int ymax = height - 1;
@@ -47,33 +47,33 @@ void IMTFilterSBicub (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
 
     for (y = 0; y < h; y++ )
     {
-        oy  = (double)y * yFactor - 0.5;
+        oy  = (float)y * yFactor - 0.5;
         oy1 = (int)oy;
-        dy  = oy - (double)oy1;
+        dy  = oy - (float)oy1;
         for (x = 0; x < w; x++ )
         {
-            ox  = (double)x * xFactor - 0.5f;
+            ox  = (float)x * xFactor - 0.5f;
             ox1 = (int)ox;
-            dx  = ox - (double)ox1;
+            dx  = ox - (float)ox1;
             for (d = 0; d < 3; d++)
             {
                 p_g[d] = 0;
             }
             for (n = -1; n < 3; n++)
             {
-                k1 = BiCubicKernel(dy - (double)n);
+                k1 = BiCubicKernel(dy - (float)n);
                 oy2 = oy1 + n;
                 if ( oy2 < 0 ) {oy2 = 0;}
                 if ( oy2 > ymax ) {oy2 = ymax;}
                 for (m = -1; m < 3; m++)
                 {
-                    k2 = k1 * BiCubicKernel((double)m - dx);
+                    k2 = k1 * BiCubicKernel((float)m - dx);
                     ox2 = ox1 + m;
                     if ( ox2 < 0 ) {ox2 = 0;}
                     if ( ox2 > xmax ) {ox2 = xmax;}
                     for (d = 0; d < 3; d++)
                     {
-                        p_g[d] += (k2 * (double)p_im[oy2][ox2].c[d]);
+                        p_g[d] += (k2 * (float)p_im[oy2][ox2].c[d]);
                     }
                 }
             }
@@ -92,28 +92,28 @@ void IMTFilterSBicont (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsign
 {
 
     unsigned d;
-    double xFactor = (double)width / new_width;
-    double yFactor = (double)height / new_height;
-    double ox, oy, dx, dy, k1, k2;
+    float xFactor = (float)width / new_width;
+    float yFactor = (float)height / new_height;
+    float ox, oy, dx, dy, k1, k2;
     int y, x, k, ox1, oy1, ox2, oy2, m, n;
-    double p_g[3] = {0};
+    float p_g[3] = {0};
     int h = new_height;
     int w = new_width;
     int ymax = height - 1;
     int xmax = width - 1;
     IMTpixel mim, pim[16];
-    double sdist, zdist, pdist[16];
+    float sdist, zdist, pdist[16];
 
     for (y = 0; y < h; y++ )
     {
-        oy  = (double)y * yFactor - 0.5;
+        oy  = (float)y * yFactor - 0.5;
         oy1 = (int)oy;
-        dy  = oy - (double)oy1;
+        dy  = oy - (float)oy1;
         for (x = 0; x < w; x++ )
         {
-            ox  = (double)x * xFactor - 0.5f;
+            ox  = (float)x * xFactor - 0.5f;
             ox1 = (int)ox;
-            dx  = ox - (double)ox1;
+            dx  = ox - (float)ox1;
             for (d = 0; d < 3; d++)
             {
                 p_g[d] = 0;
@@ -136,19 +136,19 @@ void IMTFilterSBicont (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsign
             k = 0;
             for (n = -1; n < 3; n++)
             {
-                k1 = BiCubicKernel(dy - (double)n);
+                k1 = BiCubicKernel(dy - (float)n);
                 oy2 = oy1 + n;
                 if ( oy2 < 0 ) {oy2 = 0;}
                 if ( oy2 > ymax ) {oy2 = ymax;}
                 for (m = -1; m < 3; m++)
                 {
-                    k2 = k1 * BiCubicKernel((double)m - dx);
+                    k2 = k1 * BiCubicKernel((float)m - dx);
                     ox2 = ox1 + m;
                     if ( ox2 < 0 ) {ox2 = 0;}
                     if ( ox2 > xmax ) {ox2 = xmax;}
                     for (d = 0; d < 3; d++)
                     {
-                        p_g[d] += (k2 * (double)pim[k].c[d]);
+                        p_g[d] += (k2 * (float)pim[k].c[d]);
                     }
                     k++;
                 }
@@ -190,7 +190,7 @@ void IMTFilterSBicont (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsign
             {
                 for (d = 0; d < 3; d++)
                 {
-                    pim[k].c[d] = ByteClamp((int) ((double)pim[k].c[d] * pdist[k] + (double)mim.c[d] * (1 - pdist[k]) + 0.5));
+                    pim[k].c[d] = ByteClamp((int) ((float)pim[k].c[d] * pdist[k] + (float)mim.c[d] * (1 - pdist[k]) + 0.5));
                 }
             }
             k = 0;
@@ -200,19 +200,19 @@ void IMTFilterSBicont (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsign
             }
             for (n = -1; n < 3; n++)
             {
-                k1 = BiCubicKernel(dy - (double)n);
+                k1 = BiCubicKernel(dy - (float)n);
                 oy2 = oy1 + n;
                 if ( oy2 < 0 ) {oy2 = 0;}
                 if ( oy2 > ymax ) {oy2 = ymax;}
                 for (m = -1; m < 3; m++)
                 {
-                    k2 = k1 * BiCubicKernel((double)m - dx);
+                    k2 = k1 * BiCubicKernel((float)m - dx);
                     ox2 = ox1 + m;
                     if ( ox2 < 0 ) {ox2 = 0;}
                     if ( ox2 > xmax ) {ox2 = xmax;}
                     for (d = 0; d < 3; d++)
                     {
-                        p_g[d] += (k2 * (double)pim[k].c[d]);
+                        p_g[d] += (k2 * (float)pim[k].c[d]);
                     }
                     k++;
                 }
@@ -231,9 +231,9 @@ void IMTFilterSBicont (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsign
 void IMTFilterSBilin (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width)
 {
     unsigned d;
-    double xFactor = (double)width / new_width;
-    double yFactor = (double)height / new_height;
-    double ox, oy, dx1, dy1, dx2, dy2;
+    float xFactor = (float)width / new_width;
+    float yFactor = (float)height / new_height;
+    float ox, oy, dx1, dy1, dx2, dy2;
     int y, x, ox1, oy1, ox2, oy2;
     int h = new_height;
     int w = new_width;
@@ -242,17 +242,17 @@ void IMTFilterSBilin (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
 
     for (y = 0; y < h; y++)
     {
-        oy  = (double)y * yFactor;
+        oy  = (float)y * yFactor;
         oy1 = (int)oy;
         oy2 = (oy1 == ymax) ? oy1 : oy1 + 1;
-        dy1 = oy - (double)oy1;
+        dy1 = oy - (float)oy1;
         dy2 = 1.0 - dy1;
         for (x = 0; x < w; x++)
         {
-            ox  = (double)x * xFactor;
+            ox  = (float)x * xFactor;
             ox1 = (int)ox;
             ox2 = (ox1 == xmax) ? ox1 : ox1 + 1;
-            dx1 = ox - (double)ox1;
+            dx1 = ox - (float)ox1;
             dx2 = 1.0 - dx1;
             for (d = 0; d < 3; d++)
             {
@@ -477,9 +477,9 @@ int IMTFilterSBWReduce2 (BYTE** d_im, BYTE** r_im, unsigned height, unsigned wid
 void IMTFilterSGsample (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width)
 {
     unsigned d;
-    double xFactor = (double)width / new_width;
-    double yFactor = (double)height / new_height;
-    double y0, x0, yn, xn, y0t, x0t, ynt, xnt, yt, xt, dyt, dxt, fyt, fxt, s, ss, sim, gy, gx, gc;
+    float xFactor = (float)width / new_width;
+    float yFactor = (float)height / new_height;
+    float y0, x0, yn, xn, y0t, x0t, ynt, xnt, yt, xt, dyt, dxt, fyt, fxt, s, ss, sim, gy, gx, gc;
     int y, x, y0i, x0i, yni, xni, i, j, yti, xti, ypr, xpr, ynx, xnx;
     int h = (int)height;
     int w = (int)width;
@@ -488,29 +488,29 @@ void IMTFilterSGsample (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
 
     for (y = 0; y < h2; y++)
     {
-        y0 = (double)y;
+        y0 = (float)y;
         y0 *= yFactor;
         y0i = (int)y0;
         yn = y0 + yFactor;
         yni = (int)yn;
-        if ((double)yni < yn) {yni++;}
+        if ((float)yni < yn) {yni++;}
         for (x = 0; x < w2; x++)
         {
-            x0 = (double)x;
+            x0 = (float)x;
             x0 *= xFactor;
             x0i = (int)x0;
             xn = x0 + xFactor;
             xni = (int)xn;
-            if ((double)xni < xn) {xni++;}
+            if ((float)xni < xn) {xni++;}
             for (d = 0; d < 3; d++)
             {
                 sim = 0;
                 ss = 0;
                 for (i = y0i; i < yni; i++)
                 {
-                    y0t = (double)i;
+                    y0t = (float)i;
                     if (y0t < y0) {y0t = y0;}
-                    ynt = (double)(i + 1);
+                    ynt = (float)(i + 1);
                     if (ynt > yn) {ynt = yn;}
                     yt = (y0t + ynt) / 2;
                     yti = (int)yt;
@@ -523,9 +523,9 @@ void IMTFilterSGsample (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
                     if (ynx >= h) {ynx = h - 1;}
                     for (j = x0i; j < xni; j++)
                     {
-                        x0t = (double)j;
+                        x0t = (float)j;
                         if (x0t < x0) {x0t = x0;}
-                        xnt = (double)(j + 1);
+                        xnt = (float)(j + 1);
                         if (xnt > xn) {xnt = xn;}
                         xt = (x0t + xnt) / 2;
                         xti = (int)xt;
@@ -536,25 +536,25 @@ void IMTFilterSGsample (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
                         if (xpr < 0) {xpr = 0;}
                         xnx = xti + 1;
                         if (xnx >= w) {xnx = w - 1;}
-                        gy = (double)p_im[ynx][xti].c[d];
-                        gy += (double)p_im[ynx][xti].c[d];
-                        gy += (double)p_im[ynx][xnx].c[d];
-                        gy += (double)p_im[ynx][xpr].c[d];
-                        gy -= (double)p_im[ypr][xti].c[d];
-                        gy -= (double)p_im[ypr][xti].c[d];
-                        gy -= (double)p_im[ypr][xnx].c[d];
-                        gy -= (double)p_im[ypr][xpr].c[d];
+                        gy = (float)p_im[ynx][xti].c[d];
+                        gy += (float)p_im[ynx][xti].c[d];
+                        gy += (float)p_im[ynx][xnx].c[d];
+                        gy += (float)p_im[ynx][xpr].c[d];
+                        gy -= (float)p_im[ypr][xti].c[d];
+                        gy -= (float)p_im[ypr][xti].c[d];
+                        gy -= (float)p_im[ypr][xnx].c[d];
+                        gy -= (float)p_im[ypr][xpr].c[d];
                         gy /= 8.0;
-                        gx = (double)p_im[yti][xnx].c[d];
-                        gx += (double)p_im[yti][xnx].c[d];
-                        gx += (double)p_im[ynx][xnx].c[d];
-                        gx += (double)p_im[ypr][xnx].c[d];
-                        gx -= (double)p_im[yti][xpr].c[d];
-                        gx -= (double)p_im[yti][xpr].c[d];
-                        gx -= (double)p_im[ynx][xpr].c[d];
-                        gx -= (double)p_im[ypr][xpr].c[d];
+                        gx = (float)p_im[yti][xnx].c[d];
+                        gx += (float)p_im[yti][xnx].c[d];
+                        gx += (float)p_im[ynx][xnx].c[d];
+                        gx += (float)p_im[ypr][xnx].c[d];
+                        gx -= (float)p_im[yti][xpr].c[d];
+                        gx -= (float)p_im[yti][xpr].c[d];
+                        gx -= (float)p_im[ynx][xpr].c[d];
+                        gx -= (float)p_im[ypr][xpr].c[d];
                         gx /= 8.0;
-                        gc = (double)p_im[yti][xti].c[d];
+                        gc = (float)p_im[yti][xti].c[d];
                         gc += fyt * gy;
                         gc += fxt * gx;
                         s = dxt * dyt;
@@ -581,13 +581,13 @@ void IMTFilterSHRIS (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
     int h2 = h * smode;
     int w2 = w * smode;
 
-    double imx;
-    double b11, b12, b13, b21, b22, b23, b31, b32, b33;
-    double r11, r12, r13, r21, r22, r23, r31, r32, r33;
+    float imx;
+    float b11, b12, b13, b21, b22, b23, b31, b32, b33;
+    float r11, r12, r13, r21, r22, r23, r31, r32, r33;
 
-    double k0[2];
-    double k1[3];
-    double k2[3];
+    float k0[2];
+    float k1[3];
+    float k2[3];
 
     if (smode < 2) {smode = 2;}
     if (smode > 3) {smode = 3;}
@@ -627,55 +627,55 @@ void IMTFilterSHRIS (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
             xn2 = x + 2; if (xn2 > w - 1) {xn2 = w - 1;}
             for (d = 0; d < 3; d++)
             {
-                imx = (double)p_im[yp2][xp2].c[d];
+                imx = (float)p_im[yp2][xp2].c[d];
                 b11 = -(k2[2] * imx);
-                imx = (double)p_im[yp2][xp1].c[d];
+                imx = (float)p_im[yp2][xp1].c[d];
                 b11 -= (k2[1] * imx);
                 b12 = -(k2[2] * imx);
-                imx = (double)p_im[yp2][x].c[d];
+                imx = (float)p_im[yp2][x].c[d];
                 b11 -= (k2[2] * imx);
                 b12 -= (k2[1] * imx);
                 b13 = -(k2[2] * imx);
-                imx = (double)p_im[yp2][xn1].c[d];
+                imx = (float)p_im[yp2][xn1].c[d];
                 b12 -= (k2[2] * imx);
                 b13 -= (k2[1] * imx);
-                imx = (double)p_im[yp2][xn2].c[d];
+                imx = (float)p_im[yp2][xn2].c[d];
                 b13 -= (k2[2] * imx);
-                imx = (double)p_im[yp1][xp2].c[d];
+                imx = (float)p_im[yp1][xp2].c[d];
                 b11 -= (k2[1] * imx);
                 b21 = -(k2[2] * imx);
-                imx = (double)p_im[yp1][xp1].c[d];
+                imx = (float)p_im[yp1][xp1].c[d];
                 b11 += ((2.0 - k2[0]) * imx);
                 b12 -= (k2[1] * imx);
                 b21 -= (k2[1] * imx);
                 b22 = -(k2[2] * imx);
-                imx = (double)p_im[yp1][x].c[d];
+                imx = (float)p_im[yp1][x].c[d];
                 b11 -= (k2[1] * imx);
                 b12 += ((2.0 - k2[0]) * imx);
                 b13 -= (k2[1] * imx);
                 b21 -= (k2[2] * imx);
                 b22 -= (k2[1] * imx);
                 b23 = -(k2[2] * imx);
-                imx = (double)p_im[yp1][xn1].c[d];
+                imx = (float)p_im[yp1][xn1].c[d];
                 b12 -= (k2[1] * imx);
                 b13 += ((2.0 - k2[0]) * imx);
                 b22 -= (k2[2] * imx);
                 b23 -= (k2[1] * imx);
-                imx = (double)p_im[yp1][xn2].c[d];
+                imx = (float)p_im[yp1][xn2].c[d];
                 b13 -= (k2[1] * imx);
                 b23 -= (k2[2] * imx);
-                imx = (double)p_im[y][xp2].c[d];
+                imx = (float)p_im[y][xp2].c[d];
                 b11 -= (k2[2] * imx);
                 b21 -= (k2[1] * imx);
                 b31 = -(k2[2] * imx);
-                imx = (double)p_im[y][xp1].c[d];
+                imx = (float)p_im[y][xp1].c[d];
                 b11 -= (k2[1] * imx);
                 b12 -= (k2[2] * imx);
                 b21 += ((2.0 - k2[0]) * imx);
                 b22 -= (k2[1] * imx);
                 b31 -= (k2[1] * imx);
                 b32 = -(k2[2] * imx);
-                imx = (double)p_im[y][x].c[d];
+                imx = (float)p_im[y][x].c[d];
                 b11 -= (k2[2] * imx);
                 b12 -= (k2[1] * imx);
                 b13 -= (k2[2] * imx);
@@ -685,53 +685,53 @@ void IMTFilterSHRIS (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
                 b31 -= (k2[2] * imx);
                 b32 -= (k2[1] * imx);
                 b33 = -(k2[2] * imx);
-                imx = (double)p_im[y][xn1].c[d];
+                imx = (float)p_im[y][xn1].c[d];
                 b12 -= (k2[2] * imx);
                 b13 -= (k2[1] * imx);
                 b22 -= (k2[1] * imx);
                 b23 += ((2.0 - k2[0]) * imx);
                 b32 -= (k2[2] * imx);
                 b33 -= (k2[1] * imx);
-                imx = (double)p_im[y][xn2].c[d];
+                imx = (float)p_im[y][xn2].c[d];
                 b13 -= (k2[2] * imx);
                 b23 -= (k2[1] * imx);
                 b33 -= (k2[2] * imx);
-                imx = (double)p_im[yn1][xp2].c[d];
+                imx = (float)p_im[yn1][xp2].c[d];
                 b21 -= (k2[2] * imx);
                 b31 -= (k2[1] * imx);
-                imx = (double)p_im[yn1][xp1].c[d];
+                imx = (float)p_im[yn1][xp1].c[d];
                 b21 -= (k2[1] * imx);
                 b22 -= (k2[2] * imx);
                 b31 += ((2.0 - k2[0]) * imx);
                 b32 -= (k2[1] * imx);
-                imx = (double)p_im[yn1][x].c[d];
+                imx = (float)p_im[yn1][x].c[d];
                 b21 -= (k2[2] * imx);
                 b22 -= (k2[1] * imx);
                 b23 -= (k2[2] * imx);
                 b31 -= (k2[1] * imx);
                 b32 += ((2.0 - k2[0]) * imx);
                 b33 -= (k2[1] * imx);
-                imx = (double)p_im[yn1][xn1].c[d];
+                imx = (float)p_im[yn1][xn1].c[d];
                 b22 -= (k2[2] * imx);
                 b23 -= (k2[1] * imx);
                 b32 -= (k2[1] * imx);
                 b33 += ((2.0 - k2[0]) * imx);
-                imx = (double)p_im[yn1][xn2].c[d];
+                imx = (float)p_im[yn1][xn2].c[d];
                 b23 -= (k2[2] * imx);
                 b33 -= (k2[1] * imx);
-                imx = (double)p_im[yn2][xp2].c[d];
+                imx = (float)p_im[yn2][xp2].c[d];
                 b31 -= (k2[2] * imx);
-                imx = (double)p_im[yn2][xp1].c[d];
+                imx = (float)p_im[yn2][xp1].c[d];
                 b31 -= (k2[1] * imx);
                 b32 -= (k2[2] * imx);
-                imx = (double)p_im[yn2][x].c[d];
+                imx = (float)p_im[yn2][x].c[d];
                 b31 -= (k2[2] * imx);
                 b32 -= (k2[1] * imx);
                 b33 -= (k2[2] * imx);
-                imx = (double)p_im[yn2][xn1].c[d];
+                imx = (float)p_im[yn2][xn1].c[d];
                 b32 -= (k2[2] * imx);
                 b33 -= (k2[1] * imx);
-                imx = (double)p_im[yn2][xn2].c[d];
+                imx = (float)p_im[yn2][xn2].c[d];
                 b33 -= (k2[2] * imx);
 
                 if (smode == 2)
@@ -753,7 +753,7 @@ void IMTFilterSHRIS (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
                     r12 = (k0[0] * b22 + k0[1] * b12);
                     r13 = (k1[0] * b22 + k1[1] * (b12 + b23) + k1[2] * b13);
                     r21 = (k0[0] * b22 + k0[1] * b21);
-                    r22 = (double)p_im[y][x].c[d];
+                    r22 = (float)p_im[y][x].c[d];
                     r23 = (k0[0] * b22 + k0[1] * b23);
                     r31 = (k1[0] * b22 + k1[1] * (b32 + b21) + k1[2] * b31);
                     r32 = (k0[0] * b22 + k0[1] * b32);
@@ -791,12 +791,12 @@ void IMTFilterSGSampleUp (IMTpixel** p_im, IMTpixel** d_im, unsigned height, uns
     unsigned y, x, yf, xf, yr, xr, d, k, l, bpp = 3;
     int dx, dy, ir, isz;
     IMTpixel wm, wr;
-    double imx, k0, kx, ky, kz, dd;
+    float imx, k0, kx, ky, kz, dd;
 
     if (smode < 2) {smode = 2;}
     ir = 2 * smode;
     isz = ir * ir;
-    dd = 1.0 / (double)isz;
+    dd = 1.0 / (float)isz;
 
     for (y = 0; y < height; y++)
     {
@@ -806,26 +806,26 @@ void IMTFilterSGSampleUp (IMTpixel** p_im, IMTpixel** d_im, unsigned height, uns
             xr = x * smode;
             for (d = 0; d < bpp; d++)
             {
-                imx = (double)p_im[y][x].c[d];
+                imx = (float)p_im[y][x].c[d];
                 imx *= 36.0;
                 yf = (y > 0) ? (y - 1) : y;
                 xf = (x > 0) ? (x - 1) : x;
-                imx -= (double)p_im[yf][xf].c[d];
-                imx -= (double)p_im[yf][x].c[d];
-                imx -= (double)p_im[yf][x].c[d];
+                imx -= (float)p_im[yf][xf].c[d];
+                imx -= (float)p_im[yf][x].c[d];
+                imx -= (float)p_im[yf][x].c[d];
                 xf = (x < width - 1) ? (x + 1) : x;
-                imx -= (double)p_im[yf][xf].c[d];
-                imx -= (double)p_im[y][xf].c[d];
-                imx -= (double)p_im[y][xf].c[d];
+                imx -= (float)p_im[yf][xf].c[d];
+                imx -= (float)p_im[y][xf].c[d];
+                imx -= (float)p_im[y][xf].c[d];
                 xf = (x > 0) ? (x - 1) : x;
-                imx -= (double)p_im[y][xf].c[d];
-                imx -= (double)p_im[y][xf].c[d];
+                imx -= (float)p_im[y][xf].c[d];
+                imx -= (float)p_im[y][xf].c[d];
                 yf = (y < height - 1) ? (y + 1) : y;
-                imx -= (double)p_im[yf][xf].c[d];
-                imx -= (double)p_im[yf][x].c[d];
-                imx -= (double)p_im[yf][x].c[d];
+                imx -= (float)p_im[yf][xf].c[d];
+                imx -= (float)p_im[yf][x].c[d];
+                imx -= (float)p_im[yf][x].c[d];
                 xf = (x < width - 1) ? (x + 1) : x;
-                imx -= (double)p_im[yf][xf].c[d];
+                imx -= (float)p_im[yf][xf].c[d];
                 imx /= 24.0;
                 wm.c[d] = ByteClamp((int)(imx + 0.5));
             }
@@ -837,10 +837,10 @@ void IMTFilterSGSampleUp (IMTpixel** p_im, IMTpixel** d_im, unsigned height, uns
                 {
                     dx = (int)(l + l - smode + 1);
                     xf = (dx < 0) ? ((x > 0) ? (x - 1) : x) : ((x < width - 1) ? (x + 1) : x);
-                    k0 = (double)isz;
-                    kx = (double)ABS(dx * ir);
-                    ky = (double)ABS(dy * ir);
-                    kz = (double)ABS(dx * dy);
+                    k0 = (float)isz;
+                    kx = (float)ABS(dx * ir);
+                    ky = (float)ABS(dy * ir);
+                    kz = (float)ABS(dx * dy);
                     kx -= kz;
                     ky -= kz;
                     k0 -= kz;
@@ -848,10 +848,10 @@ void IMTFilterSGSampleUp (IMTpixel** p_im, IMTpixel** d_im, unsigned height, uns
                     k0 -= ky;
                     for (d = 0; d < bpp; d++)
                     {
-                        imx = (k0 * (double)wm.c[d]);
-                        imx += (ky * (double)p_im[yf][x].c[d]);
-                        imx += (kx * (double)p_im[y][xf].c[d]);
-                        imx += (kz * (double)p_im[yf][xf].c[d]);
+                        imx = (k0 * (float)wm.c[d]);
+                        imx += (ky * (float)p_im[yf][x].c[d]);
+                        imx += (kx * (float)p_im[y][xf].c[d]);
+                        imx += (kz * (float)p_im[yf][xf].c[d]);
                         imx *= dd;
                         wr.c[d] = ByteClamp((int)(imx + 0.5));
                     }
@@ -899,8 +899,8 @@ void IMTFilterSReduce (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsign
 
 void IMTFilterSNearest (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned new_height, unsigned new_width)
 {
-    double xFactor = (double) width / new_width;
-    double yFactor = (double) height / new_height;
+    float xFactor = (float) width / new_width;
+    float yFactor = (float) height / new_height;
     int y, x, ox, oy;
     int h = new_height;
     int w = new_width;

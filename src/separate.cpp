@@ -31,10 +31,10 @@ void ImthresholdFilterSeparateUsage()
     printf("          -c N    clean blur radius (int, optional, default = 0)\n");
     printf("          -b N    base block size (int, optional, default = 3)\n");
     printf("          -f N    foreground divide (int, optional, default = 2)\n");
-    printf("          -k N.N  coefficient delta threshold (double, optional, default = 2.0)\n");
+    printf("          -k N.N  coefficient delta threshold (float, optional, default = 2.0)\n");
     printf("          -l N    level (int, optional, default = 0[auto])\n");
     printf("          -r      rewrite mask (bool, optional, default = false)\n");
-    printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
+    printf("          -o N.N  overlay (float, optional, default = 0.5)\n");
     printf("          -h      this help\n");
 }
 
@@ -48,8 +48,8 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 
     int opt;
-    double doverlay = 0.5;
-    double kdelta = 2.0;
+    float doverlay = 0.5;
+    float kdelta = 2.0;
     int bgs = 3;
     int fgs = 2;
     int level = 0;

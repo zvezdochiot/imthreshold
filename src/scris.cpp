@@ -26,8 +26,8 @@ void ImthresholdFilterSCRISUsage()
     printf("          -f str  name filter:\n");
     printf("                    'bicubic'\n");
     printf("                    'bicont' (default)\n");
-    printf("          -p N.N  part prefilter (double, optional, default = 0.5)\n");
-    printf("          -r N.N  ratio (double, optional, default = 1.0)\n");
+    printf("          -p N.N  part prefilter (float, optional, default = 0.5)\n");
+    printf("          -r N.N  ratio (float, optional, default = 1.0)\n");
     printf("          -w N    new width (int, optional, default = [auto])\n");
     printf("          -w N    new width (int, optional, default = [auto])\n");
     printf("          -z N    new height (int, optional, default = [auto])\n");
@@ -44,11 +44,11 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 
     int opt;
-    double ratio = 1.0;
+    float ratio = 1.0;
     int newh = 0;
     int neww = 0;
-    double ims = 0.0;
-    double ppart = 0.5;
+    float ims = 0.0;
+    float ppart = 0.5;
     bool fhelp = false;
     char *namefilter = "bicont";
     while ((opt = getopt(argc, argv, ":f:p:r:w:z:h")) != -1)

@@ -95,7 +95,7 @@ unsigned IMTFilterDMag2 (BYTE** p_im, unsigned height, unsigned width, unsigned 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterDNeuro2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize, double lambda, unsigned lnum)
+void IMTFilterDNeuro2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize, float lambda, unsigned lnum)
 {
     int i, j, y, x, y1, x1;
     unsigned n, l;
@@ -104,12 +104,12 @@ void IMTFilterDNeuro2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ks
     int w = (int)width;
     int k = (int)Ksize;
     int k2 = k / 2;
-    double z, s, er, sigma, dw;
-    double** weight;
+    float z, s, er, sigma, dw;
+    float** weight;
     BYTE** d_im;
 
-    weight = (double**)malloc(Ksize * sizeof(double*));
-    for (y = 0; y < k; y++) {weight[y] = (double*)malloc(Ksize * sizeof(double));}
+    weight = (float**)malloc(Ksize * sizeof(float*));
+    for (y = 0; y < k; y++) {weight[y] = (float*)malloc(Ksize * sizeof(float));}
 
     d_im = BWalloc(height, width);
 
@@ -222,11 +222,11 @@ void IMTFilterDNeuro2 (BYTE** p_im, unsigned height, unsigned width, unsigned Ks
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterDphist (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize)
+float IMTFilterDphist (BYTE** p_im, unsigned height, unsigned width, unsigned Ksize)
 {
     unsigned y, x, f, g, i, j, k, l, m, n, val, hmin, imin, hmax, imax, nrep, nreps;
     unsigned hist[512] = {0};
-    double kdp;
+    float kdp;
 
     int** d_im;
     d_im = (int**)malloc(height * sizeof(int*));
@@ -368,8 +368,8 @@ double IMTFilterDphist (BYTE** p_im, unsigned height, unsigned width, unsigned K
             nreps += nrep;
         }
     }
-    kdp = (double)nreps;
-    kdp /= (double)n;
+    kdp = (float)nreps;
+    kdp /= (float)n;
 
     for (y = 0; y < height; y++) {free(d_im[y]);}
     free(d_im);

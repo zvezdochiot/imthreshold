@@ -63,7 +63,7 @@ void IMTFilterMathDistance (IMTpixel** p_im, IMTpixel** m_im, unsigned height, u
 void IMTFilterMathDivide (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width, int delta)
 {
     unsigned y, x, d;
-    double im, imm;
+    float im, imm;
 
     for ( y = 0; y < height; y++ )
     {
@@ -71,9 +71,9 @@ void IMTFilterMathDivide (IMTpixel** p_im, IMTpixel** m_im, unsigned height, uns
         {
             for (d = 0; d < 3; d++)
             {
-                im = (double)p_im[y][x].c[d];
+                im = (float)p_im[y][x].c[d];
                 im++;
-                imm = (double)m_im[y][x].c[d];
+                imm = (float)m_im[y][x].c[d];
                 imm++;
                 im /= imm;
                 im *= 256;
@@ -91,7 +91,7 @@ void IMTFilterMathDivide (IMTpixel** p_im, IMTpixel** m_im, unsigned height, uns
 void IMTFilterMathGeometric (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width, int delta)
 {
     unsigned y, x, d;
-    double im, imm;
+    float im, imm;
 
     for ( y = 0; y < height; y++ )
     {
@@ -99,9 +99,9 @@ void IMTFilterMathGeometric (IMTpixel** p_im, IMTpixel** m_im, unsigned height, 
         {
             for (d = 0; d < 3; d++)
             {
-                im = (double)p_im[y][x].c[d];
+                im = (float)p_im[y][x].c[d];
                 im++;
-                imm = (double)m_im[y][x].c[d];
+                imm = (float)m_im[y][x].c[d];
                 imm++;
                 im *= imm;
                 im = sqrt(im);
@@ -119,7 +119,7 @@ void IMTFilterMathGeometric (IMTpixel** p_im, IMTpixel** m_im, unsigned height, 
 void IMTFilterMathHarmonic (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width, int delta)
 {
     unsigned y, x, d;
-    double im, imm;
+    float im, imm;
 
     for ( y = 0; y < height; y++ )
     {
@@ -127,9 +127,9 @@ void IMTFilterMathHarmonic (IMTpixel** p_im, IMTpixel** m_im, unsigned height, u
         {
             for (d = 0; d < 3; d++)
             {
-                im = (double)p_im[y][x].c[d];
+                im = (float)p_im[y][x].c[d];
                 im++;
-                imm = (double)m_im[y][x].c[d];
+                imm = (float)m_im[y][x].c[d];
                 imm++;
                 im = 2.0 / (1.0 / im + 1.0 /imm);
                 im += delta;
@@ -243,7 +243,7 @@ void IMTFilterMathMirror (IMTpixel** p_im, IMTpixel** m_im, unsigned height, uns
 void IMTFilterMathMultiply (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width, int delta)
 {
     unsigned y, x, d;
-    double im, imm;
+    float im, imm;
 
     for ( y = 0; y < height; y++ )
     {
@@ -251,9 +251,9 @@ void IMTFilterMathMultiply (IMTpixel** p_im, IMTpixel** m_im, unsigned height, u
         {
             for (d = 0; d < 3; d++)
             {
-                im = (double)p_im[y][x].c[d];
+                im = (float)p_im[y][x].c[d];
                 im++;
-                imm = (double)m_im[y][x].c[d];
+                imm = (float)m_im[y][x].c[d];
                 imm++;
                 im *= imm;
                 im /= 256.0;
@@ -271,30 +271,30 @@ void IMTFilterMathMultiply (IMTpixel** p_im, IMTpixel** m_im, unsigned height, u
 void IMTFilterMathNorm (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width, int delta)
 {
     unsigned y, x, d;
-    double im, imm, ims, k;
+    float im, imm, ims, k;
 
     ims = 0;
     for ( y = 0; y < height; y++ )
     {
         for ( x = 0; x < width; x++ )
         {
-            imm = (double)m_im[y][x].s;
+            imm = (float)m_im[y][x].s;
             ims += imm;
         }
     }
-    ims /= (double)height;
-    ims /= (double)width;
+    ims /= (float)height;
+    ims /= (float)width;
     ims++;
     for ( y = 0; y < height; y++ )
     {
         for ( x = 0; x < width; x++ )
         {
-            imm = (double)m_im[y][x].s;
+            imm = (float)m_im[y][x].s;
             im++;
             k = imm / ims;
             for (d = 0; d < 3; d++)
             {
-                im = (double)p_im[y][x].c[d];
+                im = (float)p_im[y][x].c[d];
                 im *= k;
                 im -= 0.5;
                 im += delta;
@@ -331,10 +331,10 @@ void IMTFilterMathPlus (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsig
 
 ///////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterMathSharpenBadMetric (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width)
+float IMTFilterMathSharpenBadMetric (IMTpixel** p_im, IMTpixel** m_im, unsigned height, unsigned width)
 {
     unsigned y, x, d, y1, x1, y2, x2, yf, xf, n;
-    double im, imm, imf1, imf2, ims1, ims2, imd, imd1, imd2, imdc, imsd, imsd1, imsd2, imsdc, k332, sharpenbadmetric;
+    float im, imm, imf1, imf2, ims1, ims2, imd, imd1, imd2, imdc, imsd, imsd1, imsd2, imsdc, k332, sharpenbadmetric;
 
     imsd = 0;
     imsd1 = 0;
@@ -352,8 +352,8 @@ double IMTFilterMathSharpenBadMetric (IMTpixel** p_im, IMTpixel** m_im, unsigned
             x2 = (((x + 1) < width) ? (x + 2) : width);
             for (d = 0; d < 3; d++)
             {
-                im = (double)p_im[y][x].c[d];
-                imm = (double)m_im[y][x].c[d];
+                im = (float)p_im[y][x].c[d];
+                imm = (float)m_im[y][x].c[d];
                 ims1 = 0;
                 ims2 = 0;
                 n = 0;
@@ -361,8 +361,8 @@ double IMTFilterMathSharpenBadMetric (IMTpixel** p_im, IMTpixel** m_im, unsigned
                 {
                     for (xf = x1; xf < x2; xf++)
                     {
-                        imf1 = (double)p_im[yf][xf].c[d];
-                        imf2 = (double)m_im[yf][xf].c[d];
+                        imf1 = (float)p_im[yf][xf].c[d];
+                        imf2 = (float)m_im[yf][xf].c[d];
                         ims1 += imf1;
                         ims2 += imf2;
                         n++;
@@ -378,7 +378,7 @@ double IMTFilterMathSharpenBadMetric (IMTpixel** p_im, IMTpixel** m_im, unsigned
                 im += imd1;
                 imm += imd2;
                 imd = im - imm;
-                imf1 = (double)m_im[y][x].c[d];
+                imf1 = (float)m_im[y][x].c[d];
                 imf1 += imd;
                 p_im[y][x].c[d] = ByteClamp((int)(imf1 + 0.5));
                 imd1 /= 255.0;
@@ -402,8 +402,8 @@ double IMTFilterMathSharpenBadMetric (IMTpixel** p_im, IMTpixel** m_im, unsigned
         imsd *= imsdc;
         imsd *= 2.0;
     } else {
-        imsd /= (double)height;
-        imsd /= (double)width;
+        imsd /= (float)height;
+        imsd /= (float)width;
         imsd /= 3.0;
     }
     if (imsd < 0) {imsd = -imsd;}
@@ -418,8 +418,8 @@ double IMTFilterMathSharpenBadMetric (IMTpixel** p_im, IMTpixel** m_im, unsigned
         {
             for (d = 0; d < 3; d++)
             {
-                imd = (double)p_im[y][x].c[d];
-                imd -= (double)m_im[y][x].c[d];
+                imd = (float)p_im[y][x].c[d];
+                imd -= (float)m_im[y][x].c[d];
                 imd = (imd < 0) ? -imd : imd;
                 p_im[y][x].c[d] = ByteClamp((int)(imd + 0.5));
             }

@@ -23,7 +23,7 @@ void ImthresholdFilterPMeanUsage()
 {
     printf("Usage : imthreshold-fpmean [options] <input_file> <output_file>\n\n");
     printf("options:\n");
-    printf("          -r N.N  radius (double, optional, default = 3.0)\n");
+    printf("          -r N.N  radius (float, optional, default = 3.0)\n");
     printf("          -m str  mode {similar, nlm, bilateral, wbselect, radial, simple, minmax} (str, optional, default = similar)\n");
     printf("          -n      neared (bool, optional, default = false)\n");
     printf("          -h      this help\n");
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 
     int opt;
-    double radius = 3.0;
+    float radius = 3.0;
     int fmode = 0;
     bool fhelp = false;
     bool fneared = false;

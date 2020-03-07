@@ -31,7 +31,7 @@ void IMTFilterSeparate (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned 
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterSeparateBGFGL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, double doverlay)
+void IMTFilterSeparateBGFGL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMTpixel** bg_im, unsigned height, unsigned width, unsigned bgs, unsigned fgs, unsigned level, float doverlay)
 {
     unsigned widthbg = (width + bgs - 1) / bgs;
     unsigned heightbg = (height + bgs - 1) / bgs;
@@ -41,7 +41,7 @@ void IMTFilterSeparateBGFGL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMT
     BYTE fgbase, bgbase, mim;
     unsigned cnth, cntw;
     IMTpixel pim, fgim, bgim;
-    double fgdist, bgdist, kover, fgpart, bgpart;
+    float fgdist, bgdist, kover, fgpart, bgpart;
     unsigned maskbl, maskover, bgsover, fgsum[3], bgsum[3], fgnum, bgnum;
 
     IMTpixel** fgt_im = IMTalloc(heightbg, widthbg);
@@ -141,8 +141,8 @@ void IMTFilterSeparateBGFGL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMT
                     }
                 }
                 pim = IMTmeanIc(p_im, y0, x0, y1, x1);
-                fgdist = (double)IMTdist(pim, fgim);
-                bgdist = (double)IMTdist(pim, bgim);
+                fgdist = (float)IMTdist(pim, fgim);
+                bgdist = (float)IMTdist(pim, bgim);
                 fgpart = 1.0;
                 bgpart = 1.0;
                 if ((fgdist + bgdist)> 0)
@@ -179,8 +179,8 @@ void IMTFilterSeparateBGFGL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMT
             pim = p_im[y][x];
             fgim = fg_im[yf][xf];
             bgim = bg_im[yb][xb];
-            fgdist = (double)IMTdist(pim, fgim);
-            bgdist = (double)IMTdist(pim, bgim);
+            fgdist = (float)IMTdist(pim, fgim);
+            bgdist = (float)IMTdist(pim, bgim);
             m_im[y][x] = (BYTE)((fgdist < bgdist) ? 0 : 255);
         }
     }
@@ -190,11 +190,11 @@ void IMTFilterSeparateBGFGL (IMTpixel** p_im, BYTE** m_im, IMTpixel** fg_im, IMT
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterSeparateDelta (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned height, unsigned width, int value, double kdelta)
+void IMTFilterSeparateDelta (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned height, unsigned width, int value, float kdelta)
 {
     unsigned y, x, d;
     int im, img, imd;
-    double simd, simp;
+    float simd, simp;
     IMTpixel gim;
     BYTE val;
 

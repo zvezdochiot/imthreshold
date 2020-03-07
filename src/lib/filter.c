@@ -25,7 +25,7 @@ IMTinfo IMTFilterInfo (IMTpixel** p_im, unsigned height, unsigned width, unsigne
 
     p_info.min = IMTmin(p_im, height, width);
     p_info.max = IMTmax(p_im, height, width);
-    p_info.mid = (double)(p_info.max + p_info.min) / 510;
+    p_info.mid = (float)(p_info.max + p_info.min) / 510;
     p_info.mean = IMTmean(p_im, height, width);
     p_info.std = IMTdev(p_im, p_info.mean, height, width);
     p_info.wb = IMTwb(p_im, p_info.mean, height, width);
@@ -37,16 +37,16 @@ IMTinfo IMTFilterInfo (IMTpixel** p_im, unsigned height, unsigned width, unsigne
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterAdSmooth (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius)
+void IMTFilterAdSmooth (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, float radius)
 {
     int y, x, yf, xf, yfp, xfp, yfn, xfn, i, j, d;
     int h = height;
     int w = width;
 
-    double f = -1.0 / 8.0 / radius / radius;
-    double p_gx, p_gy, p_weight;
-    double p_weightTotal[3] = {0};
-    double p_total[3] = {0};
+    float f = -1.0 / 8.0 / radius / radius;
+    float p_gx, p_gy, p_weight;
+    float p_weightTotal[3] = {0};
+    float p_total[3] = {0};
 
     for (y = 0; y < h; y++)
     {
@@ -84,12 +84,12 @@ void IMTFilterAdSmooth (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
                     if (xfn >= w) {xfn = w - 1;}
                     for (d = 0; d < 3; d++)
                     {
-                        p_gx = (double)p_im[yf][xfn].c[d];
-                        p_gx -= (double)p_im[yf][xfp].c[d];
-                        p_gy = (double)p_im[yfn][xf].c[d];
-                        p_gy -= (double)p_im[yfp][xf].c[d];
+                        p_gx = (float)p_im[yf][xfn].c[d];
+                        p_gx -= (float)p_im[yf][xfp].c[d];
+                        p_gy = (float)p_im[yfn][xf].c[d];
+                        p_gy -= (float)p_im[yfp][xf].c[d];
                         p_weight = exp((p_gx * p_gx + p_gy * p_gy) * f);
-                        p_total[d] += (p_weight * (double)p_im[yf][xf].c[d]);
+                        p_total[d] += (p_weight * (float)p_im[yf][xf].c[d]);
                         p_weightTotal[d] += p_weight;
                     }
                 }
@@ -114,7 +114,7 @@ void IMTFilterAdSmooth (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
 void IMTFilterInpaint (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned height, unsigned width, unsigned value)
 {
     unsigned y, x, d, nb, nn, ns, yp, xp, yn, xn, yf, xf;
-    double cs[3];
+    float cs[3];
     BYTE csb[3];
 
     BYTE** mg_im = BWalloc(height, width);
@@ -246,12 +246,12 @@ void IMTFilterInpaint (IMTpixel** p_im, BYTE** m_im, IMTpixel** g_im, unsigned h
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterPeron (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, double noise)
+void IMTFilterPeron (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, float radius, float noise)
 {
     unsigned y, x, d, r, yp, yn, xp, xn, i, j, level;
     int im, imf;
-    double dr = 0.2;
-    double fim, fimf;
+    float dr = 0.2;
+    float fim, fimf;
 
     if (radius < 0) {radius = -radius;}
     if (noise < 0) {noise = -noise;}
@@ -277,11 +277,11 @@ void IMTFilterPeron (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
                         {
                             imf = (int)p_im[i][j].c[d];
                             imf -= im;
-                            fimf = (double)imf;
+                            fimf = (float)imf;
                             fimf /= noise;
                             fimf *= fimf;
                             fimf++;
-                            fimf = (double)imf / fimf;
+                            fimf = (float)imf / fimf;
                             fim += fimf;
                         }
                     }
@@ -299,29 +299,29 @@ void IMTFilterPeron (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterRetinex (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double sigma)
+int IMTFilterRetinex (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, float sigma)
 {
     unsigned d, k, ksz;
     int y, x, yf, xf, i, j;
     int im, imf, kimi, kszm;
-    double dbi, dbj, gauss, imx, imxf, imxg, imxn, kim, kims;
-    double imxs, imxns, div2 = (sqrt(5.0)+1.0)/2.0-1.0, sumgk = 0.0;
+    float dbi, dbj, gauss, imx, imxf, imxg, imxn, kim, kims;
+    float imxs, imxns, div2 = (sqrt(5.0)+1.0)/2.0-1.0, sumgk = 0.0;
     int h = (int)height, w = (int)width;
-    double wh = (double)(w * h);
-    double* gaussKernel;
+    float wh = (float)(w * h);
+    float* gaussKernel;
 
     radius = (radius < 0) ? -radius : radius;
     ksz = (unsigned)(2 * radius + 1);
     kszm = (int)(ksz * ksz);
-    gaussKernel = (double*)malloc(kszm * sizeof(double));
+    gaussKernel = (float*)malloc(kszm * sizeof(float));
 
     k = 0;
     for (i = -radius; i <= radius; i++)
     {
-        dbi = (double)i;
+        dbi = (float)i;
         for (j = -radius; j <= radius; j++)
         {
-            dbj = (double)j;
+            dbj = (float)j;
             gauss = exp(-(dbi * dbi + dbj * dbj + 1.0) / (sigma * sigma + 1.0));
             gaussKernel[k] = gauss;
             sumgk += gauss;
@@ -340,7 +340,7 @@ int IMTFilterRetinex (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
         for ( x = 0; x < w; x++ )
         {
             im = (int)p_im[y][x].s;
-            imx = ((double)im / 3.0 + 1.0) / 256.0;
+            imx = ((float)im / 3.0 + 1.0) / 256.0;
             imxs += imx;
             imxg = 0;
             k = 0;
@@ -355,7 +355,7 @@ int IMTFilterRetinex (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
                     if (xf < 0) {xf = -xf;}
                     if (xf >= w) {xf = 2 * (w - 1) - xf;}
                     imf = (int)p_im[yf][xf].s;
-                    imxf = ((double)imf / 3.0 + 1.0) / 256.0;
+                    imxf = ((float)imf / 3.0 + 1.0) / 256.0;
                     imxg += imxf * gaussKernel[k];
                     k++;
                 }
@@ -369,7 +369,7 @@ int IMTFilterRetinex (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
             for (d = 0; d < 3; d++)
             {
                 im = (int)p_im[y][x].c[d];
-                imx = (double)im;
+                imx = (float)im;
                 im = (int)(imx * kim + 0.5);
                 d_im[y][x].c[d] = ByteClamp(im);
             }
@@ -387,10 +387,10 @@ int IMTFilterRetinex (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTSelGaussInitMatrix (double radius, double *mat, int num)
+void IMTSelGaussInitMatrix (float radius, float *mat, int num)
 {
     int dx;
-    double sd, c1, c2;
+    float sd, c1, c2;
 
     // This formula isn't really correct, but it'll do
     sd = radius / 3.329042969;
@@ -403,12 +403,12 @@ void IMTSelGaussInitMatrix (double radius, double *mat, int num)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterSelGauss (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, int maxdelta)
+void IMTFilterSelGauss (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, float radius, int maxdelta)
 {
-    double *mat;
+    float *mat;
     unsigned short *imat;
     int numrad, i, j, x, y, xk, yk, h, w;
-    double fsum, fscale;
+    float fsum, fscale;
     unsigned d;
     unsigned p_sum[3] = {0};
     unsigned p_fact[3] = {0};
@@ -417,7 +417,7 @@ void IMTFilterSelGauss (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
     int di, tmp;
 
     numrad = (int)radius;
-    mat = (double*) calloc (numrad + 1, sizeof(double));
+    mat = (float*) calloc (numrad + 1, sizeof(float));
 
     IMTSelGaussInitMatrix(radius, mat, numrad);
 
@@ -470,7 +470,7 @@ void IMTFilterSelGauss (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
                                 if ( tmp >= -maxdelta && tmp <= maxdelta)
                                 {
                                     di = imat[numrad + i];
-                                    p_rowsum[d] += di * (double)p_im[yk][xk].c[d];
+                                    p_rowsum[d] += di * (float)p_im[yk][xk].c[d];
                                     p_rowfact[d] += di;
                                 }
                             }
@@ -544,13 +544,13 @@ void IMTFilterSobel (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterUnRipple (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double thres)
+void IMTFilterUnRipple (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, float thres)
 {
 
     unsigned d;
     int y, x, yf, xf, i, j;
     int im, imf, imd;
-    double imx, p, sp, spi, si, di;
+    float imx, p, sp, spi, si, di;
     int h = (int)height;
     int w = (int)width;
 
@@ -579,14 +579,14 @@ void IMTFilterUnRipple (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
                         imf = (int)p_im[yf][xf].c[d];
                         imd = im - imf;
                         if (imd < 0) {imd = -imd;}
-                        imx = (double)(imd);
+                        imx = (float)(imd);
                         p = 1.0 / (imx + 1.0);
                         sp += p;
-                        imx = (double)imf * p;
+                        imx = (float)imf * p;
                         spi += imx;
                     }
                 }
-                imx = (double)(im);
+                imx = (float)(im);
                 if (sp == 0.0)
                 {
                     si = imx;
@@ -610,10 +610,10 @@ void IMTFilterUnRipple (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsig
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTGaussLineMatrix (double *cmatrix, double radius)
+void IMTGaussLineMatrix (float *cmatrix, float radius)
 {
-    double std_dev;
-    double sum, t, tt;
+    float std_dev;
+    float sum, t, tt;
     int i, j, iradius;
 
     if (radius < 0) {radius = -radius;}
@@ -626,7 +626,7 @@ void IMTGaussLineMatrix (double *cmatrix, double radius)
             sum = 0;
             for (j = 0; j <= 50; j++)
             {
-                t = (double)i;
+                t = (float)i;
                 t -= 0.5;
                 t += 0.02 * j;
                 tt = -(t * t) / (2 * std_dev * std_dev);
@@ -650,14 +650,14 @@ void IMTGaussLineMatrix (double *cmatrix, double radius)
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius)
+void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, float radius)
 {
     int iradius;
     int y, x, yf, xf, i;
     unsigned d;
-    double imc;
-    double sc[3];
-    double* gaussmat;
+    float imc;
+    float sc[3];
+    float* gaussmat;
     IMTpixel** t_im;
     int h = (int)height;
     int w = (int)width;
@@ -665,7 +665,7 @@ void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsi
     if (radius < 0) {radius = -radius;}
     iradius = (int)(2.0 * radius + 0.5) + 1;
 
-    gaussmat = (double*)malloc((iradius) * sizeof(double));
+    gaussmat = (float*)malloc((iradius) * sizeof(float));
     t_im = IMTalloc(height, width);
 
     IMTGaussLineMatrix (gaussmat, radius);
@@ -678,7 +678,7 @@ void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsi
             {
                 for (d = 0; d < 3; d++)
                 {
-                    imc = (double)p_im[y][x].c[d];
+                    imc = (float)p_im[y][x].c[d];
                     sc[d] = imc * gaussmat[0];
                 }
                 for (i = 1; i < iradius; i++)
@@ -687,14 +687,14 @@ void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsi
                     if (yf < 0) {yf = 0;}
                     for (d = 0; d < 3; d++)
                     {
-                        imc = (double)p_im[yf][x].c[d];
+                        imc = (float)p_im[yf][x].c[d];
                         sc[d] += imc * gaussmat[i];
                     }
                     yf = y + i;
                     if (yf >= h) {yf = h - 1;}
                     for (d = 0; d < 3; d++)
                     {
-                        imc = (double)p_im[yf][x].c[d];
+                        imc = (float)p_im[yf][x].c[d];
                         sc[d] += imc * gaussmat[i];
                     }
                 }
@@ -710,7 +710,7 @@ void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsi
             {
                 for (d = 0; d < 3; d++)
                 {
-                    imc = (double)t_im[y][x].c[d];
+                    imc = (float)t_im[y][x].c[d];
                     sc[d] = imc * gaussmat[0];
                 }
                 for (i = 1; i < iradius; i++)
@@ -719,14 +719,14 @@ void IMTFilterGaussBlur (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsi
                     if (xf < 0) {xf = 0;}
                     for (d = 0; d < 3; d++)
                     {
-                        imc = (double)t_im[y][xf].c[d];
+                        imc = (float)t_im[y][xf].c[d];
                         sc[d] += imc * gaussmat[i];
                     }
                     xf = x + i;
                     if (xf >= w) {xf = w - 1;}
                     for (d = 0; d < 3; d++)
                     {
-                        imc = (double)t_im[y][xf].c[d];
+                        imc = (float)t_im[y][xf].c[d];
                         sc[d] += imc * gaussmat[i];
                     }
                 }
@@ -757,7 +757,7 @@ int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
 {
     unsigned y, x, d, k, l, m, n, im, imt, ims, imds, imdm;
     int imd;
-    double T, Tw, Tb, Tn, iw, ib, cn[3];
+    float T, Tw, Tb, Tn, iw, ib, cn[3];
     unsigned thres[3];
     unsigned cd[256];
 
@@ -788,7 +788,7 @@ int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
                     for (d = 0; d < 3; d++)
                     {
                         im = (unsigned)p_im[y][x].c[d];
-                        cn[d] += (double)im;
+                        cn[d] += (float)im;
                     }
                 }
             }
@@ -822,12 +822,12 @@ int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
                         imt = (unsigned)d_im[y][x].s;
                         if (imt == m)
                         {
-                            if ((double)im > T)
+                            if ((float)im > T)
                             {
-                                Tw += (double)im;
+                                Tw += (float)im;
                                 iw++;
                             } else {
-                                Tb += (double)im;
+                                Tb += (float)im;
                                 ib++;
                             }
                         }
@@ -879,7 +879,7 @@ int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
                     for (d = 0; d < 3; d++)
                     {
                         im = (unsigned)p_im[y][x].c[d];
-                        cn[d] += (double)im;
+                        cn[d] += (float)im;
                     }
                 }
             }
@@ -889,7 +889,7 @@ int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
         {
             for (d = 0; d < 3; d++)
             {
-                cn[d] /= (double)n;
+                cn[d] /= (float)n;
             }
             for (y = 0; y < height; y++ )
             {
@@ -927,7 +927,7 @@ int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
                     for (d = 0; d < 3; d++)
                     {
                         im = (unsigned)p_im[y][x].c[d];
-                        cn[d] += (double)im;
+                        cn[d] += (float)im;
                     }
                 }
             }
@@ -937,7 +937,7 @@ int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
         {
             for (d = 0; d < 3; d++)
             {
-                cn[d] /= (double)n;
+                cn[d] /= (float)n;
             }
             for (y = 0; y < height; y++ )
             {
@@ -987,7 +987,7 @@ int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
                     for (d = 0; d < 3; d++)
                     {
                         im = (unsigned)p_im[y][x].c[d];
-                        cn[d] += (double)im;
+                        cn[d] += (float)im;
                     }
                 }
             }
@@ -996,7 +996,7 @@ int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
         {
             for (d = 0; d < 3; d++)
             {
-                cn[d] /= (double)n;
+                cn[d] /= (float)n;
             }
         }
         for (y = 0; y < height; y++ )
@@ -1026,12 +1026,12 @@ int IMTFilterClusterBiModC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterClusterBWC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned radius)
+float IMTFilterClusterBWC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned radius)
 {
     unsigned y, x, d, y1, x1, y2, x2, i, j, distw, distb, gpart, bc, bs;
     IMTpixel pim, gim, bim, fim, cimw, cimb, cim;
     unsigned bwcsw[3], bwcsb[3], bwcnw, bwcnb, cw, cb;
-    double kwb = 0.5;
+    float kwb = 0.5;
 
     if (radius == 0)
     {
@@ -1142,8 +1142,8 @@ double IMTFilterClusterBWC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
                 d_im[y][x] = cim;
             }
         }
-        kwb = (double)cw;
-        kwb /= (double)(cw + cb);
+        kwb = (float)cw;
+        kwb /= (float)(cw + cb);
     }
 
     return kwb;
@@ -1151,11 +1151,11 @@ double IMTFilterClusterBWC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, u
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, double amount, int threshold)
+void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, float amount, int threshold)
 {
     unsigned y, x, d;
     int t, diff, adiff;
-    double value;
+    float value;
 
     for (y = 0; y < height; y++)
     {
@@ -1168,7 +1168,7 @@ void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, un
                 adiff = (diff < 0) ? -diff : diff;
                 diff = (2 * adiff < threshold) ? 0 : diff;
 
-                value = (double)p_im[y][x].c[d];
+                value = (float)p_im[y][x].c[d];
                 value += (amount * diff);
                 d_im[y][x].c[d] = ByteClamp((int)(value + 0.5));
             }

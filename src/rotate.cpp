@@ -25,7 +25,7 @@ void ImthresholdFilterRotateUsage()
 {
     printf("Usage : imthreshold-rotate [options] <input_file> <output_file>\n\n");
     printf("options:\n");
-    printf("          -a N.N  angle (double, optional, default = 0.0)\n");
+    printf("          -a N.N  angle (float, optional, default = 0.0)\n");
     printf("          -h      this help\n");
 }
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 
     int opt;
-    double alpha = 0.0;
+    float alpha = 0.0;
     bool fhelp = false;
     while ((opt = getopt(argc, argv, ":a:h")) != -1)
     {

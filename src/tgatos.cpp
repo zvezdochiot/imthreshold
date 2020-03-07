@@ -25,14 +25,14 @@ void ImthresholdFilterTGatosUsage()
     printf("options:\n");
     printf("          -m str  mode {niblack, sauvola, chistian, bimod, dalg, default = niblack)\n");
     printf("          -r N    radius (int, optional, default = 7)\n");
-    printf("          -s N.N  sensitivity (double, optional, default = -0.2)\n");
+    printf("          -s N.N  sensitivity (float, optional, default = -0.2)\n");
     printf("          -f N    dynamic range (int, optional, default = 128)\n");
     printf("          -l N    lower bound (int, optional, default = 20)\n");
     printf("          -u N    upper bound (int, optional, default = 150)\n");
-    printf("          -d N.N  delta (double, optional, default = 0.0)\n");
-    printf("          -q N.N  q (double, optional, default = 0.6)\n");
-    printf("          -1 N.N  p1 (double, optional, default = 0.5)\n");
-    printf("          -2 N.N  p2 (double, optional, default = 0.8)\n");
+    printf("          -d N.N  delta (float, optional, default = 0.0)\n");
+    printf("          -q N.N  q (float, optional, default = 0.6)\n");
+    printf("          -1 N.N  p1 (float, optional, default = 0.5)\n");
+    printf("          -2 N.N  p2 (float, optional, default = 0.8)\n");
     printf("          -h      this help\n");
 }
 
@@ -48,14 +48,14 @@ int main(int argc, char *argv[])
     int opt;
     int fmode = 0;
     int radius = 7;
-    double sensitivity = -0.2;
+    float sensitivity = -0.2;
     int dynamic_range = 128;
     int lower_bound = 20;
     int upper_bound = 150;
-    double delta = 0.0;
-    double q = 0.6;
-    double p1 = 0.5;
-    double p2 = 0.8;
+    float delta = 0.0;
+    float q = 0.6;
+    float p1 = 0.5;
+    float p2 = 0.8;
     bool fhelp = false;
     int threshold = 0;
     while ((opt = getopt(argc, argv, ":m:r:s:f:l:u:d:q:1:2:h")) != -1)

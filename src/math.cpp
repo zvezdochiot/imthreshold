@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
                         }
                         else if (strcmp(namefilter, "sbmetric") == 0)
                         {
-                            double emetric;
+                            float emetric;
                             printf("Filter= %s\n", namefilter);
 
                             emetric = IMTFilterMathSharpenBadMetric (p_im, m_im, height, width);

@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
             FIBITMAP* dst_dib;
             unsigned width = FreeImage_GetWidth(dib);
             unsigned height = FreeImage_GetHeight(dib);
-            double fskew;
+            float fskew;
 
             IMTpixel** p_im = IMTalloc(height, width);
             IMTpixel** s_im = IMTalloc(height, width);

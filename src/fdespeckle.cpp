@@ -33,7 +33,7 @@ void ImthresholdFilterDespeckleUsage()
     printf("                    'simple' (default)\n");
     printf("          -a N    aperture size (int, optional, default = 3)\n");
     printf("          -i      invert (bool, optional, default = false)\n");
-    printf("          -k N.N  lambda neuro learnen (double, optional, default = 0.1)\n");
+    printf("          -k N.N  lambda neuro learnen (float, optional, default = 0.1)\n");
     printf("          -l N    learnen number (int, optional, default = 1)\n");
     printf("          -h      this help\n");
 }
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     int opt;
     unsigned Ksize = 3;
-    double lambda = 0.1;
+    float lambda = 0.1;
     unsigned lnum = 1;
     bool finv = false;
     bool fhelp = false;
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
                 if (finv) {IMTFilterInvertBW(p_im, height, width);}
                 if (strcmp(namefilter, "hist") == 0) {
                     printf("Method= %s\n", namefilter);
-                    double kdp = 0.0;
+                    float kdp = 0.0;
                     kdp = IMTFilterDphist(p_im, height, width, Ksize);
                     printf("Despeckle= %f\n", kdp);
                 } else if (strcmp(namefilter, "invert") == 0) {

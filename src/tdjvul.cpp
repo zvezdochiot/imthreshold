@@ -23,14 +23,14 @@ void ImthresholdIMTFilterDjVuLUsage()
 {
     printf("Usage : imthreshold-tdjvul [options] <input_file> <output_file>(BW) [fg_file] [bg_file] [fg_mask] [bg_mask]\n\n");
     printf("options:\n");
-    printf("          -a N.N  anisotropic (double, optional, default = 0.0)\n");
+    printf("          -a N.N  anisotropic (float, optional, default = 0.0)\n");
     printf("          -c N    clean fg, bg blur radius (int, optional, default = 0)\n");
     printf("          -d N    despeckle aperture size (int, optional, default = 0)\n");
     printf("          -b N    base block size (int, optional, default = 3)\n");
     printf("          -f N    foreground divide (int, optional, default = 2)\n");
     printf("          -i      invert station (bool, optional, default = false)\n");
     printf("          -l N    level (int, optional, default = 0 [auto])\n");
-    printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
+    printf("          -o N.N  overlay (float, optional, default = 0.5)\n");
     printf("          -p N    posterize fg (int, optional, default = 0)\n");
     printf("          -w N    w/b mode (int, optional, default = 0 [auto], >0-white, <0-black)\n");
     printf("          -h      this help\n");
@@ -46,8 +46,8 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 
     int opt;
-    double anisotropic = 0.0;
-    double doverlay = 0.5;
+    float anisotropic = 0.0;
+    float doverlay = 0.5;
     int bgs = 3;
     int fgs = 2;
     int level = 0;

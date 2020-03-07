@@ -36,14 +36,14 @@ void ImthresholdFilterTSauvolaUsage()
     printf("                    'niblack'\n");
     printf("                    'sauvola' (default)\n");
     printf("          -c N    contrast limit (int, optional, default = 128)\n");
-    printf("          -d N.N  delta (double, optional, default = -5.0)\n");
+    printf("          -d N.N  delta (float, optional, default = -5.0)\n");
     printf("          -i      invert (bool, optional, default = false)\n");
     printf("          -g N    dynamic range (int, optional, default = 128)\n");
     printf("          -l N    lower bound (int, optional, default = 0)\n");
     printf("          -n      norm (bool, optional, default = false)\n");
-    printf("          -o N.N  overlay (double, optional, default = 0.5)\n");
+    printf("          -o N.N  overlay (float, optional, default = 0.5)\n");
     printf("          -r N    radius (int, optional, default = 7)\n");
-    printf("          -s N.N  sensitivity (double, optional, default = 0.2)\n");
+    printf("          -s N.N  sensitivity (float, optional, default = 0.2)\n");
     printf("          -u N    upper bound (int, optional, default = 255)\n");
     printf("          -z      mirror of mean (bool, optional, default = false)\n");
     printf("          -h      this help\n");
@@ -60,13 +60,13 @@ int main(int argc, char *argv[])
 
     int opt;
     int radius = 7;
-    double doverlay = 0.5;
-    double sensitivity = 0.2;
+    float doverlay = 0.5;
+    float sensitivity = 0.2;
     unsigned contrast_limit = 128;
     int dynamic_range = 128;
     int lower_bound = 0;
     int upper_bound = 255;
-    double delta = -5.0;
+    float delta = -5.0;
     bool finv = false;
     bool fnorm = false;
     bool fmirror = false;

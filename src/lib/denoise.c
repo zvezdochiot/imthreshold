@@ -10,12 +10,12 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width, double kdenoise)
+float IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width, float kdenoise)
 {
     unsigned y, x, d, n;
-    double korigin = 1.0;
+    float korigin = 1.0;
     int val, valp, vald, valdp, vali, histn[512];
-    double ka, kn, valdn, valda, valds, valdso, valdsd, valdsn, histdelta[512];
+    float ka, kn, valdn, valda, valds, valdso, valdsd, valdsn, histdelta[512];
     IMTpixel** t_im = IMTalloc(height, width);
 
     for (d = 0; d < 512; d++)
@@ -36,7 +36,7 @@ double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width,
                 val = (int)p_im[y][x].c[d];
                 vald = val - valp;
                 valp = val;
-                valds = (double)vald;
+                valds = (float)vald;
                 valds /= 256.0;
                 valds *= valds;
                 valdso += valds;
@@ -44,9 +44,9 @@ double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width,
                 valdp = vald;
                 histn[vali]++;
                 ka = 1.0;
-                ka /= (double)(histn[vali]);
+                ka /= (float)(histn[vali]);
                 kn = 1.0 - ka;
-                valda = (double)vald;
+                valda = (float)vald;
                 valda *= ka;
                 valdn = histdelta[vali];
                 valdn *= kn;
@@ -67,7 +67,7 @@ double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width,
                 val = (int)p_im[y][x].c[d];
                 vald = val - valp;
                 valp = val;
-                valds = (double)vald;
+                valds = (float)vald;
                 valds /= 256.0;
                 valds *= valds;
                 valdso += valds;
@@ -75,9 +75,9 @@ double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width,
                 valdp = vald;
                 histn[vali]++;
                 ka = 1.0;
-                ka /= (double)(histn[vali]);
+                ka /= (float)(histn[vali]);
                 kn = 1.0 - ka;
-                valda = (double)vald;
+                valda = (float)vald;
                 valda *= ka;
                 valdn = histdelta[vali];
                 valdn *= kn;
@@ -87,7 +87,7 @@ double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width,
             }
         }
     }
-    valdso /= (double)n;
+    valdso /= (float)n;
     valdso *= 2.0;
     valdso = sqrt(valdso);
 
@@ -140,7 +140,7 @@ double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width,
                 }
             }
         }
-        valdsd /= (double)n;
+        valdsd /= (float)n;
         valdsd *= 2.0;
         valdsd = sqrt(valdsd);
 
@@ -167,7 +167,7 @@ double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width,
                 valdp = vald;
                 valdn = histdelta[vali];
                 valdn *= kdenoise;
-                valda = (double)vald;
+                valda = (float)vald;
                 valda *= korigin;
                 valda += valdn;
                 valdp = (int)valda;
@@ -193,7 +193,7 @@ double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width,
                 valdp = vald;
                 valdn = histdelta[vali];
                 valdn *= kdenoise;
-                valda = (double)vald;
+                valda = (float)vald;
                 valda *= korigin;
                 valda += valdn;
                 valdp = (int)valda;
@@ -213,17 +213,17 @@ double IMTFilterDeNoiseDiff1p (IMTpixel** p_im, unsigned height, unsigned width,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterDeNoiseDiff (IMTpixel** p_im, unsigned height, unsigned width, unsigned radius, double kdenoise)
+float IMTFilterDeNoiseDiff (IMTpixel** p_im, unsigned height, unsigned width, unsigned radius, float kdenoise)
 {
     unsigned i;
-    double kdenoises = 0.0;
+    float kdenoises = 0.0;
     if (radius > 0)
     {
         for (i = 0; i < radius; i++)
         {
             kdenoises += IMTFilterDeNoiseDiff1p (p_im, height, width, kdenoise);
         }
-        kdenoises /= (double)radius;
+        kdenoises /= (float)radius;
     }
 
     return kdenoises;
@@ -231,11 +231,11 @@ double IMTFilterDeNoiseDiff (IMTpixel** p_im, unsigned height, unsigned width, u
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width)
+float IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width)
 {
     unsigned d;
     int y, x, yp2, xp2, yp1, xp1, yn1, xn1, yn2, xn2;
-    double imx = 0.0, ims = 0.0, imd = 0.0;
+    float imx = 0.0, ims = 0.0, imd = 0.0;
     int h = (int)height;
     int w = (int)width;
     IMTpixel** t_im = IMTalloc(height, width);
@@ -264,119 +264,119 @@ double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width)
             for (d = 0; d < 3; d++)
             {
                 ims = 0;
-                imx = (double)p_im[yp2][xp2].c[d];
+                imx = (float)p_im[yp2][xp2].c[d];
                 imx *= imx;
                 ims -= imx;
-                imx = (double)p_im[yp2][xp1].c[d];
-                imx *= imx;
-                ims -= imx;
-                ims -= imx;
-                imx = (double)p_im[yp2][x].c[d];
+                imx = (float)p_im[yp2][xp1].c[d];
                 imx *= imx;
                 ims -= imx;
                 ims -= imx;
-                ims -= imx;
-                imx = (double)p_im[yp2][xn1].c[d];
-                imx *= imx;
-                ims -= imx;
-                ims -= imx;
-                imx = (double)p_im[yp2][xn2].c[d];
-                imx *= imx;
-                ims -= imx;
-                imx = (double)p_im[yp1][xp2].c[d];
-                imx *= imx;
-                ims -= imx;
-                ims -= imx;
-                imx = (double)p_im[yp1][xp1].c[d];
-                imx *= imx;
-                ims += imx;
-                ims += imx;
-                ims += imx;
-                ims += imx;
-                ims += imx;
-                imx = (double)p_im[yp1][x].c[d];
-                imx *= imx;
-                ims += imx;
-                ims += imx;
-                ims += imx;
-                imx = (double)p_im[yp1][xn1].c[d];
-                imx *= imx;
-                ims += imx;
-                ims += imx;
-                ims += imx;
-                imx = (double)p_im[yp1][xn2].c[d];
-                imx *= imx;
-                ims -= imx;
-                ims -= imx;
-                imx = (double)p_im[y][xp2].c[d];
+                imx = (float)p_im[yp2][x].c[d];
                 imx *= imx;
                 ims -= imx;
                 ims -= imx;
                 ims -= imx;
-                imx = (double)p_im[y][xp1].c[d];
-                imx *= imx;
-                ims += imx;
-                ims += imx;
-                ims += imx;
-                imx = (double)p_im[y][xn1].c[d];
-                imx *= imx;
-                ims += imx;
-                ims += imx;
-                ims += imx;
-                imx = (double)p_im[y][xn2].c[d];
+                imx = (float)p_im[yp2][xn1].c[d];
                 imx *= imx;
                 ims -= imx;
                 ims -= imx;
+                imx = (float)p_im[yp2][xn2].c[d];
+                imx *= imx;
                 ims -= imx;
-                imx = (double)p_im[yn1][xp2].c[d];
+                imx = (float)p_im[yp1][xp2].c[d];
                 imx *= imx;
                 ims -= imx;
                 ims -= imx;
-                imx = (double)p_im[yn1][xp1].c[d];
+                imx = (float)p_im[yp1][xp1].c[d];
                 imx *= imx;
                 ims += imx;
                 ims += imx;
                 ims += imx;
                 ims += imx;
                 ims += imx;
-                imx = (double)p_im[yn1][x].c[d];
+                imx = (float)p_im[yp1][x].c[d];
                 imx *= imx;
                 ims += imx;
                 ims += imx;
                 ims += imx;
-                imx = (double)p_im[yn1][xn1].c[d];
+                imx = (float)p_im[yp1][xn1].c[d];
+                imx *= imx;
+                ims += imx;
+                ims += imx;
+                ims += imx;
+                imx = (float)p_im[yp1][xn2].c[d];
+                imx *= imx;
+                ims -= imx;
+                ims -= imx;
+                imx = (float)p_im[y][xp2].c[d];
+                imx *= imx;
+                ims -= imx;
+                ims -= imx;
+                ims -= imx;
+                imx = (float)p_im[y][xp1].c[d];
+                imx *= imx;
+                ims += imx;
+                ims += imx;
+                ims += imx;
+                imx = (float)p_im[y][xn1].c[d];
+                imx *= imx;
+                ims += imx;
+                ims += imx;
+                ims += imx;
+                imx = (float)p_im[y][xn2].c[d];
+                imx *= imx;
+                ims -= imx;
+                ims -= imx;
+                ims -= imx;
+                imx = (float)p_im[yn1][xp2].c[d];
+                imx *= imx;
+                ims -= imx;
+                ims -= imx;
+                imx = (float)p_im[yn1][xp1].c[d];
                 imx *= imx;
                 ims += imx;
                 ims += imx;
                 ims += imx;
                 ims += imx;
                 ims += imx;
-                imx = (double)p_im[yn1][xn2].c[d];
+                imx = (float)p_im[yn1][x].c[d];
+                imx *= imx;
+                ims += imx;
+                ims += imx;
+                ims += imx;
+                imx = (float)p_im[yn1][xn1].c[d];
+                imx *= imx;
+                ims += imx;
+                ims += imx;
+                ims += imx;
+                ims += imx;
+                ims += imx;
+                imx = (float)p_im[yn1][xn2].c[d];
                 imx *= imx;
                 ims -= imx;
                 ims -= imx;
-                imx = (double)p_im[yn2][xp2].c[d];
+                imx = (float)p_im[yn2][xp2].c[d];
                 imx *= imx;
                 ims -= imx;
-                imx = (double)p_im[yn2][xp1].c[d];
-                imx *= imx;
-                ims -= imx;
-                ims -= imx;
-                imx = (double)p_im[yn2][x].c[d];
+                imx = (float)p_im[yn2][xp1].c[d];
                 imx *= imx;
                 ims -= imx;
                 ims -= imx;
-                ims -= imx;
-                imx = (double)p_im[yn2][xn1].c[d];
+                imx = (float)p_im[yn2][x].c[d];
                 imx *= imx;
                 ims -= imx;
                 ims -= imx;
-                imx = (double)p_im[yn2][xn2].c[d];
+                ims -= imx;
+                imx = (float)p_im[yn2][xn1].c[d];
+                imx *= imx;
+                ims -= imx;
+                ims -= imx;
+                imx = (float)p_im[yn2][xn2].c[d];
                 imx *= imx;
                 ims -= imx;
                 ims /= 81.0;
                 imd += (ims < 0.0) ? -ims : ims;
-                imx = (double)p_im[y][x].c[d];
+                imx = (float)p_im[y][x].c[d];
                 imx *= imx;
                 ims += imx;
                 ims = (ims < 0.0) ? -ims : ims;
@@ -405,11 +405,11 @@ double IMTFilterRS (IMTpixel** p_im, unsigned height, unsigned width)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterShrink (IMTpixel** p_im, unsigned height, unsigned width, int thres)
+float IMTFilterShrink (IMTpixel** p_im, unsigned height, unsigned width, int thres)
 {
     unsigned d, y, x, n;
     int imdy, imdx, imd;
-    double ims;
+    float ims;
     IMTpixel im, imy, imx, imf;
 
     if (thres < 0)
@@ -510,19 +510,19 @@ double IMTFilterShrink (IMTpixel** p_im, unsigned height, unsigned width, int th
             p_im[y - 1][x - 1] = im;
         }
     }
-    ims = (double)(n) / height / width * 2.0 / 3.0;
+    ims = (float)(n) / height / width * 2.0 / 3.0;
 
     return ims;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterNoiseVariance (IMTpixel** p_im, unsigned height, unsigned width, int radius)
+float IMTFilterNoiseVariance (IMTpixel** p_im, unsigned height, unsigned width, int radius)
 {
     unsigned x, y, n;
     unsigned r, y1, x1, y2, x2, yf, xf;
-    double imx, imm, imv, imn;
-    double noise = 0.0;
+    float imx, imm, imv, imn;
+    float noise = 0.0;
 
     r = (unsigned)((radius < 0) ? -radius : radius);
 
@@ -541,7 +541,7 @@ double IMTFilterNoiseVariance (IMTpixel** p_im, unsigned height, unsigned width,
             {
                 for (xf = x1; xf < x2; xf++)
                 {
-                    imx = (double)p_im[yf][xf].s;
+                    imx = (float)p_im[yf][xf].s;
                     imm += imx;
                     n++;
                 }
@@ -554,7 +554,7 @@ double IMTFilterNoiseVariance (IMTpixel** p_im, unsigned height, unsigned width,
             {
                 for (xf = x1; xf < x2; xf++)
                 {
-                    imx = (double)p_im[yf][xf].s;
+                    imx = (float)p_im[yf][xf].s;
                     imv += (imx * imx);
                     n++;
                 }
@@ -576,11 +576,11 @@ double IMTFilterNoiseVariance (IMTpixel** p_im, unsigned height, unsigned width,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, double noise)
+void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, float noise)
 {
     unsigned x, y, d, n;
     unsigned r, y1, x1, y2, x2, yf, xf;
-    double imx, imm, imv, kvar, var, multiplier;
+    float imx, imm, imv, kvar, var, multiplier;
     int ivar;
 
     noise *= noise;
@@ -600,7 +600,7 @@ void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
             {
                 for (xf = x1; xf < x2; xf++)
                 {
-                    imx = (double)p_im[yf][xf].s;
+                    imx = (float)p_im[yf][xf].s;
                     imm += imx;
                     n++;
                 }
@@ -613,7 +613,7 @@ void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
             {
                 for (xf = x1; xf < x2; xf++)
                 {
-                    imx = (double)p_im[yf][xf].s;
+                    imx = (float)p_im[yf][xf].s;
                     imv += (imx * imx);
                     n++;
                 }
@@ -621,7 +621,7 @@ void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
             if (n > 0) {imv /= n;}
             imv /= 9;
             imv -= (imm * imm);
-            imx = (double)p_im[y][x].s;
+            imx = (float)p_im[y][x].s;
             imx /= 3;
             if (imv < noise)
             {
@@ -632,7 +632,7 @@ void IMTFilterWiener (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
             }
             for (d = 0; d < 3; d++)
             {
-                var = (double)p_im[y][x].c[d];
+                var = (float)p_im[y][x].c[d];
                 var += kvar;
                 ivar = (int)(var + 0.5);
                 d_im[y][x].c[d] = ByteClamp(ivar);

@@ -25,7 +25,7 @@ void ImthresholdFilterAutoInvUsage()
 {
     printf("Usage : imthreshold-fautoinv [options] <input_file> <output_file>\n\n");
     printf("options:\n");
-    printf("          -p N.N  pass (double, optional, default = 0.125)\n");
+    printf("          -p N.N  pass (float, optional, default = 0.125)\n");
     printf("          -h      this help\n");
 }
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 
     int opt;
-    double pass = 0.125;
+    float pass = 0.125;
     bool fhelp = false;
     while ((opt = getopt(argc, argv, ":p:h")) != -1)
     {
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
             unsigned height = FreeImage_GetHeight(dib);
             unsigned bpp = FreeImage_GetBPP(dib);
             IMTinfo p_info;
-            double imwbf = 0;
+            float imwbf = 0;
 
             IMTpixel** p_im = IMTalloc(height, width);
 

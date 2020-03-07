@@ -10,12 +10,12 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-IMTpixel IMTmeanPtIcM (IMTpixel** IMTim, IMTpixel IMTimm, double* linfilt, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx)
+IMTpixel IMTmeanPtIcM (IMTpixel** IMTim, IMTpixel IMTimm, float* linfilt, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx)
 {
     unsigned y, x, d, i, j;
     int im, imf, imd, imm, ims = 0;
     IMTpixel immt;
-    double imx, spi, sp, p;
+    float imx, spi, sp, p;
 
     for (d = 0; d < 3; d++)
     {
@@ -35,7 +35,7 @@ IMTpixel IMTmeanPtIcM (IMTpixel** IMTim, IMTpixel IMTimm, double* linfilt, bool*
                     if (imd < 0) {imd = -imd;}
                     p = linfilt[imd];
                     sp += p;
-                    imx = (double)imf;
+                    imx = (float)imf;
                     spi += (p * imx);
                 }
                 j++;
@@ -63,7 +63,7 @@ IMTpixel IMTmeanIcM (IMTpixel** IMTim, bool** fmask, unsigned y0, unsigned x0, u
 {
     unsigned y, x, d, i, j;
     unsigned imm, n = 0;
-    double ims;
+    float ims;
     IMTpixel immean;
 
     ims = 0;
@@ -112,11 +112,11 @@ IMTpixel IMTmeanIcM (IMTpixel** IMTim, bool** fmask, unsigned y0, unsigned x0, u
 
 ////////////////////////////////////////////////////////////////////////////////
 
-double IMTwbIcM (IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx)
+float IMTwbIcM (IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx)
 {
     unsigned y, x, im, immean, i, j;
     long imn = 0, imwn = 0;
-    double imwb;
+    float imwb;
 
     immean = IMTimm.s;
     i = dy;
@@ -135,7 +135,7 @@ double IMTwbIcM (IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigned y0, u
         }
         i++;
     }
-    imwb = (double)imwn;
+    imwb = (float)imwn;
     imwb /= imn;
 
     return imwb;
@@ -200,13 +200,13 @@ IMTpixel IMTmeanThIcM (IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigned
 
 ////////////////////////////////////////////////////////////////////////////////
 
-IMTpixel IMTmeanRadIcM (IMTpixel** IMTim, IMTpixel IMTimm, double** sqfilt, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx)
+IMTpixel IMTmeanRadIcM (IMTpixel** IMTim, IMTpixel IMTimm, float** sqfilt, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx)
 {
     unsigned y, x, d, i, j;
     int im, imf, ims = 0;
     BYTE imm;
     IMTpixel immt;
-    double spi, sp, p;
+    float spi, sp, p;
 
     for (d = 0; d < 3; d++)
     {
@@ -224,7 +224,7 @@ IMTpixel IMTmeanRadIcM (IMTpixel** IMTim, IMTpixel IMTimm, double** sqfilt, bool
                     imf = (int)IMTim[y][x].c[d];
                     p = sqfilt[i][j];
                     sp += p;
-                    spi += (p * (double)(imf));
+                    spi += (p * (float)(imf));
                 }
                 j++;
             }
@@ -247,13 +247,13 @@ IMTpixel IMTmeanRadIcM (IMTpixel** IMTim, IMTpixel IMTimm, double** sqfilt, bool
 
 ////////////////////////////////////////////////////////////////////////////////
 
-IMTpixel IMTmeanBlIcM (IMTpixel** IMTim, IMTpixel IMTimm, double** sqfilt, double* linfilt, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx)
+IMTpixel IMTmeanBlIcM (IMTpixel** IMTim, IMTpixel IMTimm, float** sqfilt, float* linfilt, bool** fmask, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned dy, unsigned dx)
 {
     unsigned y, x, d, i, j;
     int im, imf, imd, ims = 0;
     BYTE imm;
     IMTpixel immt;
-    double imx, spi, sp, p;
+    float imx, spi, sp, p;
 
     for (d = 0; d < 3; d++)
     {
@@ -274,7 +274,7 @@ IMTpixel IMTmeanBlIcM (IMTpixel** IMTim, IMTpixel IMTimm, double** sqfilt, doubl
                     p = linfilt[imd];
                     p *= sqfilt[i][j];
                     sp += p;
-                    imx = (double)imf;
+                    imx = (float)imf;
                     spi += (p * imx);
                 }
                 j++;
@@ -366,15 +366,15 @@ IMTpixel IMTmeanMaxIcM (IMTpixel** IMTim, IMTpixel IMTimm, bool** fmask, unsigne
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterPMean (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double radius, int fmode, bool fneared)
+void IMTFilterPMean (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, float radius, int fmode, bool fneared)
 {
     unsigned y, x, dx, dy, y0, x0, y1, x1, uradius, rn;
     int i, j, iradius;
-    double l, radius2, p, sp, wb;
+    float l, radius2, p, sp, wb;
     IMTpixel IMTmeanS;
-    double deltac[256] = {0};
+    float deltac[256] = {0};
     bool** fmask;
-    double** fradial;
+    float** fradial;
 
     uradius = (unsigned)((radius < 0) ? -radius : radius);
     iradius = (int)uradius;
@@ -383,15 +383,15 @@ void IMTFilterPMean (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
 
     fmask = (bool**)malloc(rn * sizeof(bool*));
     for (y = 0; y < rn; y++) {fmask[y] = (bool*)malloc(rn * sizeof(bool));}
-    fradial = (double**)malloc(rn * sizeof(double*));
-    for (y = 0; y < rn; y++) {fradial[y] = (double*)malloc(rn * sizeof(double));}
+    fradial = (float**)malloc(rn * sizeof(float*));
+    for (y = 0; y < rn; y++) {fradial[y] = (float*)malloc(rn * sizeof(float));}
 
     for (i = -iradius; i <= iradius; i++)
     {
         for (j = -iradius; j <= iradius; j++)
         {
             fmask[i + iradius][j + iradius] = false;
-            l = (double)(i * i + j * j);
+            l = (float)(i * i + j * j);
             if (l < radius2)
             {
                 fmask[i + iradius][j + iradius] = true;
@@ -409,7 +409,7 @@ void IMTFilterPMean (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
     case 0:
         for (i = 0; i < 256; i++)
         {
-            deltac[i] = 1.0 / ((double)(i + 1));
+            deltac[i] = 1.0 / ((float)(i + 1));
         }
         for (y = 0; y < height; y++)
         {
@@ -487,7 +487,7 @@ void IMTFilterPMean (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
     case 4:
         for (i = 0; i < 256; i++)
         {
-            p = (double)i;
+            p = (float)i;
             p *= p;
             sp = 2.0 * radius + 1.0;
             sp *= sp;
@@ -512,7 +512,7 @@ void IMTFilterPMean (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned
     case 5:
         for (i = 0; i < 256; i++)
         {
-            p = (double)i;
+            p = (float)i;
             p *= p;
             sp = 2.0 * radius + 1.0;
             sp *= sp;

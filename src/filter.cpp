@@ -27,6 +27,7 @@ void ImthresholdFilterUsage()
     printf("options:\n");
     printf("          -f str  name filter:\n");
     printf("                    'adsmooth'\n");
+    printf("                    'bimod'\n");
     printf("                    'blur'\n");
     printf("                    'bwc'\n");
     printf("                    'cluster'\n");
@@ -56,17 +57,17 @@ void ImthresholdFilterUsage()
     printf("                    'unsharp'\n");
     printf("                    'whitefill'\n");
     printf("                    'wiener'\n");
-    printf("          -a N.N  amount (double, optional, default = 0.5)\n");
-    printf("          -c N.N  contour factor (double, optional, default = -1[auto])\n");
+    printf("          -a N.N  amount (float, optional, default = 0.5)\n");
+    printf("          -c N.N  contour factor (float, optional, default = -1[auto])\n");
     printf("          -d N    max delta (int, optional, default = 50)\n");
     printf("          -i N    num divide (int, optional, default = 1)\n");
     printf("          -k N    K num (int, optional, default = 2)\n");
     printf("          -l N    lower bound (int, optional, default = 32)\n");
-    printf("          -n N.N  noise size (double, optional, default = -1.0[auto])\n");
+    printf("          -n N.N  noise size (float, optional, default = -1.0[auto])\n");
     printf("          -p N    posterize divide factor (int, optional, default = 16)\n");
-    printf("          -r N.N  radius (double, optional, default = 3.0)\n");
-    printf("          -s N.N  sigma (double, optional, default = 4.0)\n");
-    printf("          -t N.N  threshold (double, optional, default = 0.0)\n");
+    printf("          -r N.N  radius (float, optional, default = 3.0)\n");
+    printf("          -s N.N  sigma (float, optional, default = 4.0)\n");
+    printf("          -t N.N  threshold (float, optional, default = 0.0)\n");
     printf("          -u N    upper bound (int, optional, default = 223)\n");
     printf("          -h      this help\n");
 }
@@ -81,17 +82,17 @@ int main(int argc, char *argv[])
 #endif // FREEIMAGE_LIB
 
     int opt;
-    double amount = 0.5;
-    double contour = -1.0;
+    float amount = 0.5;
+    float contour = -1.0;
     int maxdelta = 50;
     unsigned ndiv = 1;
     int knum = 2;
     int lower_bound = 32;
-    double noise = -1.0;
+    float noise = -1.0;
     int posterdiv = 16;
-    double radius = 5.0;
-    double sigma = 4.0;
-    double threshold = 0.0;
+    float radius = 5.0;
+    float sigma = 4.0;
+    float threshold = 0.0;
     int upper_bound = 223;
     bool fhelp = false;
     char *namefilter;
@@ -192,10 +193,28 @@ int main(int argc, char *argv[])
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);
                 IMTfree(d_im, height);
-            } else if (strcmp(namefilter, "bwc") == 0) {
+            } else if (strcmp(namefilter, "bimod") == 0) {
+                printf("Filter= %s\n", namefilter);
+                int thres = 0;
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
+
+                if (posterdiv < 2) {posterdiv = 2;}
+                printf("Count= %d\n", posterdiv);
+                
+                ImthresholdGetData(dib, p_im);
+                FreeImage_Unload(dib);
+                thres = IMTFilterTBiModP(p_im, d_im, height, width, posterdiv);
+                thres /= 3;
+                printf("Threshold= %d\n", thres);
+                IMTfree(p_im, height);
+                dst_dib = FreeImage_Allocate(width, height, 24);
+                ImthresholdSetData(dst_dib, d_im);
+                IMTfree(d_im, height);
+             } else if (strcmp(namefilter, "bwc") == 0) {
                 printf("Filter= %s\n", namefilter);
                 unsigned radiusint;
-                double kwb = 0.5;
+                float kwb = 0.5;
                 IMTpixel** p_im = IMTalloc(height, width);
                 IMTpixel** d_im = IMTalloc(height, width);
 
@@ -246,7 +265,7 @@ int main(int argc, char *argv[])
                 IMTfree(d_im, height);
             } else if (strcmp(namefilter, "denoise") == 0) {
                 printf("Filter= %s\n", namefilter);
-                double kdenoises;
+                float kdenoises;
                 unsigned radiusint;
                 IMTpixel** p_im = IMTalloc(height, width);
 
@@ -356,7 +375,7 @@ int main(int argc, char *argv[])
                 IMTfree(d_im, height);
             } else if (strcmp(namefilter, "levelsigma") == 0) {
                 printf("Filter= %s\n", namefilter);
-                double ks = 0;
+                float ks = 0;
                 IMTpixel** p_im = IMTalloc(height, width);
                 IMTpixel** d_im = IMTalloc(height, width);
 
@@ -478,7 +497,7 @@ int main(int argc, char *argv[])
                 IMTfree(d_im, height);
             } else if (strcmp(namefilter, "posterize") == 0) {
                 printf("Filter= %s\n", namefilter);
-                double imsh = 0;
+                float imsh = 0;
                 IMTpixel** p_im = IMTalloc(height, width);
 
                 if (posterdiv < 1) {posterdiv = 1;}
@@ -492,7 +511,7 @@ int main(int argc, char *argv[])
                 IMTfree(p_im, height);
             } else if (strcmp(namefilter, "quant") == 0) {
                 printf("Filter= %s\n", namefilter);
-                double imsh = 0;
+                float imsh = 0;
                 IMTpixel** p_im = IMTalloc(height, width);
 
                 if (posterdiv < 1) {posterdiv = 1;}
@@ -526,7 +545,7 @@ int main(int argc, char *argv[])
                 IMTfree(d_im, height);
             } else if (strcmp(namefilter, "rs") == 0) {
                 printf("Filter= %s\n", namefilter);
-                double imd = 0;
+                float imd = 0;
                 IMTpixel** p_im = IMTalloc(height, width);
 
                 ImthresholdGetData(dib, p_im);
@@ -555,7 +574,7 @@ int main(int argc, char *argv[])
                 IMTfree(d_im, height);
             } else if (strcmp(namefilter, "shrink") == 0) {
                 printf("Filter= %s\n", namefilter);
-                double imsh = 0;
+                float imsh = 0;
                 IMTpixel** p_im = IMTalloc(height, width);
 
                 if (threshold <= 0) {threshold = 4;}

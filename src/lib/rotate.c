@@ -10,22 +10,22 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-double IMTFilterFindSkew (IMTpixel** p_im, unsigned height, unsigned width)
+float IMTFilterFindSkew (IMTpixel** p_im, unsigned height, unsigned width)
 {
     unsigned y, x;
     int t, u;
     int h = (int)height;
-    double kmin, kmax, kt, dkp, dkt, yt, smin, smax, st, s;
-    double fskew;
+    float kmin, kmax, kt, dkp, dkt, yt, smin, smax, st, s;
+    float fskew;
 
-    dkp = 1.0 / sqrt((double)(height * height + width * width));
+    dkp = 1.0 / sqrt((float)(height * height + width * width));
     kmin = -0.5;
     kt = kmin;
     st = 0;
     for (y = 0; y < height; y++)
     {
         s = 0;
-        yt = (double)y;
+        yt = (float)y;
         for (x = 0; x < width; x++)
         {
             t = (int)yt;
@@ -46,7 +46,7 @@ double IMTFilterFindSkew (IMTpixel** p_im, unsigned height, unsigned width)
     for (y = 0; y < height; y++)
     {
         s = 0;
-        yt = (double)y;
+        yt = (float)y;
         for (x = 0; x < width; x++)
         {
             t = (int)yt;
@@ -69,7 +69,7 @@ double IMTFilterFindSkew (IMTpixel** p_im, unsigned height, unsigned width)
         for (y = 0; y < height; y++)
         {
             s = 0;
-            yt = (double)y;
+            yt = (float)y;
             for (x = 0; x < width; x++)
             {
                 t = (int)yt;
@@ -100,26 +100,26 @@ double IMTFilterFindSkew (IMTpixel** p_im, unsigned height, unsigned width)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterRotate (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, double angle)
+void IMTFilterRotate (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, float angle)
 {
     unsigned y, x;
-    double yt, xt, yr, xr, ktc, kts;
+    float yt, xt, yr, xr, ktc, kts;
 
     angle /= RADGRD;
     kts = sin(angle);
     ktc = cos(angle);
     for (y = 0; y < height; y++)
     {
-        yt = (double)y;
+        yt = (float)y;
         yt -= height / 2;
         for (x = 0; x < width; x++)
         {
-            xt = (double)x;
-            xt -= (double)width / 2;
+            xt = (float)x;
+            xt -= (float)width / 2;
             yr = ktc * yt - kts * xt;
-            yr += (double)height / 2;
+            yr += (float)height / 2;
             xr = ktc * xt + kts * yt;
-            xr += (double)width / 2;
+            xr += (float)width / 2;
             if (yr >= 0.0 && yr < height && xr >= 0.0 && xr < width)
             {
                 d_im[y][x] = IMTinterpolation(p_im, height, width, yr, xr);
