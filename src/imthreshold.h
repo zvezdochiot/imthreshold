@@ -233,6 +233,8 @@ int IMTFilterTRotValue (IMTpixel**, unsigned, unsigned, bool);
 int IMTFilterTRot (IMTpixel**, BYTE**, unsigned, unsigned, bool);
 int IMTFilterTSauvolaLayer (IMTpixel**, WORD**, unsigned, unsigned, int, float, int, int, int, float);
 int IMTFilterTSauvola (IMTpixel**, BYTE**, unsigned, unsigned, int, float, int, int, int, float);
+int IMTFilterTSizeLayer (IMTpixel**, WORD**, unsigned, unsigned, int, int, int, int);
+int IMTFilterTSize (IMTpixel**, BYTE**, unsigned, unsigned, int, int, int, int);
 int IMTFilterTText (IMTpixel**, BYTE**, unsigned, unsigned, unsigned, unsigned);
 int IMTFilterTTsaiValue (IMTpixel**, unsigned, unsigned, int);
 int IMTFilterTTsai (IMTpixel**, BYTE**, unsigned, unsigned, int);

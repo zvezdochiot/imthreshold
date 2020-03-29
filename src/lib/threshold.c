@@ -551,7 +551,7 @@ int IMTFilterTBiModP (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
     unsigned i, y, x, im;
     float part;
     BYTE val;
-    
+
     count = (count < 2) ? 2 : count;
     for (y = 0; y < height; y++ )
     {
@@ -2885,6 +2885,74 @@ int IMTFilterTSauvola (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned w
     return threshold;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTSizeLayer (IMTpixel** p_im, WORD** t_im, unsigned height, unsigned width, int radius, int lower_bound, int upper_bound, int delta)
+{
+    unsigned x, y, sn = 0;
+    float st = 0;
+    int im, t, threshold = 0;
+    WORD val;
+
+    if (radius < 0) {radius = -radius;}
+
+    IMTpixel** s_im = IMTalloc(radius, radius);
+    IMTpixel** b_im = IMTalloc(height, width);
+
+    if (upper_bound < lower_bound)
+    {
+        upper_bound += lower_bound;
+        lower_bound = upper_bound - lower_bound;
+        upper_bound -= lower_bound;
+    }
+    lower_bound *= 3;
+    upper_bound *= 3;
+
+    IMTFilterSGsample(p_im, s_im, height, width, radius, radius);
+    IMTFilterSBicub(s_im, b_im, radius, radius, height, width);
+    IMTfree(s_im, radius);
+
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            im = (int)p_im[y][x].s;
+            if (im < lower_bound)
+            {
+                t = lower_bound;
+            } else if (im > upper_bound)
+            {
+                t = upper_bound;
+            } else {
+                t = (int)b_im[y][x].s + delta;
+            }
+            val = Byte3Clamp((int)t);
+            st += t;
+            sn++;
+            t_im[y][x] = val;
+        }
+    }
+    sn = (sn < 0.0 || sn > 0.0) ? sn : 1.0;
+    threshold = (int)(st / sn + 0.5);
+    IMTfree(b_im, height);
+
+    return threshold;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int IMTFilterTSize (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int radius, int lower_bound, int upper_bound, int delta)
+{
+    int threshold = 0;
+    WORD** t_im = TLalloc(height, width);
+
+    threshold = IMTFilterTSizeLayer (p_im, t_im, height, width, radius, lower_bound, upper_bound, delta);
+    threshold = IMTFilterThresholdLayer (p_im, t_im, d_im, height, width);
+
+    TLfree(t_im, height);
+
+    return threshold;
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 int IMTFilterTText (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, unsigned contour, unsigned radius)

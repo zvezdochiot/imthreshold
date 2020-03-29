@@ -31,6 +31,7 @@ void ImthresholdFilterTSauvolaUsage()
     printf("                    'mscale'\n");
     printf("                    'niblack'\n");
     printf("                    'sauvola' (default)\n");
+    printf("                    'size'\n");
     printf("          -c N    contrast limit (int, optional, default = 128)\n");
     printf("          -d N.N  delta (float, optional, default = -5.0)\n");
     printf("          -g N    dynamic range (int, optional, default = 128)\n");
@@ -193,6 +194,12 @@ int main(int argc, char *argv[])
                 printf("Upper= %d\n", upper_bound);
                 printf("Delta= %f\n", delta);
                 threshold = IMTFilterTNiblackLayer(p_im, t_im, height, width, radius, sensitivity, lower_bound, upper_bound, delta);
+            } else if (strcmp(namefilter, "size") == 0) {
+                printf("Filter= %s\n", namefilter);
+                printf("Lower= %d\n", lower_bound);
+                printf("Upper= %d\n", upper_bound);
+                printf("Delta= %f\n", delta);
+                threshold = IMTFilterTSizeLayer(p_im, t_im, height, width, radius, lower_bound, upper_bound, (int)(delta + 0.5));
             } else {
                 printf("Filter= sauvola\n");
                 printf("Sensitivity= %f\n", sensitivity);
