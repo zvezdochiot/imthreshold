@@ -86,6 +86,8 @@ BYTE IMTmin (IMTpixel**, unsigned, unsigned);
 float IMTmean (IMTpixel**, unsigned, unsigned);
 float IMTdev (IMTpixel**, float, unsigned, unsigned);
 float IMTwb (IMTpixel**, float, unsigned, unsigned);
+void IMTHist (IMTpixel**, unsigned*, unsigned, unsigned, unsigned, unsigned, unsigned);
+int IMTHistBiMod (unsigned*, unsigned, float);
 void IMTFilterSMirror (IMTpixel**, unsigned, unsigned);
 int IMTFilterSNorm (IMTpixel**, unsigned, unsigned);
 void IMTFilterSCompare (IMTpixel**, IMTpixel**, unsigned, unsigned);
