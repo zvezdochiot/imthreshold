@@ -570,6 +570,50 @@ float IMTFilterLevelSigma (IMTpixel** p_im, IMTpixel** d_im, unsigned height, un
 
 ///////////////////////////////////////////////////////////////////////////////
 
+float IMTFilterLevelSize (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, int delta)
+{
+    unsigned x, y, d, sn = 0;
+    IMTpixel mim, im;
+    float st = 0;
+    int c0, c;
+    BYTE val;
+
+    if (radius < 0) {radius = -radius;}
+
+    IMTpixel** s_im = IMTalloc(radius, radius);
+    IMTFilterSGsample(p_im, s_im, height, width, radius, radius);
+    IMTFilterSBicub(s_im, d_im, radius, radius, height, width);
+    IMTfree(s_im, radius);
+    mim = IMTmeanIc (p_im, 0, 0, height, width);
+
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            for (d = 0; d < 3; d++)
+            {
+                c0 = (int)p_im[y][x].c[d];
+                c = c0;
+                c += (int)mim.c[d];
+                c -= (int)d_im[y][x].c[d];
+                c += delta;
+                val = ByteClamp(c);
+                c = (int)val;
+                c = (c > c0) ? (c - c0) : (c0 -c);
+                st += c;
+                sn++;
+                d_im[y][x].c[d] = val;
+            }
+        }
+    }
+    sn = (sn < 0.0 || sn > 0.0) ? sn : 1.0;
+    st /= sn;
+
+    return st;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 float IMTFilterMirror (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width)
 {
     unsigned y, x, d;

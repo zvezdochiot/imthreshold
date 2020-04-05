@@ -39,6 +39,7 @@ void ImthresholdFilterUsage()
     printf("                    'kmeans'\n");
     printf("                    'levelmean'\n");
     printf("                    'levelsigma'\n");
+    printf("                    'levelsize'\n");
     printf("                    'mirror'\n");
     printf("                    'monocolor'\n");
     printf("                    'mclose'\n");
@@ -201,7 +202,7 @@ int main(int argc, char *argv[])
 
                 if (posterdiv < 2) {posterdiv = 2;}
                 printf("Count= %d\n", posterdiv);
-                
+
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
                 thres = IMTFilterTBiModP(p_im, d_im, height, width, posterdiv);
@@ -386,6 +387,27 @@ int main(int argc, char *argv[])
                 FreeImage_Unload(dib);
                 ks = IMTFilterLevelSigma(p_im, d_im, height, width, amount, threshold);
                 printf("Multy= %f\n", ks);
+                IMTfree(p_im, height);
+                dst_dib = FreeImage_Allocate(width, height, 24);
+                ImthresholdSetData(dst_dib, d_im);
+                IMTfree(d_im, height);
+            } else if (strcmp(namefilter, "levelsize") == 0) {
+                printf("Filter= %s\n", namefilter);
+                int radiusint;
+                float ks = 0;
+                IMTpixel** p_im = IMTalloc(height, width);
+                IMTpixel** d_im = IMTalloc(height, width);
+
+                if (radius < 0) {radius = -radius;}
+                radiusint = int(radius + 0.5);
+                if (radiusint == 0) {radiusint = 1;}
+                printf("Radius= %d\n", radiusint);
+                printf("Delta= %f\n", threshold);
+
+                ImthresholdGetData(dib, p_im);
+                FreeImage_Unload(dib);
+                ks = IMTFilterLevelSize(p_im, d_im, height, width, radiusint, threshold);
+                printf("Distance= %f\n", ks);
                 IMTfree(p_im, height);
                 dst_dib = FreeImage_Allocate(width, height, 24);
                 ImthresholdSetData(dst_dib, d_im);

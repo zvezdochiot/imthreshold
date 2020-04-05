@@ -124,6 +124,7 @@ IMTpixel IMTFilterGreyWorld (IMTpixel**, unsigned, unsigned);
 IMTpixel IMTFilterGreyNorm (IMTpixel**, unsigned, unsigned);
 float IMTFilterLevelMean (IMTpixel**, IMTpixel**, unsigned, unsigned, int, float, float, int, int);
 float IMTFilterLevelSigma (IMTpixel**, IMTpixel**, unsigned, unsigned, float, float);
+float IMTFilterLevelSize (IMTpixel**, IMTpixel**, unsigned, unsigned, int, int);
 void IMTFilterMathAverage (IMTpixel**, IMTpixel**, unsigned, unsigned, int);
 void IMTFilterMathDistance (IMTpixel**, IMTpixel**, unsigned, unsigned, int);
 void IMTFilterMathDivide (IMTpixel**, IMTpixel**, unsigned, unsigned, int);
