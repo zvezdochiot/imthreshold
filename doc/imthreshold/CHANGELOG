@@ -1,5 +1,6 @@
 0.20200413
 
+    Threshold: fix histogram overflow
     Threshold: color correct mod
 
 0.20200405

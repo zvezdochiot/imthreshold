@@ -10,7 +10,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTHist (IMTpixel** p_im, unsigned* histogram, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned histsize)
+void IMTHist (IMTpixel** p_im, unsigned long long* histogram, unsigned y0, unsigned x0, unsigned y1, unsigned x1, unsigned histsize)
 {
     unsigned y, x, im;
 
@@ -30,44 +30,46 @@ void IMTHist (IMTpixel** p_im, unsigned* histogram, unsigned y0, unsigned x0, un
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTHistBiMod (unsigned* histogram, unsigned histsize, float part)
+int IMTHistBiMod (unsigned long long* histogram, unsigned histsize, float part)
 {
-    unsigned k, im, Tt;
-    float T, Tw, Tb, Tn, iw, ib;
+    unsigned k;
+    unsigned long long im, iw, ib, Tw, Tb;
+    float T, Tn;
     int threshold = 0;
 
     part = (part < 0.0 || part > 1.0) ? 0.5 : part;
-    T = part * (float)histsize;
-    Tn = 0.0;
+    T = part * histsize;
+    Tn = 0.0f;
     while ( T != Tn )
     {
         Tn = T;
         Tb = Tw = ib = iw = 0;
-        Tt = (unsigned)(T + 0.5);
-        for (k = 0; k < Tt; k++)
+        for (k = 0; k < T; k++)
         {
             im = histogram[k];
             Tb += (im * k);
             ib += im;
         }
-        for (k = Tt; k < histsize; k++)
+        for (k = T; k < histsize; k++)
         {
             im = histogram[k];
             Tw += (im * k);
             iw += im;
         }
+        Tb /= ib;
+        Tw /= iw;
         if (iw == 0 && ib == 0)
         {
-            T = Tn;
+            T = (float)Tn;
         } else if (iw == 0) {
-            T = Tb/ib;
+            T = (float)Tb;
         } else if (ib == 0) {
-            T = Tw/iw;
+            T = (float)Tw;
         } else {
-            T = ((Tw/iw) * part + (Tb/ib) * (1.0 - part));
+            T = (part * Tw + (1.0f - part) * Tb);
         }
     }
-    threshold = (int)(T + 0.5);
+    threshold = (unsigned)(T + 0.5f);
 
     return threshold;
 }
@@ -412,22 +414,22 @@ int IMTFilterTBHTValue (IMTpixel** p_im, unsigned height, unsigned width)
     int Tmax = 768;
     float wl = 0, wr = 0, wd = 0;
     int i, il = 0, ir = Tmax  - 1, threshold = Tmax / 2;
-    unsigned histogram[768] = {0};
+    unsigned long long histogram[768] = {0};
 
     IMTHist (p_im, histogram, 0, 0, height, width, Tmax);
     wd = 0;
     for (i = 0; i < Tmax; i++)
     {
-        wd += histogram[i];
+        wd += (float)histogram[i];
     }
     wd *= 2.0;
     for (i = il; i <= threshold; i++)
     {
-        wl += histogram[i];
+        wl += (float)histogram[i];
     }
     for (i = threshold + 1; i <= ir; i++)
     {
-        wr += histogram[i];
+        wr += (float)histogram[i];
     }
 
     while (il <= ir)
@@ -435,15 +437,15 @@ int IMTFilterTBHTValue (IMTpixel** p_im, unsigned height, unsigned width)
         threshold = (il + ir) / 2;
         if (wr > wl)
         {
-            wr -= histogram[ir];
+            wr -= (float)histogram[ir];
             ir--;
-            wr += histogram[threshold] * 0.5;
-            wl -= histogram[threshold] * 0.5;
+            wr += (float)histogram[threshold] * 0.5;
+            wl -= (float)histogram[threshold] * 0.5;
         } else {
-            wl -= histogram[il];
+            wl -= (float)histogram[il];
             il++;
-            wl += histogram[threshold + 1] * 0.5;
-            wr -= histogram[threshold + 1] * 0.5;
+            wl += (float)histogram[threshold + 1] * 0.5;
+            wr -= (float)histogram[threshold + 1] * 0.5;
         }
     }
 
@@ -525,7 +527,7 @@ int IMTFilterTBiModValueIcP (IMTpixel** p_im, unsigned y0, unsigned x0, unsigned
 {
     unsigned Tmax = 768;
     int threshold = 0;
-    unsigned histogram[768] = {0};
+    unsigned long long histogram[768] = {0};
 
     IMTHist (p_im, histogram, y0, x0, y1, x1, Tmax);
     threshold = IMTHistBiMod (histogram, Tmax, part);
@@ -575,7 +577,7 @@ int IMTFilterTBiModP (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
     unsigned i, y, x, im;
     float part;
     BYTE val;
-    unsigned histogram[768] = {0};
+    unsigned long long histogram[768] = {0};
 
     IMTHist (p_im, histogram, 0, 0, height, width, Tmax);
 
@@ -692,7 +694,7 @@ int IMTFilterTBiModC (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wi
     BYTE val;
     int threshold = 0;
     unsigned Tmax = 256;
-    unsigned histogram[256] = {0};
+    unsigned long long histogram[256] = {0};
 
     for (d = 0; d < 3; d++)
     {
@@ -906,7 +908,7 @@ int IMTFilterTDalg (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned widt
     unsigned wwidth = region_size;
     float sw, swt, dsr, dst;
     BYTE val;
-    unsigned histogram[768] = {0};
+    unsigned long long histogram[768] = {0};
     int threshold = 0;
 
     if (upper_bound < lower_bound)
@@ -1575,7 +1577,7 @@ int IMTFilterTEntValue (IMTpixel** p_im, unsigned height, unsigned width)
     float hB[768] = {0};
     float hW[768] = {0};
     int threshold = 0;
-    unsigned histogram[768] = {0};
+    unsigned long long histogram[768] = {0};
 
     IMTHist (p_im, histogram, 0, 0, height, width, cn);
     sum = (float)(width * height);
@@ -1654,7 +1656,7 @@ int IMTFilterTEqBrightValue (IMTpixel** p_im, unsigned height, unsigned width)
 {
     unsigned i, tt, Tmax = 768;
     float imx, sw, swt, dsr = 0, dst = 0;
-    unsigned histogram[768] = {0};
+    unsigned long long histogram[768] = {0};
     int threshold = 0;
 
     IMTHist (p_im, histogram, 0, 0, height, width, Tmax);
@@ -2090,7 +2092,7 @@ int IMTFilterTJanniValue (IMTpixel** p_im, unsigned height, unsigned width)
     unsigned i, cn = 768;
     unsigned gmin=0, gmax=256, gmid;
     float spg = 0;
-    unsigned histogram[768] = {0};
+    unsigned long long histogram[768] = {0};
     int threshold = 0;
 
     IMTHist (p_im, histogram, 0, 0, height, width, cn);
@@ -2565,7 +2567,7 @@ int IMTFilterTOtsuValue (IMTpixel** p_im, unsigned height, unsigned width)
     float w = 0.0f, u = 0.0f, uT = 0.0f, hn;
     float work1, work2, work3 = 0.0f;
     int threshold = 0;
-    unsigned histogram[768] = {0};
+    unsigned long long histogram[768] = {0};
 
     IMTHist (p_im, histogram, 0, 0, height, width, Tmax);
     hn = (float)(width * height);
@@ -2651,7 +2653,7 @@ int IMTFilterTRotValue (IMTpixel** p_im, unsigned height, unsigned width, bool w
     unsigned i, il, ir;
     float wl, wr, kw, wi;
     int threshold = 0;
-    unsigned histogram[768] = {0};
+    unsigned long long histogram[768] = {0};
 
     IMTHist (p_im, histogram, 0, 0, height, width, Tmax);
     if (weight)
@@ -2955,7 +2957,7 @@ int IMTFilterTTsaiValue (IMTpixel** p_im, unsigned height, unsigned width, int s
 
     unsigned cn = 768, i;
     int threshold = 0;
-    unsigned histogram[768] = {0};
+    unsigned long long histogram[768] = {0};
     float criterion = 0.0;
     float m1, m2, m3;
     float cd, c0, c1, z0, z1, pd, p0, p1;
