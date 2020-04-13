@@ -64,6 +64,30 @@ IMTpixel IMTcalcS (IMTpixel im)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+IMTpixel IMTccorS (IMTpixel im)
+{
+    unsigned d;
+    int ims, imm, t, ts;
+
+    im = IMTcalcS(im);
+
+    ims = im.s;
+    imm = ims / 3;
+    ts = 0;
+    for (d = 0; d < 3; d++)
+    {
+        t = (int)im.c[d];
+        t = (t > imm) ? (t - imm) : (imm - t);
+        ts += t;
+    }
+    ims += ts;
+    im.s = Byte3Clamp(ims);
+
+    return im;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 IMTpixel** IMTalloc (unsigned height, unsigned width)
 {
     IMTpixel** im;

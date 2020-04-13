@@ -10,12 +10,30 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void IMTFilterSCCor (IMTpixel** p_im, unsigned height, unsigned width)
+{
+    unsigned y, x;
+    IMTpixel pim;
+
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            pim = p_im[y][x];
+            pim = IMTccorS(pim);
+            p_im[y][x] = pim;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void IMTFilterSMirror (IMTpixel** p_im, unsigned height, unsigned width)
 {
     unsigned y, x, tim, pim;
 
     tim = (unsigned)IMTFilterTBiModValueIc (p_im, 0, 0, height, width);
-    for (y = 0; y < height; y++ )
+    for (y = 0; y < height; y++)
     {
         for (x = 0; x < width; x++)
         {
@@ -38,7 +56,7 @@ int IMTFilterSNorm (IMTpixel** p_im, unsigned height, unsigned width)
 
     immin = 765;
     immax = 0;
-    for (y = 0; y < height; y++ )
+    for (y = 0; y < height; y++)
     {
         for (x = 0; x < width; x++)
         {
@@ -50,7 +68,7 @@ int IMTFilterSNorm (IMTpixel** p_im, unsigned height, unsigned width)
     imd = immax - immin;
     if (imd > 0)
     {
-        for (y = 0; y < height; y++ )
+        for (y = 0; y < height; y++)
         {
             for (x = 0; x < width; x++)
             {
@@ -76,7 +94,7 @@ void IMTFilterSCompare (IMTpixel** p_im, IMTpixel** b_im, unsigned height, unsig
     int ims, imsd;
     IMTpixel pim, bim;
 
-    for (y = 0; y < height; y++ )
+    for (y = 0; y < height; y++)
     {
         for (x = 0; x < width; x++)
         {
@@ -105,7 +123,7 @@ void IMTFilterSEdge (IMTpixel** p_im, IMTpixel** b_im, unsigned height, unsigned
     int ims, imsd;
     IMTpixel pim, bim;
 
-    for (y = 0; y < height; y++ )
+    for (y = 0; y < height; y++)
     {
         for (x = 0; x < width; x++)
         {
@@ -573,7 +591,7 @@ float IMTFilterLevelSigma (IMTpixel** p_im, IMTpixel** d_im, unsigned height, un
 float IMTFilterLevelSize (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, int radius, int delta)
 {
     unsigned x, y, d, sn = 0;
-    IMTpixel mim, im;
+    IMTpixel mim;
     float st = 0;
     int c0, c;
     BYTE val;

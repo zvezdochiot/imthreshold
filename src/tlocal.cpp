@@ -36,6 +36,7 @@ void ImthresholdFilterTSauvolaUsage()
     printf("                    'niblack'\n");
     printf("                    'sauvola' (default)\n");
     printf("                    'size'\n");
+    printf("          -b      color correct (bool, optional, default = false)\n");
     printf("          -c N    contrast limit (int, optional, default = 128)\n");
     printf("          -d N.N  delta (float, optional, default = -5.0)\n");
     printf("          -i      invert (bool, optional, default = false)\n");
@@ -68,6 +69,7 @@ int main(int argc, char *argv[])
     int lower_bound = 0;
     int upper_bound = 255;
     float delta = -5.0;
+    bool fccor = false;
     bool finv = false;
     bool fnorm = false;
     bool fmirror = false;
@@ -75,12 +77,15 @@ int main(int argc, char *argv[])
     int threshold = 0;
     char *namefilter;
     namefilter="sauvola";
-    while ((opt = getopt(argc, argv, ":f:c:d:ig:l:no:r:s:u:zh")) != -1)
+    while ((opt = getopt(argc, argv, ":f:bc:d:ig:l:no:r:s:u:zh")) != -1)
     {
         switch(opt)
         {
             case 'f':
                 namefilter = optarg;
+                break;
+            case 'b':
+                fccor = true;
                 break;
             case 'c':
                 contrast_limit = atof(optarg);
@@ -155,6 +160,11 @@ int main(int argc, char *argv[])
 
             ImthresholdGetData(dib, p_im);
             FreeImage_Unload(dib);
+            if (fccor)
+            {
+                IMTFilterSCCor(p_im, height, width);
+                printf("ColorCorrect= true\n");
+            }
             if (fmirror)
             {
                 IMTFilterSMirror(p_im, height, width);

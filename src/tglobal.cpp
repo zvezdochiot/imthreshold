@@ -41,6 +41,7 @@ void ImthresholdFilterTGlobalUsage()
     printf("                    'rot'\n");
     printf("                    'tsai'\n");
     printf("                    'use'\n");
+    printf("          -b      color correct (bool, optional, default = false)\n");
     printf("          -d N    delta (int, optional, default = 0)\n");
     printf("          -i      invert (bool, optional, default = false)\n");
     printf("          -k N    K par (k/2) (int, optional, default = 2)\n");
@@ -69,12 +70,13 @@ int main(int argc, char *argv[])
     bool weight = false;
     bool fnorm = false;
     bool fmirror = false;
+    bool fccor = false;
     bool finv = false;
     bool fhelp = false;
     int threshold;
     char *namefilter;
     namefilter="bimod";
-    while ((opt = getopt(argc, argv, ":f:d:ik:m:ns:wzh")) != -1)
+    while ((opt = getopt(argc, argv, ":f:bd:ik:m:ns:wzh")) != -1)
     {
         switch(opt)
         {
@@ -83,6 +85,9 @@ int main(int argc, char *argv[])
                 break;
             case 'd':
                 delta = atof(optarg);
+                break;
+            case 'b':
+                fccor = true;
                 break;
             case 'i':
                 finv = true;
@@ -144,6 +149,11 @@ int main(int argc, char *argv[])
 
             ImthresholdGetData(dib, p_im);
             FreeImage_Unload(dib);
+            if (fccor)
+            {
+                IMTFilterSCCor(p_im, height, width);
+                printf("ColorCorrect= true\n");
+            }
             if (fmirror)
             {
                 IMTFilterSMirror(p_im, height, width);
