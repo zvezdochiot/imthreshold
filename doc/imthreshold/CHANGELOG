@@ -1,3 +1,7 @@
+0.20200418
+
+    Threshold: added dithq (quartered dithh Knuth D.E.)
+
 0.20200413
 
     Threshold: fix histogram overflow

@@ -211,6 +211,7 @@ int IMTFilterTDalg (IMTpixel**, BYTE**, unsigned, unsigned, int, int, int, int);
 int IMTFilterTDither (IMTpixel**, BYTE**, unsigned, unsigned);
 int IMTFilterTDithH (IMTpixel**, BYTE**, unsigned, unsigned, int, int);
 int IMTFilterTDithO (IMTpixel**, BYTE**, unsigned, unsigned, int, int);
+int IMTFilterTDithQ (IMTpixel**, BYTE**, unsigned, unsigned, int, int);
 int IMTFilterTDjVuL (IMTpixel**, BYTE**, IMTpixel**, IMTpixel**, unsigned, unsigned, unsigned, unsigned, unsigned, int, float, float, unsigned);
 int IMTFilterTEntValue (IMTpixel**, unsigned, unsigned);
 int IMTFilterTEnt (IMTpixel**, BYTE**, unsigned, unsigned);
