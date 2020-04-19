@@ -1144,11 +1144,11 @@ int IMTFilterTDither (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wi
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int kpg, int delta)
+int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int kpg, int delta, unsigned wwidth)
 {
     unsigned x, y, i, j, k, l, lmin = 0;
     unsigned whg, wwn, iy0, ix0, iy, ix, tt;
-    unsigned wwidth = 4, herrmin, ww = wwidth * wwidth, kw = 768 / ww;
+    unsigned herrmin, ww, kw;
     BYTE val;
     int tx, imm, threshold = 0;
     // Knuth D.E. dither matrix
@@ -1158,23 +1158,85 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
         { 13,  9,  6,  2 },
         { 15, 11,  4,  0 }
     };
-    char hdith1s = "A";
+    int tdith1[4][4] = {
+        { 1, 5, 7, 0 },
+        { 3, 6, 2, 0 },
+        { 8, 4, 0, 0 },
+        { 0, 0, 0, 0 }
+    };
+    int qdith1[4][4] = {
+        { 1, 2, 0, 0 },
+        { 3, 0, 0, 0 },
+        { 0, 0, 0, 0 },
+        { 0, 0, 0, 0 }
+    };
+    char dith1s = "A";
     int hdith2[4][4] = {
         { 14, 10,  5,  1 },
         { 12,  8,  7,  3 },
         {  2,  6,  9, 13 },
         {  0,  4, 11, 15 }
     };
-    char hdith2s = "a";
+    int tdith2[4][4] = {
+        { 7, 5, 1, 0 },
+        { 2, 6, 3, 0 },
+        { 0, 4, 8, 0 },
+        { 0, 0, 0, 0 }
+    };
+    int qdith2[4][4] = {
+        { 2, 1, 0, 0 },
+        { 0, 3, 0, 0 },
+        { 0, 0, 0, 0 },
+        { 0, 0, 0, 0 }
+    };
+    char dith2s = "a";
+    int dith1[4][4], dith2[4][4];
     int hdithy[2][17], hdithx[2][17], herr, herrp, herrg;
+    wwidth = (wwidth < 2) ? 2 : wwidth;
+    wwidth = (wwidth > 4) ? 4 : wwidth;
+    ww = wwidth * wwidth;
+    kw = 768 / ww;
+    if (wwidth == 2)
+    {
+		for (y = 0; y < wwidth; y++)
+		{
+			for (x = 0; x < wwidth; x++)
+			{
+				dith1[y][x] = qdith1[y][x];
+			    dith2[y][x] = qdith2[y][x];
+			}
+		}
+	}
+	else if (wwidth == 3)
+    {
+		for (y = 0; y < wwidth; y++)
+		{
+			for (x = 0; x < wwidth; x++)
+			{
+				dith1[y][x] = tdith1[y][x];
+			    dith2[y][x] = tdith2[y][x];
+			}
+		}
+	}
+	else
+    {
+		for (y = 0; y < wwidth; y++)
+		{
+			for (x = 0; x < wwidth; x++)
+			{
+				dith1[y][x] = hdith1[y][x];
+			    dith2[y][x] = hdith2[y][x];
+			}
+		}
+	}
     for (y = 0; y < wwidth; y++)
     {
         for (x = 0; x < wwidth; x++)
         {
-            l = hdith1[y][x] + 1;
+            l = dith1[y][x] + 1;
             hdithy[0][l] = y;
             hdithx[0][l] = x;
-            l = hdith2[y][x] + 1;
+            l = dith2[y][x] + 1;
             hdithy[1][l] = y;
             hdithx[1][l] = x;
         }
@@ -1357,122 +1419,6 @@ int IMTFilterTDithO (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
             {
                 j = odithy[l];
                 i = odithx[l];
-                iy = iy0 + j;
-                ix = ix0 + i;
-                if (iy < height && ix < width)
-                {
-                    val = (BYTE) ( ( l > lmin ) ? 255 : 0 );
-                    d_im[iy][ix] = val;
-                }
-            }
-            tt = kw * (ww - lmin);
-            threshold += tt;
-        }
-    }
-    threshold /= whg;
-    threshold /= wwn;
-
-    return threshold;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-int IMTFilterTDithQ (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned width, int kpg, int delta)
-{
-    unsigned x, y, i, j, k, l, lmin = 0;
-    unsigned whg, wwn, iy0, ix0, iy, ix, tt;
-    unsigned wwidth = 2, herrmin, ww = wwidth * wwidth, kw = 768 / ww;
-    BYTE val;
-    int tx, imm, threshold = 0;
-    // quartered dithh Knuth D.E. dither matrix
-    int hdith1[2][2] = {
-        { 1, 2 },
-        { 3, 0 }
-    };
-    char hdith1s = "A";
-    int hdith2[2][2] = {
-        { 2, 1 },
-        { 0, 3 }
-    };
-    char hdith2s = "a";
-    int hdithy[2][5], hdithx[2][5], herr, herrp, herrg;
-    for (y = 0; y < wwidth; y++)
-    {
-        for (x = 0; x < wwidth; x++)
-        {
-            l = hdith1[y][x] + 1;
-            hdithy[0][l] = y;
-            hdithx[0][l] = x;
-            l = hdith2[y][x] + 1;
-            hdithy[1][l] = y;
-            hdithx[1][l] = x;
-        }
-    }
-    whg = (height + wwidth - 1) / wwidth;
-    wwn = (width + wwidth - 1) / wwidth;
-    for (y = 0; y < whg; y++)
-    {
-        iy0 = y * wwidth;
-        for (x = 0; x < wwn; x++)
-        {
-            ix0 = x * wwidth;
-            k = (y + x) % 2;
-            imm = 0;
-            for (l = 1; l < (ww + 1); l++)
-            {
-                j = hdithy[k][l];
-                i = hdithx[k][l];
-                iy = iy0 + j;
-                ix = ix0 + i;
-                tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
-                tx += delta;
-                imm += tx;
-            }
-            imm /= ww;
-            herrp = herrg = 0;
-            for (l = 1; l < (ww + 1); l++)
-            {
-                j = hdithy[k][l];
-                i = hdithx[k][l];
-                iy = iy0 + j;
-                ix = ix0 + i;
-                tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
-                tx += delta;
-                herrg += (765 - tx);
-                tx -= imm;
-                tx *= kpg;
-                tx += imm;
-                tx = (int)Byte3Clamp(tx);
-                herrp += (765 - tx);
-            }
-            herrmin = herrp + herrg;
-            lmin = 0;
-            for (l = 1; l < (ww + 1); l++)
-            {
-                j = hdithy[k][l];
-                i = hdithx[k][l];
-                iy = iy0 + j;
-                ix = ix0 + i;
-                tx = (iy < height && ix < width) ? p_im[iy][ix].s : 765;
-                tx += delta;
-                tx -= imm;
-                tx *= kpg;
-                tx += imm;
-                tx = (int)Byte3Clamp(tx);
-                herrp += (tx + tx - 765);
-                herrg -= 765;
-                herr = (herrp < 0) ? (-herrp) : herrp;
-                herr += (herrg < 0) ? (-herrg) : herrg;
-                if (herr < herrmin)
-                {
-                    herrmin = herr;
-                    lmin = l;
-                }
-            }
-            for (l = 1; l < (ww + 1); l++)
-            {
-                j = hdithy[k][l];
-                i = hdithx[k][l];
                 iy = iy0 + j;
                 ix = ix0 + i;
                 if (iy < height && ix < width)

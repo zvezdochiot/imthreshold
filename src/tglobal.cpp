@@ -32,6 +32,7 @@ void ImthresholdFilterTGlobalUsage()
     printf("                    'dithh'\n");
     printf("                    'ditho'\n");
     printf("                    'dithq'\n");
+    printf("                    'ditht'\n");
     printf("                    'entropy'\n");
     printf("                    'eqbright'\n");
     printf("                    'grad'\n");
@@ -184,7 +185,7 @@ int main(int argc, char *argv[])
                 printf("Filter= %s\n", namefilter);
                 printf("Coeff= %d\n", knum);
                 printf("Delta= %d\n", delta);
-                threshold = IMTFilterTDithH(p_im, d_im, height, width, knum, delta);
+                threshold = IMTFilterTDithH(p_im, d_im, height, width, knum, delta, 4);
             } else if (strcmp(namefilter, "ditho") == 0) {
                 printf("Filter= %s\n", namefilter);
                 printf("Coeff= %d\n", knum);
@@ -194,7 +195,12 @@ int main(int argc, char *argv[])
                 printf("Filter= %s\n", namefilter);
                 printf("Coeff= %d\n", knum);
                 printf("Delta= %d\n", delta);
-                threshold = IMTFilterTDithQ(p_im, d_im, height, width, knum, delta);
+                threshold = IMTFilterTDithH(p_im, d_im, height, width, knum, delta, 2);
+            } else if (strcmp(namefilter, "ditht") == 0) {
+                printf("Filter= %s\n", namefilter);
+                printf("Coeff= %d\n", knum);
+                printf("Delta= %d\n", delta);
+                threshold = IMTFilterTDithH(p_im, d_im, height, width, knum, delta, 3);
             } else if (strcmp(namefilter, "entropy") == 0) {
                 printf("Filter= %s\n", namefilter);
                 threshold = IMTFilterTEnt(p_im, d_im, height, width);
