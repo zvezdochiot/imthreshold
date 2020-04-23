@@ -88,6 +88,40 @@ IMTpixel IMTccorS (IMTpixel im)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+IMTpixel IMTRGBtoRYB4 (IMTpixel pim, int direct)
+{
+    int R, G, B, r, y, b;
+
+    if (direct < 0)
+    {
+        r = (int)pim.c[0];
+        y = (int)pim.c[1];
+        b = (int)pim.c[2];
+        R = (r + r + r + r + r - y - y - y + b + 1) / 3;
+        G = (y + y + y + y + y + y + y + y + y - r - r - r - b - b - b + 1) / 3;
+        B = (r - y - y - y + b + b + b + b + b + 1) / 3;
+        pim.c[0] = ByteClamp(R);
+        pim.c[1] = ByteClamp(G);
+        pim.c[2] = ByteClamp(B);
+    }
+    else
+    {
+        R = (int)pim.c[0];
+        G = (int)pim.c[1];
+        B = (int)pim.c[2];
+        r = (R + R + R + G + 2) / 4;
+        y = (R + G + G + B + 2) / 4;
+        b = (G + B + B + B + 2) / 4;
+        pim.c[0] = ByteClamp(r);
+        pim.c[1] = ByteClamp(y);
+        pim.c[2] = ByteClamp(b);
+    }
+    pim = IMTcalcS(pim);
+    return pim;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 IMTpixel** IMTalloc (unsigned height, unsigned width)
 {
     IMTpixel** im;

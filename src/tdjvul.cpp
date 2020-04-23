@@ -23,6 +23,7 @@ void ImthresholdIMTFilterDjVuLUsage()
 {
     printf("Usage : imthreshold-tdjvul [options] <input_file> <output_file>(BW) [fg_file] [bg_file] [fg_mask] [bg_mask]\n\n");
     printf("options:\n");
+    printf("          -4      RGB to RYB4 (bool, optional, default = false)\n");
     printf("          -a N.N  anisotropic (float, optional, default = 0.0)\n");
     printf("          -c N    clean fg, bg blur radius (int, optional, default = 0)\n");
     printf("          -d N    despeckle aperture size (int, optional, default = 0)\n");
@@ -56,11 +57,15 @@ int main(int argc, char *argv[])
     int fdespeckle = 0;
     unsigned fposter = 0;
     bool finvs = false;
+    bool fryb4 = false;
     bool fhelp = false;
-    while ((opt = getopt(argc, argv, ":a:c:d:b:f:il:p:o:w:h")) != -1)
+    while ((opt = getopt(argc, argv, ":4a:c:d:b:f:il:p:o:w:h")) != -1)
     {
         switch(opt)
         {
+            case '4':
+                fryb4 = true;
+                break;
             case 'b':
                 bgs = atof(optarg);
                 break;
@@ -172,6 +177,11 @@ int main(int argc, char *argv[])
 
                 ImthresholdGetData(dib, p_im);
                 FreeImage_Unload(dib);
+                if (fryb4)
+                {
+                    printf("ColorSpace= RYB4\n");
+                    IMTFilterRGBtoRYB4(p_im, height, width, 1);
+                }
                 if (fposter != 0)
                 {
                     printf("Posterize= %d\n", fposter);
@@ -185,6 +195,12 @@ int main(int argc, char *argv[])
                 }
                 IMTfree(p_im, height);
 
+                if (fryb4)
+                {
+                    printf("ColorSpace= RGB\n");
+                    IMTFilterRGBtoRYB4(fg_im, heightfg, widthfg, -1);
+                    IMTFilterRGBtoRYB4(bg_im, heightbg, widthbg, -1);
+                }
                 if (fdespeckle > 0)
                 {
                     printf("Despeckle= %d\n", fdespeckle);

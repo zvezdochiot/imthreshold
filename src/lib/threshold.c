@@ -32,14 +32,13 @@ void IMTHist (IMTpixel** p_im, unsigned long long* histogram, unsigned y0, unsig
 
 int IMTHistBiMod (unsigned long long* histogram, unsigned histsize, float part)
 {
-    unsigned k;
+    unsigned k, T, Tn;
     unsigned long long im, iw, ib, Tw, Tb;
-    float T, Tn;
     int threshold = 0;
 
-    part = (part < 0.0 || part > 1.0) ? 0.5 : part;
-    T = part * histsize;
-    Tn = 0.0f;
+    part = (part < 0.0f || part > 1.0f) ? 0.5f : part;
+    T = (unsigned)(part * (float)histsize + 0.5f);
+    Tn = 0;
     while ( T != Tn )
     {
         Tn = T;
@@ -56,20 +55,26 @@ int IMTHistBiMod (unsigned long long* histogram, unsigned histsize, float part)
             Tw += (im * k);
             iw += im;
         }
-        Tb /= ib;
-        Tw /= iw;
+        Tb /= (ib > 1) ? ib : 1;
+        Tw /= (iw > 1) ? iw : 1;
         if (iw == 0 && ib == 0)
         {
-            T = (float)Tn;
-        } else if (iw == 0) {
-            T = (float)Tb;
-        } else if (ib == 0) {
-            T = (float)Tw;
-        } else {
-            T = (part * Tw + (1.0f - part) * Tb);
+            T = Tn;
+        }
+        else if (iw == 0)
+        {
+            T = (unsigned)Tb;
+        }
+        else if (ib == 0)
+        {
+            T = (unsigned)Tw;
+        }
+        else
+        {
+            T = (unsigned)(part * (float)Tw + (1.0f - part) * (float)Tb + 0.5f);
         }
     }
-    threshold = (unsigned)(T + 0.5f);
+    threshold = (int)T;
 
     return threshold;
 }
@@ -577,7 +582,7 @@ int IMTFilterTBiModP (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
     unsigned i, y, x, im;
     float part;
     BYTE val;
-    unsigned long long histogram[768] = {0};
+    unsigned long long histogram[768];
 
     IMTHist (p_im, histogram, 0, 0, height, width, Tmax);
 
@@ -593,7 +598,7 @@ int IMTFilterTBiModP (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigne
     for (i = 1; i < count; i++)
     {
         part = (float)i;
-        part /= count;
+        part /= (float)count;
         val = ByteClamp((int)(255 * i / (count - 1)));
         t = IMTHistBiMod (histogram, Tmax, part);
         threshold += t;
@@ -1198,37 +1203,37 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
     kw = 768 / ww;
     if (wwidth == 2)
     {
-		for (y = 0; y < wwidth; y++)
-		{
-			for (x = 0; x < wwidth; x++)
-			{
-				dith1[y][x] = qdith1[y][x];
-			    dith2[y][x] = qdith2[y][x];
-			}
-		}
-	}
-	else if (wwidth == 3)
+        for (y = 0; y < wwidth; y++)
+        {
+            for (x = 0; x < wwidth; x++)
+            {
+                dith1[y][x] = qdith1[y][x];
+                dith2[y][x] = qdith2[y][x];
+            }
+        }
+    }
+    else if (wwidth == 3)
     {
-		for (y = 0; y < wwidth; y++)
-		{
-			for (x = 0; x < wwidth; x++)
-			{
-				dith1[y][x] = tdith1[y][x];
-			    dith2[y][x] = tdith2[y][x];
-			}
-		}
-	}
-	else
+        for (y = 0; y < wwidth; y++)
+        {
+            for (x = 0; x < wwidth; x++)
+            {
+                dith1[y][x] = tdith1[y][x];
+                dith2[y][x] = tdith2[y][x];
+            }
+        }
+    }
+    else
     {
-		for (y = 0; y < wwidth; y++)
-		{
-			for (x = 0; x < wwidth; x++)
-			{
-				dith1[y][x] = hdith1[y][x];
-			    dith2[y][x] = hdith2[y][x];
-			}
-		}
-	}
+        for (y = 0; y < wwidth; y++)
+        {
+            for (x = 0; x < wwidth; x++)
+            {
+                dith1[y][x] = hdith1[y][x];
+                dith2[y][x] = hdith2[y][x];
+            }
+        }
+    }
     for (y = 0; y < wwidth; y++)
     {
         for (x = 0; x < wwidth; x++)

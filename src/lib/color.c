@@ -10,6 +10,24 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void IMTFilterRGBtoRYB4 (IMTpixel** p_im, unsigned height, unsigned width, int direct)
+{
+    unsigned y, x;
+    IMTpixel pim;
+
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            pim = p_im[y][x];
+            pim = IMTRGBtoRYB4 (pim, direct);
+            p_im[y][x] = pim;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void IMTFilterSCCor (IMTpixel** p_im, unsigned height, unsigned width)
 {
     unsigned y, x;
@@ -43,7 +61,7 @@ void IMTFilterSMirror (IMTpixel** p_im, unsigned height, unsigned width)
                 pim = 765 - pim;
             }
             pim *= 2;
-            p_im[y][x].s = (WORD)pim;
+            p_im[y][x].s = Byte3Clamp(pim);
         }
     }
 }
@@ -76,7 +94,7 @@ int IMTFilterSNorm (IMTpixel** p_im, unsigned height, unsigned width)
                 im -= immin;
                 im *= 765;
                 im /= imd;
-                p_im[y][x].s = (WORD)im;
+                p_im[y][x].s = Byte3Clamp(im);
             }
         }
     }
@@ -108,9 +126,7 @@ void IMTFilterSCompare (IMTpixel** p_im, IMTpixel** b_im, unsigned height, unsig
             ims *= imsd;
             ims /= 765;
             ims += 384;
-            if (ims < 0) {ims = 0;}
-            if (ims > 765) {ims = 765;}
-            p_im[y][x].s = (WORD)ims;
+            p_im[y][x].s = Byte3Clamp(ims);
         }
     }
 }
@@ -133,9 +149,7 @@ void IMTFilterSEdge (IMTpixel** p_im, IMTpixel** b_im, unsigned height, unsigned
             ims -= (int)bim.s;
             imsd = (int)IMTdist(pim, bim);
             if (ims < 0) {ims = 384 - imsd;} else {ims = 384 + imsd;}
-            if (ims < 0) {ims = 0;}
-            if (ims > 765) {ims = 765;}
-            p_im[y][x].s = (WORD)ims;
+            p_im[y][x].s = Byte3Clamp(ims);
         }
     }
 }
@@ -192,7 +206,6 @@ IMTpixel IMTFilterIllumCorr (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, 
     {
         for (x = 0; x < width; x++)
         {
-            d_im[y][x].s = 0;
             for (d = 0; d < 3; d++)
             {
                 im = (unsigned)p_im[y][x].c[d];
@@ -206,8 +219,8 @@ IMTpixel IMTFilterIllumCorr (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, 
                 res /= 2;
                 val = ByteClamp((int)(res + 0.5));
                 d_im[y][x].c[d] = val;
-                d_im[y][x].s += val;
             }
+            d_im[y][x] = IMTcalcS(d_im[y][x]);
         }
     }
     return mean;
@@ -222,20 +235,19 @@ void IMTFilterInvert (IMTpixel** p_im, unsigned height, unsigned width)
     {
         for (x = 0; x < width; x++)
         {
-            p_im[y][x].s = 0;
             for (d = 0; d < 3; d++)
             {
                 t = (unsigned)(255 - p_im[y][x].c[d]);
                 p_im[y][x].c[d] = (BYTE)(t);
-                p_im[y][x].s += (WORD)(t);
             }
+            p_im[y][x] = IMTcalcS(p_im[y][x]);
         }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterCopy (IMTpixel** p_im, IMTpixel** b_im, unsigned height, unsigned width)
+void IMTFilterCopy (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width)
 {
     unsigned y, x;
 
@@ -243,7 +255,7 @@ void IMTFilterCopy (IMTpixel** p_im, IMTpixel** b_im, unsigned height, unsigned 
     {
         for (x = 0; x < width; x++)
         {
-            b_im[y][x] = p_im[y][x];
+            d_im[y][x] = p_im[y][x];
         }
     }
 }

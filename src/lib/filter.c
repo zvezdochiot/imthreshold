@@ -1151,7 +1151,7 @@ float IMTFilterClusterBWC (IMTpixel** p_im, IMTpixel** d_im, unsigned height, un
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width, float amount, int threshold)
+void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, unsigned height, unsigned width, float amount, int threshold)
 {
     unsigned y, x, d;
     int t, diff, adiff;
@@ -1170,9 +1170,9 @@ void IMTFilterUnsharpMask (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, un
 
                 value = (float)p_im[y][x].c[d];
                 value += (amount * diff);
-                d_im[y][x].c[d] = ByteClamp((int)(value + 0.5));
+                p_im[y][x].c[d] = ByteClamp((int)(value + 0.5));
             }
-            d_im[y][x] = IMTcalcS (d_im[y][x]);
+            p_im[y][x] = IMTcalcS (p_im[y][x]);
         }
     }
 }
