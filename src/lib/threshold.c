@@ -578,43 +578,46 @@ int IMTFilterTBiMod (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
 
 int IMTFilterTBiModP (IMTpixel** p_im, IMTpixel** d_im, unsigned height, unsigned width, unsigned count)
 {
-    int threshold = 0, t, Tmax = 768;
-    unsigned i, y, x, im;
+    int threshold = 0, t, Tmax = 256;
+    unsigned i, y, x, d, im;
     float part;
     BYTE val;
-    unsigned long long histogram[768];
-
-    IMTHist (p_im, histogram, 0, 0, height, width, Tmax);
+    unsigned long long histogram[256];
 
     count = (count < 2) ? 2 : count;
-    for (y = 0; y < height; y++ )
+    threshold = 0;
+    for (d = 0; d < 3; d++)
     {
-        for (x = 0; x < width; x++)
+        IMTFilterSSelect (p_im, height, width, d);
+        IMTHist (p_im, histogram, 0, 0, height, width, Tmax);
+        for (i = 1; i < count; i++)
         {
-            val = (BYTE)0;
-            d_im[y][x] = IMTset(val, val, val);
-        }
-    }
-    for (i = 1; i < count; i++)
-    {
-        part = (float)i;
-        part /= (float)count;
-        val = ByteClamp((int)(255 * i / (count - 1)));
-        t = IMTHistBiMod (histogram, Tmax, part);
-        threshold += t;
-        for (y = 0; y < height; y++ )
-        {
-            for (x = 0; x < width; x++)
+            part = (float)i;
+            part /= (float)count;
+            val = ByteClamp((int)(255 * i / (count - 1)));
+            t = IMTHistBiMod (histogram, Tmax, part);
+            threshold += t;
+            for (y = 0; y < height; y++ )
             {
-                im = p_im[y][x].s;
-                if (im >= t)
+                for (x = 0; x < width; x++)
                 {
-                    d_im[y][x] = IMTset(val, val, val);
+                    im = p_im[y][x].c[d];
+                    if (im >= t)
+                    {
+                        d_im[y][x].c[d] = val;
+                    }
                 }
             }
         }
     }
     threshold /= (count - 1);
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            d_im[y][x] = IMTcalcS(d_im[y][x]);
+        }
+    }
 
     return threshold;
 }

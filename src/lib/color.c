@@ -156,6 +156,22 @@ void IMTFilterSEdge (IMTpixel** p_im, IMTpixel** b_im, unsigned height, unsigned
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void IMTFilterSSelect (IMTpixel** p_im, unsigned height, unsigned width, unsigned comp)
+{
+    unsigned y, x;
+    comp = (comp > 2) ? 2 : comp;
+
+    for (y = 0; y < height; y++)
+    {
+        for (x = 0; x < width; x++)
+        {
+            p_im[y][x].s = p_im[y][x].c[comp];
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 IMTpixel IMTFilterIllumCorr (IMTpixel** p_im, IMTpixel** b_im, IMTpixel** d_im, unsigned height, unsigned width)
 {
     unsigned y, x, d, im, imb;
