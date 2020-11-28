@@ -5,9 +5,16 @@ CPP           = g++
 CFLAGS        = -DUNIX -O2 -Wall -s
 LIBS          = -lfreeimage
 VER           = 0
-VERB          = 20200714
+VERB          = 20201128
+ifeq ($(OS),Windows_NT)
+PLIBF         = $(PNAME).$(VER).dll
+PLIBFI        = $(PNAME)freeimage.$(VER).dll
+RM            = del /Q
+else
 PLIBF         = lib$(PNAME).so.$(VER)
 PLIBFI        = lib$(PNAME)freeimage.so.$(VER)
+RM            = rm -f
+endif
 PLIB          = $(PLIBF) $(PLIBFI)
 PREFIX        = /usr/local
 INCPREFIX     = $(PREFIX)/include
@@ -22,21 +29,13 @@ LN            = ln -fs
 all: $(PROGNAME)
 
 clean:
-	rm -f $(PROGNAME) lib$(PNAME).so* lib$(PNAME)freeimage.so*
+	$(RM) $(PROGNAME) $(PLIBF) $(PLIBFI) *.exe
 
 $(PLIBF): src/lib/color.c src/lib/commom.c src/lib/denoise.c src/lib/despeckle.c src/lib/filter.c src/lib/math.c src/lib/pmean.c src/lib/rotate.c src/lib/separate.c src/lib/size.c src/lib/threshold.c
 	$(CC) $(CFLAGS) -shared -Wl,-soname,$@ $^ -o $@
-	chmod 644 $@
-	mv $@ $@.$(VERB)
-	ln -s $@.$(VERB) $@
-	ln -s $@ libimthreshold.so
 
 $(PLIBFI): src/imthresholdfreeimage.cpp $(PLIBF)
 	$(CPP) $(CFLAGS) -shared -Wl,-soname,$@ $^ $(LIBS) -o $@
-	chmod 644 $@
-	mv $@ $@.$(VERB)
-	ln -s $@.$(VERB) $@
-	ln -s $@ libimthresholdfreeimage.so
 
 $(PNAME)-deskew: src/deskew.cpp $(PLIB)
 	$(CPP) $(CFLAGS) $^ $(LIBS) -o $@
@@ -103,10 +102,10 @@ $(PNAME)-twhiterohrer: src/twhiterohrer.cpp $(PLIB)
 
 install: $(PROGNAME)
 	$(INSTALL) -d $(LIBPREFIX)
-	$(INSTALL) -m 0644 lib$(PNAME).so.$(VER).$(VERB) $(LIBPREFIX)/lib$(PNAME).so.$(VER).$(VERB)
+	$(INSTALL) -m 0644 lib$(PNAME).so.$(VER) $(LIBPREFIX)/lib$(PNAME).so.$(VER).$(VERB)
 	$(LN)  lib$(PNAME).so.$(VER).$(VERB)  $(LIBPREFIX)/lib$(PNAME).so.$(VER)
 	$(LN)  lib$(PNAME).so.$(VER)  $(LIBPREFIX)/lib$(PNAME).so
-	$(INSTALL) -m 0644 lib$(PNAME)freeimage.so.$(VER).$(VERB) $(LIBPREFIX)/lib$(PNAME)freeimage.so.$(VER).$(VERB)
+	$(INSTALL) -m 0644 lib$(PNAME)freeimage.so.$(VER) $(LIBPREFIX)/lib$(PNAME)freeimage.so.$(VER).$(VERB)
 	$(LN)  lib$(PNAME)freeimage.so.$(VER).$(VERB)  $(LIBPREFIX)/lib$(PNAME)freeimage.so.$(VER)
 	$(LN)  lib$(PNAME)freeimage.so.$(VER)  $(LIBPREFIX)/lib$(PNAME)freeimage.so
 	$(INSTALL) -d $(INCPREFIX)

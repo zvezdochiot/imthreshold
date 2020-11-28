@@ -1160,45 +1160,27 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
     BYTE val;
     int tx, imm, threshold = 0;
     // Knuth D.E. dither matrix
-    int hdith1[4][4] = {
+    int hdith[4][4] = {
         {  1,  5, 10, 14 },
         {  3,  7,  8, 12 },
         { 13,  9,  6,  2 },
         { 15, 11,  4,  0 }
     };
-    int tdith1[4][4] = {
+    int tdith[4][4] = {
         { 1, 5, 7, 0 },
         { 3, 6, 2, 0 },
         { 8, 4, 0, 0 },
         { 0, 0, 0, 0 }
     };
-    int qdith1[4][4] = {
+    int qdith[4][4] = {
         { 1, 2, 0, 0 },
         { 3, 0, 0, 0 },
         { 0, 0, 0, 0 },
         { 0, 0, 0, 0 }
     };
     char dith1s = "A";
-    int hdith2[4][4] = {
-        { 14, 10,  5,  1 },
-        { 12,  8,  7,  3 },
-        {  2,  6,  9, 13 },
-        {  0,  4, 11, 15 }
-    };
-    int tdith2[4][4] = {
-        { 7, 5, 1, 0 },
-        { 2, 6, 3, 0 },
-        { 0, 4, 8, 0 },
-        { 0, 0, 0, 0 }
-    };
-    int qdith2[4][4] = {
-        { 2, 1, 0, 0 },
-        { 0, 3, 0, 0 },
-        { 0, 0, 0, 0 },
-        { 0, 0, 0, 0 }
-    };
     char dith2s = "a";
-    int dith1[4][4], dith2[4][4];
+    int dith[4][4];
     int hdithy[2][17], hdithx[2][17], herr, herrp, herrg;
     wwidth = (wwidth < 2) ? 2 : wwidth;
     wwidth = (wwidth > 4) ? 4 : wwidth;
@@ -1210,8 +1192,7 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
         {
             for (x = 0; x < wwidth; x++)
             {
-                dith1[y][x] = qdith1[y][x];
-                dith2[y][x] = qdith2[y][x];
+                dith[y][x] = qdith[y][x];
             }
         }
     }
@@ -1221,8 +1202,7 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
         {
             for (x = 0; x < wwidth; x++)
             {
-                dith1[y][x] = tdith1[y][x];
-                dith2[y][x] = tdith2[y][x];
+                dith[y][x] = tdith[y][x];
             }
         }
     }
@@ -1232,8 +1212,7 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
         {
             for (x = 0; x < wwidth; x++)
             {
-                dith1[y][x] = hdith1[y][x];
-                dith2[y][x] = hdith2[y][x];
+                dith[y][x] = hdith[y][x];
             }
         }
     }
@@ -1241,12 +1220,11 @@ int IMTFilterTDithH (IMTpixel** p_im, BYTE** d_im, unsigned height, unsigned wid
     {
         for (x = 0; x < wwidth; x++)
         {
-            l = dith1[y][x] + 1;
+            l = dith[y][x] + 1;
             hdithy[0][l] = y;
             hdithx[0][l] = x;
-            l = dith2[y][x] + 1;
             hdithy[1][l] = y;
-            hdithx[1][l] = x;
+            hdithx[1][l] = wwidth - x - 1;
         }
     }
     whg = (height + wwidth - 1) / wwidth;

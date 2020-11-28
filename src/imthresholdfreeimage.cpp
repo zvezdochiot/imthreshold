@@ -158,7 +158,7 @@ void ImthresholdSetDataBW(FIBITMAP* dib, BYTE** d_im)
 
 FIBITMAP* ImthresholdFilterNone(FIBITMAP* src_dib)
 {
-    if (!src_dib) return false;
+    if (!src_dib) return NULL;
     FIBITMAP *tmp = FreeImage_Clone(src_dib);
     return tmp;
 }
